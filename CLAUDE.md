@@ -377,8 +377,9 @@ pending_payment ──(결제 승인)──▶ confirmed ──(취소 요청)�
 ## 16. 진행 현황 (2026-11-17 기준)
 
 - **완료:** 설계 문서(`docs/schema.md`, `docs/booking-flow.md`) · 마이그레이션 0001~0010(운영 DB 반영됨) · 고객 예약·결제(fake)·조회·취소·환불 흐름 · Vercel 프로덕션 배포(`snowy-booking.vercel.app`)
-- **고객 UI 리뉴얼 완료(2026-11-17):** 디자인 토큰 `app/globals.css`(눈빛 canvas·겨울 블루 accent·`--ease-out` 등), 공용 `components/ui/*`, 홈·시설 상세(`/facilities/[slug]`)·예약 4단계·조회·완료·실패·/off. 시설 문구는 `lib/content/facilities.ts`(사진 근거만, [미정]). Playwright로 모바일 390px·PC 1280px 확인
-  - Button 색·크기는 className 덮어쓰기 금지 → variant/size 추가(`danger`, `xl`). 입력 폼 화면은 `PageShell surface`(흰 바탕)
+- **고객 UI 2차 리뉴얼(2026-11-17):** 디자인 규칙 = 루트 `DESIGN-bmw.md`(브랜드 로고·이름·M 줄무늬 제외): 흰 캔버스, 주요 버튼 단일 파란색 #1c69d4, 짙은 남색 #1a2129는 페이지당 색 띠 하나, **모서리 0**, 그림자 없음, 제목 700/본문 300, 자간 0, 섹션 80px. 배치는 `design-taste-frontend` 스킬(place, compact page)로 뽑음: nav-split · footer-visit · colour-band · block 버튼 · 요금=tall-small · 위치 크게(type moment) · 공간 3개 row. 토큰은 `app/globals.css`, 사진 배정은 `lib/content/facilities.ts`의 `PHOTO`
+  - **임의 설명 문구 금지**(운영자 지시): 시설 소개·특징·홍보 문구 없음. 화면 문구는 확정 사실(위치·이용 시간·요금·인원·규정)만. 운영자 소개 문구를 받으면 `lib/content/facilities.ts`에 추가
+  - Button 색·크기는 className 덮어쓰기 금지 → variant/size 추가. 기본 요소 스타일은 `@layer base` 안에(레이어 밖 CSS는 Tailwind 유틸리티를 이김)
 - **다음:** ① 관리자 화면(같은 디자인 토큰)(로그인·예약 관리·현장 배정/입실·점검 흐름·유선/무상·환불 재시도/계좌 환불·요금/달력/공휴일·설정) ③ 약관 3종 페이지 ④ 시설 소개·이용 안내·오시는 길
 - 관리자 DB 함수는 이미 있음(0010) — 화면만 만들면 된다. 환불 재시도 경로(토스 취소 실패 → cancel_requested → 재시도)는 관리자 화면에서 e2e 검증 예정. fake 토스는 cancelReason에 `[FAIL:CODE]`를 넣으면 실패를 시뮬레이션한다
 

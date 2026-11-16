@@ -16,10 +16,10 @@ export default async function PaymentFailPage({
   return (
     <PageShell center>
       <div className="enter w-full">
-        <h1 className="text-[22px] font-bold">결제가 완료되지 않았어요</h1>
-        <p className="mt-2 text-[15px] text-muted">{message ?? '결제가 취소되었거나 실패했습니다.'}</p>
-        <p className="mt-1 text-[13px] text-subtle">결제된 금액은 없습니다. 다시 예약해 주세요.</p>
-        <ButtonLink href="/booking" size="lg" className="mt-8">
+        <h1 className="text-[32px] leading-[1.15]">결제가 완료되지 않았습니다</h1>
+        <p className="mt-3 text-[16px] text-body">{message ?? '결제가 취소되었거나 실패했습니다.'}</p>
+        <p className="mt-1 text-[14px] text-muted">결제된 금액은 없습니다.</p>
+        <ButtonLink href="/booking" size="block" className="mt-8">
           다시 예약하기
         </ButtonLink>
       </div>

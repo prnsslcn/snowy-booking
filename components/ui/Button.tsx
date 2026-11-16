@@ -1,31 +1,32 @@
 import Link from 'next/link';
 import type { ButtonHTMLAttributes, ComponentProps } from 'react';
 
-// 색을 className 으로 덮어쓰지 말고 variant 를 추가할 것(Tailwind v4 는 같은 속성 클래스의 승패가 CSS 생성 순서)
-type Variant = 'primary' | 'secondary' | 'ghost' | 'dark' | 'outline' | 'danger';
-type Size = 'sm' | 'md' | 'lg' | 'xl';
+/**
+ * 직각 블록 버튼(DESIGN: 0px, 14px/700/0.5px, 높이 48, 좌우 32).
+ * 색·크기는 className 으로 덮어쓰지 말고 variant/size 를 추가(Tailwind v4 는 같은 속성 클래스 승패가 CSS 생성 순서).
+ */
+type Variant = 'primary' | 'secondary' | 'onDark' | 'danger' | 'text';
+type Size = 'sm' | 'md' | 'block';
 
 const base =
-  'pressable inline-flex items-center justify-center gap-1.5 font-semibold whitespace-nowrap select-none disabled:opacity-40 disabled:cursor-not-allowed focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent';
+  'pressable inline-flex items-center justify-center gap-2 rounded-none text-[14px] font-bold tracking-[0.5px] whitespace-nowrap select-none disabled:cursor-not-allowed focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary';
 
 const variants: Record<Variant, string> = {
-  primary: 'bg-accent text-white hover:bg-accent-strong',
-  secondary: 'bg-accent-soft text-accent hover:bg-[#dde9fd]',
-  ghost: 'bg-transparent text-muted hover:bg-line-soft',
-  dark: 'bg-ink text-white hover:bg-ink-2',
-  outline: 'border border-line bg-surface text-ink hover:bg-line-soft',
-  danger: 'border border-line bg-surface text-danger hover:bg-danger-soft',
+  primary: 'bg-primary text-white hover:bg-primary-active disabled:bg-primary-disabled disabled:text-muted',
+  secondary: 'border border-hairline-strong bg-canvas text-ink hover:border-ink',
+  onDark: 'border border-white bg-transparent text-white hover:bg-white hover:text-dark',
+  danger: 'border border-hairline-strong bg-canvas text-error hover:border-error',
+  text: 'h-auto px-0 bg-transparent text-ink',
 };
 
 const sizes: Record<Size, string> = {
-  sm: 'h-9 rounded-[10px] px-3.5 text-sm',
-  md: 'h-12 rounded-[14px] px-5 text-[15px]',
-  lg: 'h-14 w-full rounded-[16px] px-6 text-[17px]', // 전체 폭(폼·하단 CTA)
-  xl: 'h-14 rounded-[16px] px-7 text-[17px]', // 큰 인라인(히어로 CTA)
+  sm: 'h-11 px-5',
+  md: 'h-12 px-8',
+  block: 'h-14 w-full px-8',
 };
 
 export function buttonClass(variant: Variant = 'primary', size: Size = 'md', className = '') {
-  return `${base} ${variants[variant]} ${sizes[size]} ${className}`;
+  return `${base} ${variants[variant]} ${variant === 'text' ? '' : sizes[size]} ${className}`;
 }
 
 export function Button({
@@ -44,4 +45,14 @@ export function ButtonLink({
   ...props
 }: ComponentProps<typeof Link> & { variant?: Variant; size?: Size }) {
   return <Link className={buttonClass(variant, size, className)} {...props} />;
+}
+
+/** "자세히 보기 ›" 형식의 글자 링크(라벨 + 밑줄 그려짐) */
+export function ArrowLink({ className = '', children, ...props }: ComponentProps<typeof Link>) {
+  return (
+    <Link className={`label inline-flex items-center gap-1.5 py-3 text-ink ${className}`} {...props}>
+      <span className="draw">{children}</span>
+      <span aria-hidden>›</span>
+    </Link>
+  );
 }

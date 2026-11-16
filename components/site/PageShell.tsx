@@ -3,39 +3,31 @@ import type { ReactNode } from 'react';
 import { SiteFooter } from '@/components/site/SiteFooter';
 import { SiteHeader } from '@/components/site/SiteHeader';
 
-type Width = 'narrow' | 'wide' | 'full';
+type Width = 'form' | 'full';
 
-const widths: Record<Width, string> = {
-  narrow: 'mx-auto w-full max-w-xl px-4 sm:px-6',
-  wide: 'mx-auto w-full max-w-6xl px-4 sm:px-6',
-  full: 'w-full',
-};
-
+/** form: 예약·조회 같은 입력 화면(좁은 단), full: 섹션이 각자 .wrap 을 가짐 */
 export function PageShell({
   children,
-  width = 'narrow',
+  width = 'form',
   center = false,
-  footer = true,
-  surface = false,
 }: {
   children: ReactNode;
   width?: Width;
   center?: boolean;
-  footer?: boolean;
-  /** 흰 바탕(입력 폼 화면) — 회색 입력칸이 배경과 구분되도록 */
-  surface?: boolean;
 }) {
   return (
-    <div className={`flex min-h-[100dvh] flex-col ${surface ? 'bg-surface' : ''}`}>
+    <div className="flex min-h-[100dvh] flex-col">
       <SiteHeader />
       <main
-        className={`${widths[width]} flex-1 ${
-          center ? 'flex flex-col items-center justify-center py-16 text-center' : 'py-8 sm:py-12'
-        }`}
+        className={
+          width === 'full'
+            ? 'flex-1'
+            : `wrap flex-1 ${center ? 'flex flex-col items-center justify-center py-20 text-center' : 'py-10 md:py-16'}`
+        }
       >
-        {children}
+        {width === 'form' ? <div className="mx-auto w-full max-w-[560px]">{children}</div> : children}
       </main>
-      {footer && <SiteFooter />}
+      <SiteFooter />
     </div>
   );
 }

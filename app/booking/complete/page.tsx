@@ -27,50 +27,40 @@ export default async function CompletePage({ searchParams }: { searchParams: Pro
 
   return (
     <PageShell>
-      <div className="enter pt-4 text-center">
-        <div className="mx-auto flex h-16 w-16 items-center justify-center rounded-full bg-accent text-white">
-          <svg viewBox="0 0 24 24" className="h-8 w-8" fill="none" aria-hidden>
-            <path d="m5.5 12.5 4.5 4.5 8.5-10" stroke="currentColor" strokeWidth="2.4" strokeLinecap="round" strokeLinejoin="round" />
-          </svg>
-        </div>
-        <h1 className="mt-6 text-[26px] font-bold">예약이 확정되었어요</h1>
-        <p className="mt-2 text-[15px] text-muted">예약 내용은 문자로도 보내드렸어요.</p>
+      <div className="enter">
+        <p className="label text-success">예약 확정</p>
+        <h1 className="mt-3 text-[32px] leading-[1.15]">예약이 확정되었습니다</h1>
+        <p className="mt-3 text-[16px] text-body">예약 내용은 문자로도 발송됩니다.</p>
       </div>
 
       {data && (
-        <div className="enter mt-8 overflow-hidden rounded-[22px] border border-line-soft bg-surface">
-          <div className="bg-ice px-6 py-7 text-center">
-            <p className="text-[14px] font-medium text-ink-2">예약번호</p>
-            <p className="tabular mt-2 text-[44px] font-bold leading-none tracking-[0.25em] text-ink">{data.lookup_code}</p>
-            <p className="mt-3 text-[13px] text-muted">조회·취소할 때 휴대폰 번호와 함께 필요해요.</p>
+        <div className="enter mt-10">
+          <div className="bg-dark px-6 py-8 text-white">
+            <p className="label text-on-dark-soft">예약번호</p>
+            <p className="tabular mt-3 text-[64px] font-bold leading-none tracking-[0.2em]">{data.lookup_code}</p>
+            <p className="mt-4 text-[14px] text-on-dark-soft">조회·취소 시 휴대폰 번호와 함께 입력</p>
           </div>
-          <dl className="tabular space-y-3 px-6 py-5 text-[15px]">
-            <div className="flex justify-between gap-4">
-              <dt className="text-muted">이용일</dt>
-              <dd className="text-right font-medium">{formatDateKorean(data.date)} {USAGE_TIME}</dd>
-            </div>
-            <div className="flex justify-between gap-4">
-              <dt className="text-muted">공간</dt>
-              <dd className="font-medium">{typeName} 1동 · {data.guest_count}명</dd>
-            </div>
-            <div className="flex justify-between gap-4">
-              <dt className="text-muted">결제 금액</dt>
-              <dd className="font-semibold">{formatWon(data.amount)}</dd>
-            </div>
+          <dl>
+            {[
+              ['이용일', `${formatDateKorean(data.date)} ${USAGE_TIME}`],
+              ['공간', `${typeName} 1동 · ${data.guest_count}명`],
+              ['결제 금액', formatWon(data.amount)],
+            ].map(([k, v]) => (
+              <div key={k} className="flex justify-between gap-4 border-b border-hairline py-4">
+                <dt className="text-[16px] text-muted">{k}</dt>
+                <dd className="tabular text-right text-[16px] text-ink">{v}</dd>
+              </div>
+            ))}
           </dl>
-          <p className="border-t border-line-soft px-6 py-4 text-[13px] leading-relaxed text-subtle">
-            자리(호수)는 이용 당일 현장에서 배정해 드려요. {TICKET_NOTICE}
-          </p>
+          <p className="mt-4 text-[14px] text-muted">자리(호수)는 이용 당일 현장에서 배정됩니다. {TICKET_NOTICE}</p>
         </div>
       )}
 
-      <div className="mt-6 grid grid-cols-2 gap-2">
-        <ButtonLink href="/booking/lookup" variant="outline" size="lg">
+      <div className="mt-10 grid grid-cols-2 gap-3">
+        <ButtonLink href="/booking/lookup" variant="secondary">
           예약 조회
         </ButtonLink>
-        <ButtonLink href="/" variant="dark" size="lg">
-          홈으로
-        </ButtonLink>
+        <ButtonLink href="/">홈</ButtonLink>
       </div>
     </PageShell>
   );

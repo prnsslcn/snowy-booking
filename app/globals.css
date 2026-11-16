@@ -1,126 +1,132 @@
-/* Pretendard는 app/layout.tsx의 <link>로 로드 — CSS @import는 렌더 차단이라 지양 */
+/* Pretendard는 app/layout.tsx의 <link>로 로드 */
 @import "tailwindcss";
 
 /*
-  스노위랜드 디자인 토큰 — 겨울 밝은 톤 · 애플식 여백 · 토스식 정보 밀도.
-  눈(canvas) 위의 흰 카드, 겨울 하늘색 포인트 하나. 그라데이션·장식 최소화.
+  디자인 토큰 — DESIGN-bmw.md 규칙(브랜드 요소 제외).
+  흰 캔버스 · 단일 파란 주요 버튼 · 짙은 남색은 색 띠 하나에만 · 모서리 0 · 그림자 없음 ·
+  제목 700 / 본문 300 · 자간 0 · 섹션 간격 80px.
 */
 @theme {
-  --color-canvas: #f5f8fb;      /* 눈빛 배경 */
-  --color-surface: #ffffff;
-  --color-ice: #eaf2fb;         /* 옅은 하늘 — 섹션 강조 배경 */
-  --color-ink: #0f1a2a;         /* 본문 제목 — 겨울 밤 남색 */
-  --color-ink-2: #2b3747;
-  --color-muted: #5f6b7a;
-  --color-subtle: #95a0ad;
-  --color-line: #e3e8ef;
-  --color-line-soft: #eef2f6;
-  --color-field: #f1f4f8;       /* 입력칸 배경(토스식) */
+  --color-canvas: #ffffff;
+  --color-surface-soft: #f7f7f7;   /* 푸터 */
+  --color-surface-card: #fafafa;   /* 사진 받침 */
+  --color-surface-strong: #ebebeb;
+  --color-dark: #1a2129;           /* 색 띠(한 페이지 하나) */
+  --color-dark-elevated: #262e38;
 
-  --color-accent: #2b74ea;      /* 겨울 하늘 블루 */
-  --color-accent-strong: #1d5fcc;
-  --color-accent-soft: #eaf2ff;
+  --color-ink: #262626;
+  --color-body: #3c3c3c;
+  --color-body-strong: #1a1a1a;
+  --color-muted: #6b6b6b;
+  --color-muted-soft: #9a9a9a;
+  --color-hairline: #e6e6e6;
+  --color-hairline-strong: #cccccc;
+  --color-on-dark-soft: #bbbbbb;
 
-  --color-success: #10a05a;
-  --color-success-soft: #e6f6ee;
-  --color-warning: #c76d06;
-  --color-warning-soft: #fff4e5;
-  --color-danger: #e2474c;
-  --color-danger-soft: #fdeced;
-  --color-manual: #6d4fc2;      /* 계좌 직접 환불 배지(보라) */
-  --color-manual-soft: #f1ecfb;
+  --color-primary: #1c69d4;
+  --color-primary-active: #0653b6;
+  --color-primary-disabled: #d6d6d6;
 
-  --font-sans: "Pretendard Variable", Pretendard, -apple-system, BlinkMacSystemFont,
-    system-ui, sans-serif;
+  --color-success: #15803d;        /* 글자용(대비 확보) */
+  --color-warning: #b45309;
+  --color-error: #dc2626;
+  --color-manual: #6d4fc2;         /* 계좌 직접 환불 배지 */
 
-  --radius-card: 22px;
-  --radius-field: 14px;
+  --font-sans: "Pretendard Variable", Pretendard, system-ui, -apple-system, BlinkMacSystemFont,
+    "Segoe UI", Roboto, sans-serif;
 
-  /* 모션 — UI 는 강한 ease-out, 화면 내 이동은 ease-in-out */
   --ease-out: cubic-bezier(0.23, 1, 0.32, 1);
-  --ease-in-out: cubic-bezier(0.77, 0, 0.175, 1);
-  --ease-drawer: cubic-bezier(0.32, 0.72, 0, 1);
 }
 
-html {
-  -webkit-text-size-adjust: 100%;
-  -webkit-tap-highlight-color: transparent;
+/* 기본 스타일은 반드시 base 레이어에 — 레이어 밖 CSS 는 Tailwind 유틸리티(text-white 등)를 이긴다 */
+@layer base {
+  html {
+    -webkit-text-size-adjust: 100%;
+    -webkit-tap-highlight-color: transparent;
+  }
+
+  body {
+    background: var(--color-canvas);
+    color: var(--color-body);
+    font-family: var(--font-sans);
+    font-weight: 300;
+    word-break: keep-all;
+    line-height: 1.55;
+    letter-spacing: 0;
+  }
+
+  h1, h2, h3, h4 {
+    color: var(--color-ink);
+    font-weight: 700;
+    letter-spacing: 0;
+  }
+
+  b, strong { font-weight: 700; }
 }
 
-body {
-  background: var(--color-canvas);
-  color: var(--color-ink);
-  font-family: var(--font-sans);
-  word-break: keep-all;
-  line-height: 1.55;
-  font-feature-settings: "tnum" 0;
+.tabular { font-variant-numeric: tabular-nums; }
+
+/* 작은 라벨(13px / 700 / 1.5px) */
+.label {
+  font-size: 13px;
+  font-weight: 700;
+  line-height: 1.3;
+  letter-spacing: 1.5px;
 }
 
-h1, h2, h3, h4 {
-  line-height: 1.25;
-  letter-spacing: -0.025em;
+/* 컨텐츠 폭 — 좌우 끝선 통일 */
+.wrap {
+  width: 100%;
+  max-width: 1280px;
+  margin-inline: auto;
+  padding-inline: 20px;
+}
+@media (min-width: 768px) {
+  .wrap { padding-inline: 40px; }
 }
 
-/* 숫자 정렬(금액·잔여·예약번호) */
-.tabular {
-  font-variant-numeric: tabular-nums;
-}
-
-/* ── 누름 피드백: 모든 pressable 공용 ─────────────────────────── */
+/* ── 움직임: 누름·hover 반응만, 짧게 ─────────────────────────── */
 .pressable {
   transition:
-    transform 160ms var(--ease-out),
+    transform 140ms var(--ease-out),
     background-color 150ms ease,
     border-color 150ms ease,
     color 150ms ease;
 }
-.pressable:active:not(:disabled) {
-  transform: scale(0.97);
-}
+.pressable:active:not(:disabled) { transform: scale(0.98); }
 
-/* ── 단계·블록 등장: 마운트 시 1회, 짧게 ─────────────────────── */
-.enter {
-  opacity: 1;
-  transform: translateY(0);
-  transition:
-    opacity 220ms var(--ease-out),
-    transform 220ms var(--ease-out);
-
-  @starting-style {
-    opacity: 0;
-    transform: translateY(8px);
-  }
-}
-
-/* 사진 카드 — 마우스 기기에서만 살짝 확대 */
-.photo-zoom img {
-  transition: transform 450ms var(--ease-out);
+/* 링크 밑줄이 그려짐 */
+.draw {
+  background: linear-gradient(currentColor, currentColor) 0 100% / 0 1px no-repeat;
+  transition: background-size 220ms var(--ease-out);
 }
 @media (hover: hover) and (pointer: fine) {
-  .photo-zoom:hover img {
-    transform: scale(1.03);
-  }
+  .draw:hover { background-size: 100% 1px; }
 }
 
-/* 가로 스크롤 갤러리 — 스크롤바 숨김 */
-.no-scrollbar {
-  scrollbar-width: none;
+/* 링크 카드: 2px 들림 + 사진 1.03 확대(프레임 안에서) */
+.lift { transition: transform 220ms var(--ease-out); }
+.zoom-frame { overflow: hidden; background: var(--color-surface-card); }
+.zoom-frame img { transition: transform 450ms var(--ease-out); }
+@media (hover: hover) and (pointer: fine) {
+  .lift:hover { transform: translateY(-2px); }
+  .lift:hover .zoom-frame img,
+  .zoom-link:hover img { transform: scale(1.03); }
 }
-.no-scrollbar::-webkit-scrollbar {
-  display: none;
+
+/* 히어로 등장(로드 시 1회) · 단계 전환 */
+.enter {
+  opacity: 1;
+  transform: none;
+  transition: opacity 320ms var(--ease-out), transform 320ms var(--ease-out);
+  @starting-style { opacity: 0; transform: translateY(10px); }
 }
+
+.no-scrollbar { scrollbar-width: none; }
+.no-scrollbar::-webkit-scrollbar { display: none; }
 
 @media (prefers-reduced-motion: reduce) {
-  .enter {
-    transform: none;
-    @starting-style {
-      transform: none;
-    }
-  }
-  .pressable:active:not(:disabled) {
-    transform: none;
-  }
-  .photo-zoom img {
-    transition: none;
-  }
+  .enter { transform: none; @starting-style { transform: none; } }
+  .pressable:active:not(:disabled), .lift:hover { transform: none; }
+  .zoom-frame img, .zoom-link img { transition: none; }
 }

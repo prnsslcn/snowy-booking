@@ -42,15 +42,15 @@ export default function PaymentSuccessPage() {
     <PageShell center>
       {!error ? (
         <div className="enter">
-          <div className="mx-auto h-10 w-10 animate-spin rounded-full border-[3px] border-line border-t-accent [animation-duration:700ms]" />
-          <p className="mt-6 text-[17px] font-semibold">결제를 확인하고 있어요</p>
-          <p className="mt-1 text-[14px] text-muted">창을 닫지 말고 잠시만 기다려 주세요.</p>
+          <div className="mx-auto h-10 w-10 animate-spin rounded-full border-[3px] border-hairline border-t-primary [animation-duration:700ms]" />
+          <p className="mt-6 text-[18px] font-bold text-ink">결제 확인 중</p>
+          <p className="mt-1 text-[16px] text-body">창을 닫지 마세요.</p>
         </div>
       ) : (
         <div className="enter w-full">
-          <h1 className="text-[22px] font-bold">결제를 완료하지 못했어요</h1>
-          <p className="mt-2 text-[15px] text-muted">{error}</p>
-          <ButtonLink href="/booking" size="lg" className="mt-8">
+          <h1 className="text-[32px] leading-[1.15]">결제를 완료하지 못했습니다</h1>
+          <p className="mt-3 text-[16px] text-body">{error}</p>
+          <ButtonLink href="/booking" size="block" className="mt-8">
             다시 예약하기
           </ButtonLink>
         </div>
