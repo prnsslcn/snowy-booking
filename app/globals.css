@@ -2,31 +2,49 @@
 @import "tailwindcss";
 
 /*
-  임시 기본 토큰 (grill-booking 미니멀 톤 기반, 겨울 블루 포인트).
-  시설 사진·브랜드 자료 수령 후 디자인 확정 시 교체.
+  스노위랜드 디자인 토큰 — 겨울 밝은 톤 · 애플식 여백 · 토스식 정보 밀도.
+  눈(canvas) 위의 흰 카드, 겨울 하늘색 포인트 하나. 그라데이션·장식 최소화.
 */
 @theme {
-  --color-canvas: #f7f9fc;
+  --color-canvas: #f5f8fb;      /* 눈빛 배경 */
   --color-surface: #ffffff;
-  --color-ink: #191f28;
-  --color-muted: #6b7684;
-  --color-subtle: #8b95a1;
-  --color-line: #e5e8eb;
-  --color-line-soft: #f2f4f6;
-  --color-accent: #2f6fde;
-  --color-accent-strong: #2458b3;
-  --color-accent-soft: #eaf1fd;
-  --color-success: #16a34a;
-  --color-danger: #e5484d;
-  /* 계좌 직접 환불 배지 (CLAUDE.md §9) */
-  --color-manual-refund: #7c3aed;
+  --color-ice: #eaf2fb;         /* 옅은 하늘 — 섹션 강조 배경 */
+  --color-ink: #0f1a2a;         /* 본문 제목 — 겨울 밤 남색 */
+  --color-ink-2: #2b3747;
+  --color-muted: #5f6b7a;
+  --color-subtle: #95a0ad;
+  --color-line: #e3e8ef;
+  --color-line-soft: #eef2f6;
+  --color-field: #f1f4f8;       /* 입력칸 배경(토스식) */
+
+  --color-accent: #2b74ea;      /* 겨울 하늘 블루 */
+  --color-accent-strong: #1d5fcc;
+  --color-accent-soft: #eaf2ff;
+
+  --color-success: #10a05a;
+  --color-success-soft: #e6f6ee;
+  --color-warning: #c76d06;
+  --color-warning-soft: #fff4e5;
+  --color-danger: #e2474c;
+  --color-danger-soft: #fdeced;
+  --color-manual: #6d4fc2;      /* 계좌 직접 환불 배지(보라) */
+  --color-manual-soft: #f1ecfb;
 
   --font-sans: "Pretendard Variable", Pretendard, -apple-system, BlinkMacSystemFont,
     system-ui, sans-serif;
+
+  --radius-card: 22px;
+  --radius-field: 14px;
+
+  /* 모션 — UI 는 강한 ease-out, 화면 내 이동은 ease-in-out */
+  --ease-out: cubic-bezier(0.23, 1, 0.32, 1);
+  --ease-in-out: cubic-bezier(0.77, 0, 0.175, 1);
+  --ease-drawer: cubic-bezier(0.32, 0.72, 0, 1);
 }
 
 html {
   -webkit-text-size-adjust: 100%;
+  -webkit-tap-highlight-color: transparent;
 }
 
 body {
@@ -34,10 +52,75 @@ body {
   color: var(--color-ink);
   font-family: var(--font-sans);
   word-break: keep-all;
-  line-height: 1.5;
+  line-height: 1.55;
+  font-feature-settings: "tnum" 0;
 }
 
 h1, h2, h3, h4 {
-  line-height: 1.3;
-  letter-spacing: -0.01em;
+  line-height: 1.25;
+  letter-spacing: -0.025em;
+}
+
+/* 숫자 정렬(금액·잔여·예약번호) */
+.tabular {
+  font-variant-numeric: tabular-nums;
+}
+
+/* ── 누름 피드백: 모든 pressable 공용 ─────────────────────────── */
+.pressable {
+  transition:
+    transform 160ms var(--ease-out),
+    background-color 150ms ease,
+    border-color 150ms ease,
+    color 150ms ease;
+}
+.pressable:active:not(:disabled) {
+  transform: scale(0.97);
+}
+
+/* ── 단계·블록 등장: 마운트 시 1회, 짧게 ─────────────────────── */
+.enter {
+  opacity: 1;
+  transform: translateY(0);
+  transition:
+    opacity 220ms var(--ease-out),
+    transform 220ms var(--ease-out);
+
+  @starting-style {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+}
+
+/* 사진 카드 — 마우스 기기에서만 살짝 확대 */
+.photo-zoom img {
+  transition: transform 450ms var(--ease-out);
+}
+@media (hover: hover) and (pointer: fine) {
+  .photo-zoom:hover img {
+    transform: scale(1.03);
+  }
+}
+
+/* 가로 스크롤 갤러리 — 스크롤바 숨김 */
+.no-scrollbar {
+  scrollbar-width: none;
+}
+.no-scrollbar::-webkit-scrollbar {
+  display: none;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .enter {
+    transform: none;
+    @starting-style {
+      transform: none;
+    }
+  }
+  .pressable:active:not(:disabled) {
+    transform: none;
+  }
+  .photo-zoom img {
+    transition: none;
+  }
 }

@@ -1,18 +1,18 @@
 'use client';
 
+import Image from 'next/image';
 import { useRouter } from 'next/navigation';
-import { useCallback, useEffect, useMemo, useState } from 'react';
+import { useCallback, useEffect, useMemo, useState, type ReactNode } from 'react';
 
 import { Calendar, type CalendarDay } from '@/components/booking/Calendar';
 import { PageShell } from '@/components/site/PageShell';
 import { Badge } from '@/components/ui/Badge';
 import { Button } from '@/components/ui/Button';
-import { Card } from '@/components/ui/Card';
-import { Field, Input } from '@/components/ui/Field';
-import { Stepper } from '@/components/ui/Stepper';
+import { Field, Input, Select } from '@/components/ui/Field';
 import { errorMessage } from '@/lib/booking/error-messages';
 import { PAYMENTS_FAKE, PayError, payAndConfirmFake, reserveClient } from '@/lib/client/pay';
 import { requestTossPayment } from '@/lib/client/toss-payment';
+import { facilityByType } from '@/lib/content/facilities';
 import { formatDateKorean, formatPhone, formatWon } from '@/lib/format';
 import { SAME_DAY_CUTOFF_HOUR } from '@/lib/policy/booking-window';
 import { parseMobilePhone } from '@/lib/policy/phone';
@@ -46,8 +46,14 @@ interface AvailResponse {
   days: DayAvail[];
 }
 
-const STEPS = ['날짜', '상품', '예약자 정보', '결제'];
+const TOTAL_STEPS = 4;
 const CUTOFF = `${String(SAME_DAY_CUTOFF_HOUR).padStart(2, '0')}:00`;
+const TITLES: Record<number, string> = {
+  1: '언제 방문하시나요?',
+  2: '어떤 공간으로 할까요?',
+  3: '예약하시는 분을 알려주세요',
+  4: '결제 정보를 확인해 주세요',
+};
 
 export default function BookingPageClient({ preferredType }: { preferredType: string | null }) {
   const router = useRouter();
@@ -56,7 +62,7 @@ export default function BookingPageClient({ preferredType }: { preferredType: st
   const [loadError, setLoadError] = useState('');
 
   const [date, setDate] = useState('');
-  const [type, setType] = useState<string>('');
+  const [type, setType] = useState('');
   const [name, setName] = useState('');
   const [phone, setPhone] = useState('');
   const [count, setCount] = useState(0);
@@ -98,7 +104,6 @@ export default function BookingPageClient({ preferredType }: { preferredType: st
   function pickDate(iso: string) {
     setDate(iso);
     const d = avail?.days.find((x) => x.date === iso);
-    // 시설 상세에서 넘어온 경우 해당 상품 자동 선택(잔여 있을 때만)
     const pre = preferredType ? d?.types.find((t) => t.slug === preferredType || t.type === preferredType) : null;
     setType(pre && pre.remaining > 0 ? pre.type : '');
     setStep(2);
@@ -113,8 +118,8 @@ export default function BookingPageClient({ preferredType }: { preferredType: st
   function validateInfo(): boolean {
     const e: Record<string, string> = {};
     if (!name.trim()) e.name = '이름을 입력해 주세요.';
-    if (!parseMobilePhone(phone)) e.phone = '휴대폰 번호 형식이 올바르지 않습니다.';
-    if (!selected || count < 1 || count > selected.maxCapacity) e.count = '인원을 선택해 주세요.';
+    if (!parseMobilePhone(phone)) e.phone = '휴대폰 번호를 정확히 입력해 주세요.';
+    if (!selected || count < 1 || count > selected.maxCapacity) e.count = '이용 인원을 선택해 주세요.';
     if (!agreeRefund || !agreeRules) e.agree = '필수 항목에 모두 동의해 주세요.';
     setErrors(e);
     return Object.keys(e).length === 0;
@@ -149,9 +154,7 @@ export default function BookingPageClient({ preferredType }: { preferredType: st
     } catch (err) {
       if (err instanceof PayError) {
         setPayError(errorMessage(err.code));
-        if (['SOLD_OUT', 'DATE_LOCKED', 'DATE_CLOSED', 'OUT_OF_WINDOW'].includes(err.code)) {
-          await load();
-        }
+        if (['SOLD_OUT', 'DATE_LOCKED', 'DATE_CLOSED', 'OUT_OF_WINDOW'].includes(err.code)) await load();
       } else {
         const code = (err as { code?: string }).code;
         if (code !== 'USER_CANCEL') setPayError('결제가 취소되었거나 실패했습니다. 다시 시도해 주세요.');
@@ -160,187 +163,286 @@ export default function BookingPageClient({ preferredType }: { preferredType: st
     }
   }
 
+  const allAgreed = agreeRefund && agreeRules;
+
   return (
-    <PageShell>
-      <div className="mb-8">
-        <Stepper current={step} labels={STEPS} />
+    <PageShell surface>
+      {/* 진행 표시 */}
+      <div className="flex items-center gap-3">
+        <button
+          type="button"
+          onClick={() => {
+            setPayError('');
+            if (step > 1) setStep(step - 1);
+            else router.push('/');
+          }}
+          aria-label="이전"
+          className="pressable -ml-2 flex h-10 w-10 items-center justify-center rounded-full text-ink-2 hover:bg-line-soft"
+        >
+          <svg viewBox="0 0 16 16" className="h-5 w-5" fill="none" aria-hidden>
+            <path d="M10 3.5 5.5 8l4.5 4.5" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" />
+          </svg>
+        </button>
+        <div className="h-1 flex-1 overflow-hidden rounded-full bg-line" role="progressbar" aria-valuemin={1} aria-valuemax={TOTAL_STEPS} aria-valuenow={step}>
+          <div
+            className="h-full origin-left rounded-full bg-accent transition-transform duration-300 ease-[var(--ease-out)]"
+            style={{ transform: `scaleX(${step / TOTAL_STEPS})` }}
+          />
+        </div>
+        <span className="tabular w-8 text-right text-[13px] font-medium text-subtle">
+          {step}/{TOTAL_STEPS}
+        </span>
       </div>
 
-      {loadError && <p className="mb-4 text-sm text-danger">{loadError}</p>}
+      <div key={step} className="enter mt-7">
+        <h1 className="text-[26px] font-bold sm:text-[30px]">{TITLES[step]}</h1>
 
-      {/* 1. 날짜 */}
-      {step === 1 && (
-        <section className="space-y-3">
-          <h2 className="text-lg font-bold text-ink">날짜 선택</h2>
-          <p className="text-sm text-muted">
-            당일 이용 {USAGE_TIME}. 오늘부터 1개월 이내({avail?.maxDate ?? '…'}까지) 예약할 수 있으며,
-            당일 예약은 {CUTOFF}까지입니다.
-          </p>
-          {avail ? (
-            <Calendar value={date} onSelect={pickDate} days={dayMap} minDate={avail.minDate} maxDate={avail.maxDate} />
-          ) : (
-            !loadError && <p className="text-sm text-subtle">불러오는 중…</p>
-          )}
-        </section>
-      )}
+        {/* 지금까지 고른 것 — 눌러서 되돌아가기 */}
+        {step >= 2 && date && (
+          <div className="mt-3 flex flex-wrap gap-2">
+            <Chip onClick={() => setStep(1)}>{formatDateKorean(date)}</Chip>
+            {step >= 3 && selected && <Chip onClick={() => setStep(2)}>{selected.name}</Chip>}
+          </div>
+        )}
 
-      {/* 2. 상품 */}
-      {step === 2 && day && (
-        <section className="space-y-3">
-          <h2 className="text-lg font-bold text-ink">상품 선택</h2>
-          <p className="text-sm text-muted">
-            {formatDateKorean(date)} · {day.weekendRate ? '주말 요금' : '주중 요금'} 적용일
-          </p>
-          <p className="text-xs text-subtle">1인 1동 · 자리(호수)는 이용 당일 현장에서 배정됩니다.</p>
-          <div className="space-y-3">
+        {loadError && <p className="mt-4 rounded-[14px] bg-danger-soft px-4 py-3 text-[14px] text-danger">{loadError}</p>}
+
+        {/* 1. 날짜 */}
+        {step === 1 && (
+          <div className="mt-6">
+            <p className="mb-4 text-[15px] text-muted">
+              당일 이용 {USAGE_TIME} · 오늘부터 1개월 이내 · 당일 예약은 {CUTOFF}까지
+            </p>
+            {avail ? (
+              <Calendar value={date} onSelect={pickDate} days={dayMap} today={avail.today} minDate={avail.minDate} maxDate={avail.maxDate} />
+            ) : (
+              !loadError && <div className="h-[420px] animate-pulse rounded-[22px] bg-line-soft" />
+            )}
+          </div>
+        )}
+
+        {/* 2. 공간 */}
+        {step === 2 && day && (
+          <div className="mt-6 space-y-3">
+            <p className="text-[15px] text-muted">
+              {day.weekendRate ? '주말 요금' : '주중 요금'} 적용일 · 1인 1동 · 자리는 현장에서 배정됩니다
+            </p>
             {day.types.map((t) => {
               const soldOut = t.remaining <= 0;
+              const cover = facilityByType(t.type)?.cover;
               return (
                 <button
                   key={t.type}
                   type="button"
                   disabled={soldOut}
                   onClick={() => pickType(t)}
-                  className={`w-full rounded-2xl border p-5 text-left transition-colors ${
+                  className={`pressable flex w-full items-center gap-4 rounded-[22px] border p-3 text-left ${
                     soldOut
-                      ? 'cursor-not-allowed border-line-soft bg-line-soft'
+                      ? 'cursor-not-allowed border-line-soft bg-surface/60'
                       : type === t.type
-                        ? 'border-accent bg-accent-soft'
-                        : 'border-line bg-surface hover:border-accent/40'
+                        ? 'border-accent bg-accent-soft/50'
+                        : 'border-line-soft bg-surface hover:border-line'
                   }`}
                 >
-                  <div className="flex items-center justify-between">
-                    <span className={`font-bold ${soldOut ? 'text-subtle' : 'text-ink'}`}>
-                      {t.name} <span className="text-sm font-normal text-subtle">· 최대 {t.maxCapacity}인</span>
-                    </span>
-                    <span className={`text-base font-extrabold ${soldOut ? 'text-subtle' : 'text-ink'}`}>
-                      {formatWon(t.price)}
-                    </span>
-                  </div>
-                  <div className="mt-2 flex items-center gap-2">
-                    {soldOut ? (
-                      <Badge tone="danger">예약마감</Badge>
-                    ) : (
-                      <Badge tone={t.remaining <= 3 ? 'warning' : 'accent'}>{t.remaining}동 남음</Badge>
-                    )}
-                    <span className="text-xs text-subtle">{t.rateKind === 'weekend' ? '주말 요금' : '주중 요금'}</span>
+                  {cover && (
+                    <Image
+                      src={cover.src}
+                      alt=""
+                      width={240}
+                      height={240}
+                      sizes="88px"
+                      className={`h-[88px] w-[88px] shrink-0 rounded-[16px] object-cover ${soldOut ? 'opacity-40 grayscale' : ''}`}
+                    />
+                  )}
+                  <div className="min-w-0 flex-1 py-1">
+                    <div className="flex items-center gap-2">
+                      <span className={`text-[17px] font-bold ${soldOut ? 'text-subtle' : ''}`}>{t.name}</span>
+                      <span className="text-[13px] text-subtle">최대 {t.maxCapacity}인</span>
+                    </div>
+                    <p className={`tabular mt-1 text-[17px] font-bold ${soldOut ? 'text-subtle' : 'text-ink'}`}>{formatWon(t.price)}</p>
+                    <div className="mt-2">
+                      {soldOut ? (
+                        <Badge tone="danger">마감</Badge>
+                      ) : (
+                        <Badge tone={t.remaining <= 3 ? 'warning' : 'accent'}>
+                          <span className="tabular">{t.remaining}동 남음</span>
+                        </Badge>
+                      )}
+                    </div>
                   </div>
                 </button>
               );
             })}
           </div>
-          <Button variant="ghost" onClick={() => setStep(1)} className="w-full">
-            날짜 다시 선택
-          </Button>
-        </section>
-      )}
+        )}
 
-      {/* 3. 예약자 정보 + 동의 */}
-      {step === 3 && selected && (
-        <section className="space-y-5">
-          <h2 className="text-lg font-bold text-ink">예약자 정보</h2>
-          <Card className="bg-line-soft/60 p-4 text-sm text-muted">
-            {formatDateKorean(date)} · {selected.name} · {formatWon(selected.price)}
-          </Card>
-
-          <Field label="이름" error={errors.name}>
-            <Input value={name} onChange={(e) => setName(e.target.value)} placeholder="홍길동" autoComplete="name" />
-          </Field>
-          <Field label="휴대폰 번호" error={errors.phone} hint={`예약 조회·안내 문자에 사용됩니다. ${ONE_PER_DAY_NOTICE}`}>
-            <Input
-              value={phone}
-              onChange={(e) => setPhone(formatPhone(e.target.value))}
-              placeholder="010-1234-5678"
-              inputMode="numeric"
-              autoComplete="tel"
-              maxLength={13}
-            />
-          </Field>
-          <Field label="이용 인원" error={errors.count} hint={`영유아 포함 최대 ${selected.maxCapacity}인`}>
-            <select
-              value={count || ''}
-              onChange={(e) => setCount(Number(e.target.value))}
-              className="h-12 w-full rounded-xl border border-line bg-surface px-3.5 text-[15px] text-ink outline-none focus:border-accent"
-            >
-              <option value="" disabled>
-                인원 선택
-              </option>
-              {Array.from({ length: selected.maxCapacity }, (_, i) => i + 1).map((n) => (
-                <option key={n} value={n}>
-                  {n}명
+        {/* 3. 예약자 정보 + 동의 */}
+        {step === 3 && selected && (
+          <div className="mt-6 space-y-5">
+            <Field label="이름" error={errors.name}>
+              <Input value={name} onChange={(e) => setName(e.target.value)} placeholder="홍길동" autoComplete="name" aria-invalid={!!errors.name} />
+            </Field>
+            <Field label="휴대폰 번호" error={errors.phone} hint={`예약 확인 문자를 보내드려요. ${ONE_PER_DAY_NOTICE}`}>
+              <Input
+                value={phone}
+                onChange={(e) => setPhone(formatPhone(e.target.value))}
+                placeholder="010-0000-0000"
+                inputMode="numeric"
+                autoComplete="tel"
+                maxLength={13}
+                aria-invalid={!!errors.phone}
+              />
+            </Field>
+            <Field label="이용 인원" error={errors.count} hint={`영유아 포함 최대 ${selected.maxCapacity}인`}>
+              <Select value={count || ''} onChange={(e) => setCount(Number(e.target.value))} aria-invalid={!!errors.count}>
+                <option value="" disabled>
+                  인원 선택
                 </option>
-              ))}
-            </select>
-          </Field>
+                {Array.from({ length: selected.maxCapacity }, (_, i) => i + 1).map((n) => (
+                  <option key={n} value={n}>
+                    {n}명
+                  </option>
+                ))}
+              </Select>
+            </Field>
 
-          <div className="space-y-2 rounded-xl bg-line-soft p-4">
-            <label className="flex items-start gap-2.5">
-              <input type="checkbox" checked={agreeRefund} onChange={(e) => setAgreeRefund(e.target.checked)} className="mt-0.5 h-4 w-4 accent-accent" />
-              <span className="text-sm text-muted">
-                <b className="text-ink">[필수]</b> 취소·환불 규정({REFUND_SUMMARY})을 확인했으며 동의합니다.
-              </span>
-            </label>
-            <label className="flex items-start gap-2.5">
-              <input type="checkbox" checked={agreeRules} onChange={(e) => setAgreeRules(e.target.checked)} className="mt-0.5 h-4 w-4 accent-accent" />
-              <span className="text-sm text-muted">
-                <b className="text-ink">[필수]</b> 이용 수칙(이용 시간 {USAGE_TIME}, 최대 인원 준수)을 확인했으며 동의합니다.
-                {` ${TICKET_NOTICE} ${PARKING_NOTICE}`}
-              </span>
-            </label>
-          </div>
-          {errors.agree && <p className="-mt-3 text-sm text-danger">{errors.agree}</p>}
-
-          <div className="flex gap-2">
-            <Button variant="ghost" onClick={() => setStep(2)} className="flex-1">
-              이전
-            </Button>
-            <Button className="flex-1" onClick={() => validateInfo() && setStep(4)}>
-              다음
-            </Button>
-          </div>
-        </section>
-      )}
-
-      {/* 4. 결제 */}
-      {step === 4 && selected && (
-        <section className="space-y-5">
-          <h2 className="text-lg font-bold text-ink">결제</h2>
-          <Card className="divide-y divide-line">
-            <Row label="이용일" value={`${formatDateKorean(date)} ${USAGE_TIME}`} />
-            <Row label="상품" value={`${selected.name} 1동 · ${count}명`} />
-            <Row label="요금" value={selected.rateKind === 'weekend' ? '주말 요금' : '주중 요금'} />
-            <Row label="예약자" value={`${name.trim()} · ${formatPhone(phone)}`} />
-            <div className="flex items-center justify-between p-5">
-              <span className="font-semibold text-ink">결제 금액</span>
-              <span className="text-xl font-extrabold text-ink">{formatWon(selected.price)}</span>
+            <div className="overflow-hidden rounded-[22px] border border-line-soft bg-surface">
+              <CheckRow
+                checked={allAgreed}
+                onChange={(v) => {
+                  setAgreeRefund(v);
+                  setAgreeRules(v);
+                }}
+                strong
+              >
+                필수 항목 모두 동의
+              </CheckRow>
+              <div className="border-t border-line-soft">
+                <CheckRow checked={agreeRefund} onChange={setAgreeRefund}>
+                  <span className="text-subtle">[필수]</span> 취소·환불 규정 동의
+                  <span className="mt-0.5 block text-[13px] text-subtle">{REFUND_SUMMARY}</span>
+                </CheckRow>
+                <CheckRow checked={agreeRules} onChange={setAgreeRules}>
+                  <span className="text-subtle">[필수]</span> 이용 수칙 동의
+                  <span className="mt-0.5 block text-[13px] text-subtle">
+                    이용 시간 {USAGE_TIME}·최대 인원 준수. {TICKET_NOTICE} {PARKING_NOTICE}
+                  </span>
+                </CheckRow>
+              </div>
             </div>
-          </Card>
-          <p className="text-xs text-subtle">결제 금액은 서버에서 다시 확인됩니다. 결제창에서 10분 안에 결제를 완료해 주세요.</p>
+            <BottomBar>
+              {Object.keys(errors).length > 0 && (
+                <p role="alert" className="enter mb-3 rounded-[14px] bg-danger-soft px-4 py-3 text-[14px] text-danger">
+                  {errors.agree && Object.keys(errors).length === 1 ? errors.agree : '입력하지 않았거나 잘못된 항목이 있어요.'}
+                </p>
+              )}
+              <Button size="lg" onClick={() => validateInfo() && setStep(4)}>
+                다음
+              </Button>
+            </BottomBar>
+          </div>
+        )}
 
-          {PAYMENTS_FAKE && (
-            <div className="rounded-xl bg-[#fff5e5] px-4 py-3 text-sm text-[#c2780f]">
-              <Badge tone="warning">개발 모드</Badge> 실제 결제 대신 테스트 결제로 진행됩니다.
+        {/* 4. 결제 */}
+        {step === 4 && selected && (
+          <div className="mt-6 space-y-4">
+            <div className="rounded-[22px] border border-line-soft bg-surface">
+              <SummaryRow label="이용일" value={`${formatDateKorean(date)} ${USAGE_TIME}`} />
+              <SummaryRow label="공간" value={`${selected.name} 1동 · ${count}명`} />
+              <SummaryRow label="예약자" value={`${name.trim()} · ${formatPhone(phone)}`} />
+              <SummaryRow label="요금" value={selected.rateKind === 'weekend' ? '주말 요금' : '주중 요금'} />
+              <div className="flex items-center justify-between border-t border-line-soft px-5 py-5">
+                <span className="text-[15px] font-semibold">결제 금액</span>
+                <span className="tabular text-[24px] font-bold">{formatWon(selected.price)}</span>
+              </div>
             </div>
-          )}
-          {payError && <p className="text-sm text-danger">{payError}</p>}
+            <ul className="space-y-1.5 px-1 text-[13px] leading-relaxed text-muted">
+              <li>· 취소·환불: {REFUND_SUMMARY}</li>
+              <li>· 결제창에서 10분 안에 결제를 마쳐 주세요. 시간이 지나면 자리가 풀립니다.</li>
+              <li>· 결제 금액은 서버에서 한 번 더 확인합니다.</li>
+            </ul>
 
-          <Button size="lg" onClick={pay} disabled={submitting}>
-            {submitting ? '처리 중…' : `${formatWon(selected.price)} 결제하기`}
-          </Button>
-          <Button variant="ghost" onClick={() => { setPayError(''); setStep(3); }} className="w-full" disabled={submitting}>
-            이전
-          </Button>
-        </section>
-      )}
+            {PAYMENTS_FAKE && (
+              <p className="rounded-[14px] bg-warning-soft px-4 py-3 text-[14px] text-warning">
+                개발 모드 — 실제 결제 없이 테스트 결제로 진행됩니다.
+              </p>
+            )}
+            <BottomBar>
+              {/* 오류는 고정 버튼 바로 위에 — 스크롤 위치와 무관하게 보이도록 */}
+              {payError && (
+                <p role="alert" className="enter mb-3 rounded-[14px] bg-danger-soft px-4 py-3 text-[14px] text-danger">
+                  {payError}
+                </p>
+              )}
+              <Button size="lg" onClick={pay} disabled={submitting}>
+                {submitting ? '결제 준비 중…' : <span className="tabular">{formatWon(selected.price)} 결제하기</span>}
+              </Button>
+            </BottomBar>
+          </div>
+        )}
+      </div>
     </PageShell>
   );
 }
 
-function Row({ label, value }: { label: string; value: string }) {
+function Chip({ onClick, children }: { onClick: () => void; children: ReactNode }) {
   return (
-    <div className="flex items-center justify-between gap-4 p-5">
-      <span className="shrink-0 text-sm text-muted">{label}</span>
-      <span className="text-right text-sm font-medium text-ink">{value}</span>
+    <button
+      type="button"
+      onClick={onClick}
+      className="pressable inline-flex items-center gap-1 rounded-full bg-surface px-3 py-1.5 text-[13px] font-medium text-ink-2 ring-1 ring-line-soft hover:ring-line"
+    >
+      {children}
+      <svg viewBox="0 0 16 16" className="h-3 w-3 text-subtle" fill="none" aria-hidden>
+        <path d="M5 3.5 9.5 8 5 12.5" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" />
+      </svg>
+    </button>
+  );
+}
+
+function CheckRow({
+  checked,
+  onChange,
+  strong,
+  children,
+}: {
+  checked: boolean;
+  onChange: (v: boolean) => void;
+  strong?: boolean;
+  children: ReactNode;
+}) {
+  return (
+    <label className={`flex cursor-pointer items-start gap-3 px-5 ${strong ? 'py-4' : 'py-3.5'}`}>
+      <input type="checkbox" checked={checked} onChange={(e) => onChange(e.target.checked)} className="peer sr-only" />
+      <span
+        aria-hidden
+        className={`mt-px flex h-6 w-6 shrink-0 items-center justify-center rounded-full transition-colors duration-150 peer-focus-visible:outline-2 peer-focus-visible:outline-offset-2 peer-focus-visible:outline-accent ${
+          checked ? 'bg-accent text-white' : 'bg-line-soft text-subtle'
+        }`}
+      >
+        <svg viewBox="0 0 16 16" className="h-3.5 w-3.5" fill="none">
+          <path d="m3.5 8.5 3 3 6-7" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+        </svg>
+      </span>
+      <span className={`text-[15px] ${strong ? 'font-bold' : 'text-ink-2'}`}>{children}</span>
+    </label>
+  );
+}
+
+function SummaryRow({ label, value }: { label: string; value: string }) {
+  return (
+    <div className="flex items-start justify-between gap-4 px-5 py-3.5 first:pt-5">
+      <span className="shrink-0 text-[14px] text-muted">{label}</span>
+      <span className="text-right text-[15px] font-medium">{value}</span>
+    </div>
+  );
+}
+
+/** 모바일에서 화면 하단에 붙는 주요 버튼(토스식). 넓은 화면에서는 일반 흐름. */
+function BottomBar({ children }: { children: ReactNode }) {
+  return (
+    <div className="sticky bottom-0 z-30 -mx-4 bg-gradient-to-t from-surface from-70% to-surface/0 px-4 pb-[calc(env(safe-area-inset-bottom)+16px)] pt-6 sm:static sm:mx-0 sm:bg-none sm:px-0 sm:pb-0 sm:pt-2">
+      {children}
     </div>
   );
 }

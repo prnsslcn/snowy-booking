@@ -18,6 +18,7 @@ export interface LookupResult {
   orderId: string;
   lookupCode: string;
   status: string;
+  type: string;
   guestName: string;
   guestCount: number;
   typeName: string;
@@ -69,7 +70,7 @@ export async function lookupBooking(
   const { data } = await supabase
     .from('bookings')
     .select(
-      'order_id, lookup_code, status, guest_name, guest_count, date, amount, refund_amount, refund_method, created_at, price_snapshot',
+      'order_id, lookup_code, status, type, guest_name, guest_count, date, amount, refund_amount, refund_method, created_at, price_snapshot',
     )
     .eq('source', 'online')
     .eq('guest_phone', phone)
@@ -91,6 +92,7 @@ export async function lookupBooking(
       orderId: data.order_id,
       lookupCode: data.lookup_code ?? code,
       status: data.status,
+      type: data.type,
       guestName: data.guest_name,
       guestCount: data.guest_count,
       typeName: snapshot.type_name ?? '',

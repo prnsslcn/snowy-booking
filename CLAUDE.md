@@ -377,7 +377,9 @@ pending_payment ──(결제 승인)──▶ confirmed ──(취소 요청)�
 ## 16. 진행 현황 (2026-11-17 기준)
 
 - **완료:** 설계 문서(`docs/schema.md`, `docs/booking-flow.md`) · 마이그레이션 0001~0010(운영 DB 반영됨) · 고객 예약·결제(fake)·조회·취소·환불 흐름 · Vercel 프로덕션 배포(`snowy-booking.vercel.app`)
-- **다음:** ① 고객·관리자 UI 리뉴얼(§14 UI 방향) ② 관리자 화면(로그인·예약 관리·현장 배정/입실·점검 흐름·유선/무상·환불 재시도/계좌 환불·요금/달력/공휴일·설정) ③ 약관 3종 페이지 ④ 시설 소개·이용 안내·오시는 길
+- **고객 UI 리뉴얼 완료(2026-11-17):** 디자인 토큰 `app/globals.css`(눈빛 canvas·겨울 블루 accent·`--ease-out` 등), 공용 `components/ui/*`, 홈·시설 상세(`/facilities/[slug]`)·예약 4단계·조회·완료·실패·/off. 시설 문구는 `lib/content/facilities.ts`(사진 근거만, [미정]). Playwright로 모바일 390px·PC 1280px 확인
+  - Button 색·크기는 className 덮어쓰기 금지 → variant/size 추가(`danger`, `xl`). 입력 폼 화면은 `PageShell surface`(흰 바탕)
+- **다음:** ① 관리자 화면(같은 디자인 토큰)(로그인·예약 관리·현장 배정/입실·점검 흐름·유선/무상·환불 재시도/계좌 환불·요금/달력/공휴일·설정) ③ 약관 3종 페이지 ④ 시설 소개·이용 안내·오시는 길
 - 관리자 DB 함수는 이미 있음(0010) — 화면만 만들면 된다. 환불 재시도 경로(토스 취소 실패 → cancel_requested → 재시도)는 관리자 화면에서 e2e 검증 예정. fake 토스는 cancelReason에 `[FAIL:CODE]`를 넣으면 실패를 시뮬레이션한다
 
 ### 운영·개발 메모
