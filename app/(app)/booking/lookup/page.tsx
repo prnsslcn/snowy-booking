@@ -141,7 +141,7 @@ export default function LookupPage() {
           <div className="flex items-center gap-4 py-5">
             {thumb && <Image src={thumb.src} alt="" width={160} height={160} sizes="64px" className="h-16 w-16 object-cover" />}
             <div className="min-w-0 flex-1">
-              <p className="text-[18px] font-bold text-ink">{result.typeName} 1동</p>
+              <p className="text-[18px] font-medium text-ink">{result.typeName} 1동</p>
               <p className="text-[16px] text-body">
                 {formatDateKorean(result.date)} {USAGE_TIME}
               </p>

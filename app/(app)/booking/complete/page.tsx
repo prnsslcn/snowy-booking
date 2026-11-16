@@ -37,7 +37,7 @@ export default async function CompletePage({ searchParams }: { searchParams: Pro
         <div className="enter mt-10">
           <div className="bg-dark px-6 py-8 text-white">
             <p className="label text-on-dark-soft">예약번호</p>
-            <p className="tabular mt-3 text-[64px] font-bold leading-none tracking-[0.2em]">{data.lookup_code}</p>
+            <p className="tabular mt-3 text-[64px] font-medium leading-none tracking-[0.2em]">{data.lookup_code}</p>
             <p className="mt-4 text-[14px] text-on-dark-soft">조회·취소 시 휴대폰 번호와 함께 입력</p>
           </div>
           <dl>

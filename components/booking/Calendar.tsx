@@ -58,7 +58,7 @@ export function Calendar({
   return (
     <div className="border border-hairline">
       <div className="flex items-center justify-between border-b border-hairline px-4 py-2">
-        <span className="tabular text-[18px] font-bold text-ink">
+        <span className="tabular text-[18px] font-medium text-ink">
           {view.y}년 {view.m + 1}월
         </span>
         <div className="flex">
@@ -84,7 +84,7 @@ export function Calendar({
 
       <div className="grid grid-cols-7 p-2 text-center">
         {WEEKDAYS.map((w, i) => (
-          <div key={w} className={`pb-2 pt-1 text-[12px] tracking-[0.5px] ${i === 0 ? 'text-error' : i === 6 ? 'text-primary' : 'text-muted'}`}>
+          <div key={w} className={`pb-2 pt-1 text-[12px] ${i === 0 ? 'text-error' : i === 6 ? 'text-primary' : 'text-muted'}`}>
             {w}
           </div>
         ))}
@@ -109,9 +109,9 @@ export function Calendar({
               aria-label={`${view.m + 1}월 ${d}일${closedLike ? (status === 'closed' ? ' 휴장' : ' 마감') : ''}`}
               className={`pressable relative m-0.5 flex h-12 flex-col items-center justify-center text-[16px] ${
                 selected
-                  ? 'bg-primary font-bold text-white'
+                  ? 'bg-primary font-medium text-white'
                   : selectable
-                    ? `font-bold text-ink hover:bg-surface-soft ${isToday ? 'outline outline-1 -outline-offset-1 outline-ink' : ''}`
+                    ? `font-medium text-ink hover:bg-surface-soft ${isToday ? 'outline outline-1 -outline-offset-1 outline-ink' : ''}`
                     : closedLike
                       ? 'cursor-default bg-surface-soft text-muted-soft'
                       : 'cursor-default font-light text-muted-soft/60'
@@ -129,7 +129,7 @@ export function Calendar({
         })}
       </div>
 
-      <div className="flex items-center gap-5 border-t border-hairline px-4 py-3 text-[12px] tracking-[0.5px] text-muted">
+      <div className="flex items-center gap-5 border-t border-hairline px-4 py-3 text-[12px] text-muted">
         <span className="flex items-center gap-1.5">
           <span className="h-1 w-1 rounded-full bg-primary" /> 주말 요금
         </span>

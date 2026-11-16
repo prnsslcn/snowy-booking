@@ -53,3 +53,7 @@ supabase/.branches
 
 # Playwright MCP 산출물
 /.playwright-mcp
+
+# taste-skill 점검 산출물
+/.taste-skill
+/shots

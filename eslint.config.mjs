@@ -21,6 +21,8 @@ const eslintConfig = defineConfig([
     "out/**",
     "build/**",
     "next-env.d.ts",
+    // taste-skill 키트 원본(수정 금지)
+    "public/assets/**",
   ]),
 ]);
 

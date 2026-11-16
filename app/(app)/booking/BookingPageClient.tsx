@@ -173,7 +173,7 @@ export default function BookingPageClient({ preferredType }: { preferredType: st
                 onClick={() => goStep(n)}
                 disabled={!done}
                 aria-current={active ? 'step' : undefined}
-                className={`-mb-px w-full border-b-2 py-3 text-left text-[13px] font-bold tracking-[1.5px] ${
+                className={`-mb-px w-full border-b-2 py-3 text-left text-[13px] font-medium ${
                   active ? 'border-ink text-ink' : done ? 'border-transparent text-muted hover:text-ink' : 'border-transparent text-muted-soft'
                 }`}
               >
@@ -241,10 +241,10 @@ export default function BookingPageClient({ preferredType }: { preferredType: st
                   )}
                   <div className="min-w-0 flex-1">
                     <div className="flex items-baseline gap-2">
-                      <span className={`text-[18px] font-bold ${soldOut ? 'text-muted-soft' : 'text-ink'}`}>{t.name}</span>
+                      <span className={`text-[18px] font-medium ${soldOut ? 'text-muted-soft' : 'text-ink'}`}>{t.name}</span>
                       <span className="text-[14px] text-muted">최대 {t.maxCapacity}인</span>
                     </div>
-                    <p className={`tabular mt-1 text-[18px] font-bold ${soldOut ? 'text-muted-soft' : 'text-ink'}`}>{formatWon(t.price)}</p>
+                    <p className={`tabular mt-1 text-[18px] font-medium ${soldOut ? 'text-muted-soft' : 'text-ink'}`}>{formatWon(t.price)}</p>
                     <div className="mt-2">
                       {soldOut ? <Badge tone="error">마감</Badge> : <Badge tone={t.remaining <= 3 ? 'warning' : 'neutral'}>
                         <span className="tabular">{t.remaining}동 남음</span>
@@ -330,8 +330,8 @@ export default function BookingPageClient({ preferredType }: { preferredType: st
               <SummaryRow label="예약자" value={`${name.trim()} · ${formatPhone(phone)}`} />
               <SummaryRow label="요금" value={selected.rateKind === 'weekend' ? '주말 요금' : '주중 요금'} />
               <div className="flex items-baseline justify-between border-y-2 border-ink py-5">
-                <dt className="text-[16px] font-bold text-ink">결제 금액</dt>
-                <dd className="tabular text-[32px] font-bold text-ink">{formatWon(selected.price)}</dd>
+                <dt className="text-[16px] font-medium text-ink">결제 금액</dt>
+                <dd className="tabular text-[32px] font-medium text-ink">{formatWon(selected.price)}</dd>
               </div>
             </dl>
             <ul className="space-y-1 text-[14px] text-muted">
@@ -367,7 +367,7 @@ function CheckRow({ checked, onChange, strong, children }: { checked: boolean; o
           <path d="m3.5 8.5 3 3 6-7" stroke="currentColor" strokeWidth="2" />
         </svg>
       </span>
-      <span className={`text-[16px] ${strong ? 'font-bold text-ink' : 'text-body'}`}>{children}</span>
+      <span className={`text-[16px] ${strong ? 'font-medium text-ink' : 'text-body'}`}>{children}</span>
     </label>
   );
 }

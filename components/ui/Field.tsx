@@ -2,7 +2,7 @@ import type { InputHTMLAttributes, ReactNode, SelectHTMLAttributes } from 'react
 
 /** 입력칸(DESIGN text-input): 흰 바탕, 1px 선, 높이 48, 모서리 0, 포커스 시 선이 ink 로. */
 const fieldClass =
-  'h-12 w-full rounded-none border border-hairline-strong bg-canvas px-4 text-[16px] font-light text-ink outline-none transition-[border-color,box-shadow] duration-150 placeholder:text-muted-soft focus:border-ink focus:shadow-[inset_0_0_0_1px_var(--color-ink)] aria-[invalid=true]:border-error';
+  'h-12 w-full rounded-[2px] border border-hairline-strong bg-canvas px-4 text-[16px] text-ink outline-none transition-[border-color,box-shadow] duration-150 placeholder:text-muted-soft focus:border-ink focus:shadow-[inset_0_0_0_1px_var(--color-ink)] aria-[invalid=true]:border-error';
 
 export function Field({
   label,
@@ -17,7 +17,7 @@ export function Field({
 }) {
   return (
     <label className="block">
-      <span className="mb-2 block text-[14px] font-bold text-ink">{label}</span>
+      <span className="mb-2 block text-[14px] font-medium text-ink">{label}</span>
       {children}
       {error ? (
         <span className="mt-1.5 block text-[14px] text-error">{error}</span>

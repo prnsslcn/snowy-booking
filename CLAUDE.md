@@ -377,9 +377,12 @@ pending_payment ──(결제 승인)──▶ confirmed ──(취소 요청)�
 ## 16. 진행 현황 (2026-11-17 기준)
 
 - **완료:** 설계 문서(`docs/schema.md`, `docs/booking-flow.md`) · 마이그레이션 0001~0010(운영 DB 반영됨) · 고객 예약·결제(fake)·조회·취소·환불 흐름 · Vercel 프로덕션 배포(`snowy-booking.vercel.app`)
-- **고객 UI 2차 리뉴얼(2026-11-17):** 디자인 규칙 = 루트 `DESIGN-bmw.md`(브랜드 로고·이름·M 줄무늬 제외): 흰 캔버스, 주요 버튼 단일 파란색 #1c69d4, 짙은 남색 #1a2129는 페이지당 색 띠 하나, **모서리 0**, 그림자 없음, 제목 700/본문 300, 자간 0, 섹션 80px. 배치는 `design-taste-frontend` 스킬(place, compact page)로 뽑음: nav-split · footer-visit · colour-band · block 버튼 · 요금=tall-small · 위치 크게(type moment) · 공간 3개 row. 토큰은 `app/globals.css`, 사진 배정은 `lib/content/facilities.ts`의 `PHOTO`
-  - **임의 설명 문구 금지**(운영자 지시): 시설 소개·특징·홍보 문구 없음. 화면 문구는 확정 사실(위치·이용 시간·요금·인원·규정)만. 운영자 소개 문구를 받으면 `lib/content/facilities.ts`에 추가
-  - Button 색·크기는 className 덮어쓰기 금지 → variant/size 추가. 기본 요소 스타일은 `@layer base` 안에(레이어 밖 CSS는 Tailwind 유틸리티를 이김)
+- **고객 UI 3차(2026-11-17) — taste-skill(`design-taste-frontend`, `npx skills` 설치) 방식, DESIGN.md 미사용:**
+  - 분류 `place`. 스크립트로 뽑은 값: palette `olive-on-bone`(bg #ecebe7 · ink/action #38450f) · type `zilla`(Zilla Slab/Rethink Sans + 한글 대체 Hahmlet/IBM Plex Sans KR) · nav-split · footer-visit · colour-band(close-photo) · buttons arrow · mark ring · rooms row · place trio · type moment address · moment `picture-develops`
+  - **라우트 그룹 2개(각자 최상위 레이아웃):** `app/(kit)` = 홈·시설 상세, 키트 CSS/JS(`public/assets`, 스킬 원본 — 수정 금지)만 사용, Tailwind 없음(클래스 이름 충돌). `app/(app)` = 예약·조회·결과·/off, Tailwind + 키트와 같은 토큰(`app/(app)/globals.css`). 그룹 간 이동은 일반 `<a>`(전체 로드)
+  - 키트 JS는 하이드레이션 뒤 `components/kit/KitScripts.tsx`로 붙임(먼저 실행되면 React #418). 사진은 `components/kit/Img.tsx`(Next 이미지 최적화 srcset, 히어로·마무리는 `<picture>` 폰 크롭)
+  - 점검: `node ~/.claude/skills/design-taste-frontend/scripts/gate.mjs http://localhost:3100/` → **GATE: PASS**(예외 3건: 한글 h1 stress, trio 높이, actionbar 쌍둥이 버튼 — `.taste-skill/waivers.json`, gitignore). 관리자 공지는 팝업 대신 히어로 h1 위 한 줄(taste: 팝업 금지)
+  - **임의 설명 문구 금지**(운영자 지시): 확정 사실(위치·수량·인원·요금·이용 시간·규정)만. 사업자 정보 표시는 법(전자상거래법)이 스킬 규칙보다 우선
 - **다음:** ① 관리자 화면(같은 디자인 토큰)(로그인·예약 관리·현장 배정/입실·점검 흐름·유선/무상·환불 재시도/계좌 환불·요금/달력/공휴일·설정) ③ 약관 3종 페이지 ④ 시설 소개·이용 안내·오시는 길
 - 관리자 DB 함수는 이미 있음(0010) — 화면만 만들면 된다. 환불 재시도 경로(토스 취소 실패 → cancel_requested → 재시도)는 관리자 화면에서 e2e 검증 예정. fake 토스는 cancelReason에 `[FAIL:CODE]`를 넣으면 실패를 시뮬레이션한다
 
@@ -391,7 +394,7 @@ pending_payment ──(결제 승인)──▶ confirmed ──(취소 요청)�
 - **검증 스크립트:** `scripts/db/run-tests.sh`(DB 스모크 + 동시성), `scripts/e2e-api.sh`(고객 API 38개, 로컬 dev 서버 필요)
 - **Vercel:** Production 변수는 기본 Secret. `NEXT_PUBLIC_*`는 **Config** 타입으로 추가해야 함(Secret이면 거부). `next.config.ts`가 `SUPABASE_URL`/`SUPABASE_ANON_KEY`도 `NEXT_PUBLIC_`으로 매핑(우회용). **`NEXT_PUBLIC_PAYMENTS_FAKE`·`TOSS_FAKE`는 Vercel에 절대 넣지 않음**
 - git 원격은 SSH(`git@github.com:prnsslcn/snowy-booking.git`)
-- 디자인 도구: Playwright MCP(브라우저 확인), `emil-design-eng` 스킬(애니메이션 원칙) 설치됨
+- 디자인 도구: Playwright MCP, `emil-design-eng`, `design-taste-frontend`(taste) 스킬 설치됨
 
 ### 시설 사진 (`public/images/facilities/`, 1600px·q75 웹용 사본 / 원본 `public/images/{c,m,l}N.jpg`는 gitignore)
 

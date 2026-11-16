@@ -13,7 +13,7 @@ const tones: Record<Tone, string> = {
 /** 직각 테두리 배지(caption 12px / 400 / 0.5px). */
 export function Badge({ tone = 'neutral', children }: { tone?: Tone; children: React.ReactNode }) {
   return (
-    <span className={`inline-flex items-center border px-2 py-1 text-[12px] font-normal leading-none tracking-[0.5px] ${tones[tone]}`}>
+    <span className={`inline-flex items-center border px-2 py-1 text-[12px] font-normal leading-none ${tones[tone]}`}>
       {children}
     </span>
   );

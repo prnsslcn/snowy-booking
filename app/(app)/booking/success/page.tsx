@@ -43,7 +43,7 @@ export default function PaymentSuccessPage() {
       {!error ? (
         <div className="enter">
           <div className="mx-auto h-10 w-10 animate-spin rounded-full border-[3px] border-hairline border-t-primary [animation-duration:700ms]" />
-          <p className="mt-6 text-[18px] font-bold text-ink">결제 확인 중</p>
+          <p className="mt-6 text-[18px] font-medium text-ink">결제 확인 중</p>
           <p className="mt-1 text-[16px] text-body">창을 닫지 마세요.</p>
         </div>
       ) : (
