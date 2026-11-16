@@ -156,7 +156,7 @@ TS 쪽(달력 표시용 `lib/policy/pricing.ts`)은 이 RPC 결과를 기간 단
 
 | 제약 | 정의 | 위반 시 |
 |---|---|---|
-| 유닛 중복 | unique `(unit_id, date)` where status ∈ ACTIVE | 최종 방어선(정상 경로에서는 advisory lock으로 미리 걸러짐) |
+| 유닛 중복 | **exclusion** `(unit_id =, date =)` where status ∈ ACTIVE, `deferrable initially immediate` | 최종 방어선(정상 경로에서는 advisory lock으로 미리 걸러짐). unique index 대신 exclusion 제약을 쓰는 이유: 문장 끝에서 검사할 수 있어(deferrable) 두 예약의 유닛 맞바꾸기를 UPDATE 한 문장으로 처리할 수 있다 |
 | 1인 1일 1동 | unique `(guest_phone, date)` where status ∈ ACTIVE and source = 'online' | `DUPLICATE_PHONE_DATE` |
 | 조회코드 | unique `(guest_phone, lookup_code)` where status ∈ ACTIVE and lookup_code is not null | 발급 시 재추첨 |
 
@@ -265,9 +265,11 @@ grill-booking과 동일: `booking_id, type(confirm/cancel), channel(sms), recipi
 | `is_weekend_rate(date)`, `price_for(type, date)` | 요금 판정(§2) |
 | `availability(from, to)` | 날짜 × 유형별 `{운영 유닛 수, 활성 예약 수, 잔여, 요금, 상태(open/closed/locked/sold_out)}`. 달력·상품 선택 화면용 |
 | `reserve_booking(type, date, name, phone, count)` | 온라인 선점 → pending_payment(booking-flow §3) |
+| `release_pending_booking(order_id)` | 결제창 이탈·실패 시 즉시 자리 반환(/booking/fail) |
 | `confirm_booking_tx(order_id, payment_key, amount, method, approved_at, raw)` | grill-booking 0011과 동일 구조 |
 | `expire_pending_bookings()` | 만료된 pending을 cancelled로(pg_cron 1분 간격) |
-| `request_cancel_tx(order_id)`, `finalize_refund_tx(...)`, `record_cancel_error(booking_id, code, msg)` | 환불 2단계 + 실패 기록 |
+| `request_cancel_tx(order_id, admin_override)` | 환불 1단계. `admin_override`이면 입실·퇴실 상태도 허용(관리자 전액 환불) |
+| `finalize_refund_tx(booking_id, refund_amount, refund_method('toss'/'none'), is_partial, raw)`, `record_cancel_error(booking_id, code, msg)` | 환불 2단계 + 실패 기록 |
 | `admin_manual_refund_tx(booking_id, amount, note)` | 계좌 직접 환불 |
 | `admin_create_booking(type, date, name, phone, count, source, amount?, payment_method?, note?)` | 유선·무상(1인 1일 제한 없음) |
 | `admin_update_offline_booking(booking_id, extras, payment_method?, ...)` | 유선 금액 조정 |
@@ -275,7 +277,12 @@ grill-booking과 동일: `booking_id, type(confirm/cancel), channel(sms), recipi
 | `admin_reassign_unit(booking_id, new_unit_id)` / `admin_swap_units(booking_a, booking_b)` | 배정 변경(같은 유형·같은 날짜) |
 | `admin_check_in / admin_check_out / admin_undo_check(booking_id)` | |
 | `blackout_conflicts(unit_id, from, to)` | 경고창용: 그 기간에 이 유닛에 배정된 활성 예약 목록 |
-| `admin_create_blackout(unit_id, from, to, reason)` | 충돌 0건일 때만 등록, 아니면 `BLACKOUT_CONFLICT` |
+| `admin_create_blackout(unit_id, from, to, reason)` / `admin_delete_blackout(id)` | 충돌 0건일 때만 등록, 아니면 `BLACKOUT_CONFLICT`(겹치는 점검은 `BLACKOUT_OVERLAP`) |
+| `admin_add_unit(type, label)` / `admin_set_unit_active(unit_id, active)` | 유닛 증설 / 비활성화. 오늘 이후 활성 예약이 있으면 `UNIT_HAS_BOOKINGS` |
+
+내부 헬퍼(외부 실행 권한 없음): `lock_type_date`, `lock_phone_date`, `expire_stale_pending`, `unit_blacked_out`, `pick_free_unit`, `kst_today`, `is_active_status`, `pending_payment_timeout`.
+
+**권한 원칙:** 0001에서 public 스키마의 함수·테이블 기본 권한(anon·authenticated)을 끊고, 각 함수에 `service_role` 실행 권한만 명시적으로 준다(`is_admin`만 예외로 authenticated). grill-booking은 `revoke from public`만 해서 anon이 모든 RPC를 실행할 수 있는 상태였다.
 
 모든 함수는 오류를 `raise exception '<CODE>'`로 던지고, `lib/booking/errors.ts`가 코드를 한국어 안내 문구로 바꾼다(grill-booking 방식).
 
@@ -296,14 +303,16 @@ grill-booking과 동일: `booking_id, type(confirm/cancel), channel(sms), recipi
 ## 9. 마이그레이션 계획(초안)
 
 ```
-0001_extensions.sql          pgcrypto, btree_gist, pg_cron
+0001_extensions.sql          pgcrypto, btree_gist, pg_cron, 기본 권한 정리, 공용 유틸
 0002_products_units.sql      product_types, units + 시드
 0003_calendar.sql            holidays, peak_periods(+시드), closed_dates, locked_dates, unit_blackouts
-0004_bookings_payments.sql   bookings, payments, partial unique 3종
+0004_bookings_payments.sql   bookings(유닛 exclusion + partial unique 2종), payments
 0005_admin_misc.sql          admins, is_admin(), admin_actions, notifications, lookup_attempts, site_settings
-0006_rls.sql
-0007_pricing_availability.sql
-0008_reserve_confirm.sql     reserve_booking, confirm_booking_tx, expire + cron
-0009_refund.sql              request_cancel_tx, finalize_refund_tx, record_cancel_error, admin_manual_refund_tx
-0010_admin_bookings.sql      유선·무상·배정·입실·점검
+0006_rls.sql                 RLS + 명시적 GRANT
+0007_pricing_availability.sql 요금 판정, 재고 헬퍼, availability
+0008_reserve_confirm.sql     reserve_booking, release_pending_booking, confirm_booking_tx, 만료 스윕 + cron
+0009_refund.sql              request_cancel_tx, record_cancel_error, finalize_refund_tx, admin_manual_refund_tx
+0010_admin_bookings.sql      유선·무상·배정·맞바꾸기·입실·점검·유닛 관리
 ```
+
+검증: `scripts/db/run-tests.sh`(기능 스모크 + 동시성 테스트, 로컬 DB).
