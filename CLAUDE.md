@@ -390,6 +390,23 @@ pending_payment ──(결제 승인)──▶ confirmed ──(취소 요청)�
 - git 원격은 SSH(`git@github.com:prnsslcn/snowy-booking.git`)
 - 디자인 도구: Playwright MCP(브라우저 확인), `emil-design-eng` 스킬(애니메이션 원칙) 설치됨
 
+### 시설 사진 (`public/images/facilities/`, 1600px·q75 웹용 사본 / 원본 `public/images/{c,m,l}N.jpg`는 gitignore)
+
+운영자 파일명: C=카바나, M=카라반(운영자 표현 '중형'), L=단체카라반('대형'). 화면 표기는 §1 명칭(카바나/카라반/단체카라반) 유지.
+
+| 파일 | 방향 | 내용 |
+|---|---|---|
+| cabana-1 | 세로 | 눈 덮인 A자형 목조 외관 정면, 파란 하늘·소나무 (카바나 대표) |
+| cabana-2 | 세로 | 내부 전경 — 삼각 원목 천장, 작은 창, 좌식 테이블 |
+| cabana-3 | 세로 | 내부 벽면 — 난방 패널·감지기 |
+| caravan-1 | **가로** | 흰 카라반 외관, 파란 하늘·지붕 위 눈 (카라반 대표) |
+| caravan-2 | 세로 | 라운지 — ㄷ자 소파 + 원목 테이블 |
+| caravan-3 | 세로 | 2층 침대 |
+| caravan-4 | 세로 | 온도조절기(난방) |
+| caravan-group-1 | **가로** | 설원 위 카라반 2대 + 눈 덮인 소나무, 파란 하늘 (**홈 히어로 후보**, 단체카라반 대표) |
+| caravan-group-2 | 세로 | 복층 침대 + 사다리, 원목 내벽 |
+| caravan-group-3 | 세로 | 넓은 거실 — 좌식 테이블, 히터, 창 2개 |
+
 ## 15. 디렉터리 구조 (제안)
 
 ```

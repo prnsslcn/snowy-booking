@@ -47,3 +47,6 @@ next-env.d.ts
 # supabase cli local state
 supabase/.temp
 supabase/.branches
+
+# 시설 사진 원본(대용량) — 웹용 사본은 public/images/facilities/
+/public/images/*.jpg
