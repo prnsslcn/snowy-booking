@@ -3,6 +3,7 @@
 import { revalidatePath } from 'next/cache';
 
 import { getAdminUser } from '@/lib/admin/auth';
+import { logAdminAction } from '@/lib/admin/audit';
 import { adminErrorMessage } from '@/lib/admin/errors';
 import { RefundError, refundBooking } from '@/lib/booking/refund';
 import { createAdminClient } from '@/lib/supabase/admin';
@@ -15,11 +16,7 @@ import type { Json } from '@/types/database';
 
 export type ActionResult<T = undefined> = { ok: true; data?: T } | { ok: false; error: string };
 
-async function log(email: string, action: string, bookingId: string | null, detail: Record<string, unknown>) {
-  await createAdminClient()
-    .from('admin_actions')
-    .insert({ admin_email: email, action, booking_id: bookingId, detail: detail as { [key: string]: Json } });
-}
+const log = logAdminAction;
 
 function refresh(bookingId: string) {
   revalidatePath('/admin');

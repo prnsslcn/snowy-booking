@@ -26,6 +26,15 @@ const MESSAGES: Record<string, string> = {
   PAYMENT_METHOD_REQUIRED: '결제수단을 골라 주세요.',
   INVALID_AMOUNT: '금액을 확인해 주세요.',
   SOLD_OUT: '그 날짜에 남은 유닛이 없습니다.',
+  INVALID_RANGE: '기간을 확인해 주세요(시작일 ≤ 종료일).',
+  RANGE_TOO_LONG: '기간이 너무 깁니다.',
+  UNIT_NOT_FOUND: '유닛을 찾을 수 없습니다.',
+  BLACKOUT_CONFLICT: '그 기간에 이 유닛에 배정된 예약이 있습니다. 먼저 다른 유닛으로 옮겨 주세요.',
+  BLACKOUT_OVERLAP: '이 유닛에 겹치는 점검 기간이 이미 있습니다.',
+  BLACKOUT_NOT_FOUND: '점검 기간을 찾을 수 없습니다.',
+  LABEL_REQUIRED: '유닛 이름을 입력해 주세요.',
+  LABEL_DUPLICATE: '같은 이름의 유닛이 이미 있습니다.',
+  UNIT_HAS_BOOKINGS: '오늘 이후 이 유닛에 배정된 예약이 있습니다. 먼저 다른 유닛으로 옮겨 주세요.',
 };
 
 export function adminErrorMessage(raw: string): string {

@@ -2,7 +2,7 @@
 
 import Link from 'next/link';
 import { usePathname, useRouter } from 'next/navigation';
-import type { ReactNode } from 'react';
+import { useEffect, useRef, type ReactNode } from 'react';
 
 import { createClient } from '@/lib/supabase/client';
 
@@ -14,6 +14,10 @@ export const ADMIN_NAV = [
   { href: '/admin', label: '대시보드' },
   { href: '/admin/board', label: '현장 배정' },
   { href: '/admin/bookings', label: '예약 관리' },
+  { href: '/admin/calendar', label: '운영 달력' },
+  { href: '/admin/units', label: '유닛·점검' },
+  { href: '/admin/pricing', label: '요금' },
+  { href: '/admin/settings', label: '운영 설정' },
 ] as const;
 
 function isActive(pathname: string, href: string) {
@@ -39,6 +43,13 @@ function LogoutButton({ className = '' }: { className?: string }) {
 
 export function AdminShell({ email, children }: { email: string; children: ReactNode }) {
   const pathname = usePathname();
+  // 폰 가로 메뉴: 지금 화면 메뉴가 보이도록 가운데로
+  const mobileNav = useRef<HTMLElement>(null);
+  useEffect(() => {
+    const el = mobileNav.current?.querySelector<HTMLElement>('[aria-current="page"]');
+    const nav = mobileNav.current;
+    if (el && nav) nav.scrollTo({ left: el.offsetLeft - (nav.clientWidth - el.clientWidth) / 2 });
+  }, [pathname]);
   return (
     <div className="min-h-[100dvh] lg:grid lg:grid-cols-[232px_1fr]">
       {/* 데스크톱 왼쪽 메뉴 */}
@@ -78,7 +89,7 @@ export function AdminShell({ email, children }: { email: string; children: React
           </Link>
           <LogoutButton />
         </div>
-        <nav className="-mb-px flex gap-1 overflow-x-auto px-3 pb-2">
+        <nav ref={mobileNav} className="-mb-px flex gap-1 overflow-x-auto px-3 pb-2 [scrollbar-width:none]">
           {ADMIN_NAV.map((n) => {
             const active = isActive(pathname, n.href);
             return (

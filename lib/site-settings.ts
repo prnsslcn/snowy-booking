@@ -14,7 +14,7 @@ export const SITE_SETTINGS_TAG = 'site-settings';
 export const YEAR_TOKEN = '{year}';
 export const DEFAULT_CLOSED_TITLE = '{year} 시즌 영업이 종료되었습니다';
 export const DEFAULT_CLOSED_MESSAGE =
-  '{year} 시즌 스노위랜드 카바나·카라반을 찾아주신 모든 분께 감사드립니다.\n다음 시즌에 다시 찾아뵙겠습니다.';
+  '{year} 시즌 스노위 카바나·카라반을 찾아주신 모든 분께 감사드립니다.\n다음 시즌에 다시 찾아뵙겠습니다.';
 
 export function applyYear(text: string, now: Date = new Date()): string {
   return text.replaceAll(YEAR_TOKEN, kstToday(now).slice(0, 4));
