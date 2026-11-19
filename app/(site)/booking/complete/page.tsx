@@ -44,7 +44,7 @@ export default async function CompletePage({ searchParams }: { searchParams: Pro
           <dl className="mt-6 divide-y divide-black/[.06] border-y border-black/[.08]">
             {[
               ['이용일', `${formatDateKorean(data.date)} ${USAGE_TIME}`],
-              ['공간', `${typeName} 1${unit} · ${data.guest_count}명`],
+              ['공간', data.guest_count ? `${typeName} 1${unit} · ${data.guest_count}명` : `${typeName} 1${unit}`],
               ['결제 금액', formatWon(data.amount)],
             ].map(([k, v]) => (
               <div key={k} className="flex justify-between gap-4 py-4">

@@ -4,7 +4,7 @@ import { useState } from 'react';
 
 /**
  * 예약 달력. open 선택 가능 / closed 휴장 / locked·sold_out 마감 / unavailable 흐리게.
- * 선택: 검은 면(둥근 칸). 오늘: 얇은 테. 주말 요금일: 숫자 아래 작은 점.
+ * 선택: 파란 면(둥근 칸). 오늘: 얇은 테. (주말 요금 표시는 하지 않음)
  */
 
 export type CalendarDayStatus = 'open' | 'closed' | 'locked' | 'sold_out' | 'unavailable';
@@ -116,18 +116,12 @@ export function Calendar({
             >
               <span className="leading-none tabular-nums">{d}</span>
               {closedLike && <span className="mt-1 text-[10px] font-normal leading-none text-[#0a0a0a]/45">{status === 'closed' ? '휴장' : '마감'}</span>}
-              {selectable && info?.weekendRate && (
-                <span className={`absolute bottom-1.5 h-1 w-1 rounded-full ${selected ? 'bg-ice-200' : 'bg-ice-500'}`} />
-              )}
             </button>
           );
         })}
       </div>
 
       <div className="mt-3 flex items-center gap-5 border-t border-black/[.06] px-2 pt-3 text-[12px] text-[#0a0a0a]/50">
-        <span className="flex items-center gap-1.5">
-          <span className="h-1 w-1 rounded-full bg-ice-500" /> 주말 요금
-        </span>
         <span className="flex items-center gap-1.5">
           <span className="h-3 w-3 rounded-[4px] bg-black/[.05]" /> 휴장·마감
         </span>

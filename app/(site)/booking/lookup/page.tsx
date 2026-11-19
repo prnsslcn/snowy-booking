@@ -25,7 +25,7 @@ interface LookupResult {
   status: string;
   type: string;
   guestName: string;
-  guestCount: number;
+  guestCount: number | null;
   typeName: string;
   date: string;
   amount: number;
@@ -213,7 +213,7 @@ export default function LookupPage() {
                     {status.label}
                   </Badge>
                 </li>
-                <Row label="예약자" value={`${result.guestName} · ${result.guestCount}명`} />
+                <Row label="예약자" value={result.guestCount ? `${result.guestName} · ${result.guestCount}명` : result.guestName} />
                 <Row label="결제 금액" value={formatWon(result.amount)} />
                 {result.status === 'refunded' && <Row label="환불 금액" value={formatWon(result.refundAmount ?? 0)} />}
               </ul>

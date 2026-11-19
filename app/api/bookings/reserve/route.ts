@@ -24,8 +24,9 @@ export async function POST(request: Request) {
 
   const type = str(body.type);
   const date = str(body.date);
-  const guestCount = int(body.guestCount);
-  if (!type || !ISO_DATE_RE.test(date) || guestCount === null) {
+  // 이용 인원은 고객 화면에서 받지 않는다(선택 값). 보내면 기존대로 검증.
+  const guestCount = body.guestCount == null ? null : int(body.guestCount);
+  if (!type || !ISO_DATE_RE.test(date) || (body.guestCount != null && guestCount === null)) {
     return NextResponse.json({ error: 'VALIDATION_FAILED' }, { status: 400 });
   }
   if (body.agreed !== true) {

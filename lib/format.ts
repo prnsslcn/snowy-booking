@@ -1,4 +1,9 @@
 /** 원 단위 정수를 "50,000원" 형식으로. */
+/** ₩70,000 — 시설 안내 요금 범위 표기용 */
+export function formatKrw(amount: number): string {
+  return `₩${amount.toLocaleString('ko-KR')}`;
+}
+
 export function formatWon(amount: number): string {
   return `${amount.toLocaleString('ko-KR')}원`;
 }

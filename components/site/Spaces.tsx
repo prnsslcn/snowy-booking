@@ -29,22 +29,16 @@ export interface Space {
   name: string;
   /** 큰 영문 제목 */
   display: string;
-  count: string;
   maxCapacity: number;
-  priceWeekday: string;
-  priceWeekend: string;
+  /** 요금 범위(₩70,000 ~ ₩90,000) */
+  price: string;
   photos: SpacePhoto[];
   /** 펼쳐 보는 세부 안내(확정 사실만) */
   details: string[];
 }
 
-/** 사실 칸 테두리·여백 — 폰 4열 한 줄, 데스크톱 2×2 */
-const CELL = [
-  'border-r pr-2 lg:pr-4',
-  'border-r px-2 lg:border-r-0 lg:pl-4 lg:pr-0',
-  'border-r px-2 lg:pl-0 lg:pr-4',
-  'pl-2 lg:pl-4',
-];
+/** 사실 칸 테두리·여백 — 최대 인원 | 요금 두 칸 */
+const CELL = ['border-r pr-3 lg:pr-4', 'pl-3 lg:pl-4'];
 
 /*
   grill-booking FaqAccordion 구조: 버튼 + 원형 + 아이콘(열리면 45° 회전),
@@ -115,10 +109,8 @@ function SpacePanel({ space, index, total, dark }: { space: Space; index: number
   };
 
   const facts: [string, string][] = [
-    ['수량', space.count],
     ['최대 인원', `${space.maxCapacity}인`],
-    ['주중', space.priceWeekday],
-    ['주말', space.priceWeekend],
+    ['요금', space.price],
   ];
 
   return (
@@ -156,7 +148,7 @@ function SpacePanel({ space, index, total, dark }: { space: Space; index: number
           </motion.p>
 
           <motion.dl
-            className={`mt-4 grid grid-cols-4 border-t ${rule} md:mt-6 lg:order-3 lg:mt-auto lg:grid-cols-2`}
+            className={`mt-4 grid grid-cols-[auto_1fr] border-t ${rule} md:mt-6 lg:order-3 lg:mt-auto lg:grid-cols-[0.6fr_1.4fr]`}
             style={WILL}
             {...blockIn(8, '14%', 0.78, 0.28, inView)}
           >

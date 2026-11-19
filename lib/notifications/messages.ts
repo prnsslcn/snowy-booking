@@ -16,7 +16,8 @@ export interface BookingInfo {
   lookupCode: string | null;
   guestName: string;
   guestPhone: string | null;
-  guestCount: number;
+  /** 온라인 예약은 인원을 받지 않아 null */
+  guestCount: number | null;
   amount: number;
   typeName: string;
   dateIso: string;
@@ -54,7 +55,7 @@ export function buildMessages(
       customer: [
         `[${SMS_BRAND}] 예약이 확정되었습니다.`,
         `예약번호 ${code}`,
-        `${info.guestName}님 · ${info.typeName} ${info.guestCount}인`,
+        `${info.guestName}님 · ${info.typeName}${info.guestCount ? ` ${info.guestCount}인` : ''}`,
         `이용 ${when}`,
         `결제 ${formatWon(info.amount)}`,
         '',
@@ -63,7 +64,7 @@ export function buildMessages(
         `※ ${TICKET_NOTICE}`,
         ...tail(),
       ].join('\n'),
-      admin: `[예약확정] ${formatDateKorean(info.dateIso)} ${info.typeName} ${info.guestCount}인\n${info.guestName} ${phone} #${code}\n${formatWon(info.amount)}`,
+      admin: `[예약확정] ${formatDateKorean(info.dateIso)} ${info.typeName}${info.guestCount ? ` ${info.guestCount}인` : ''}\n${info.guestName} ${phone} #${code}\n${formatWon(info.amount)}`,
     };
   }
 

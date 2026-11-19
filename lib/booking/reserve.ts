@@ -17,7 +17,8 @@ export interface ReserveInput {
   date: string;
   guestName: string;
   guestPhone: string;
-  guestCount: number;
+  /** 이용 인원(선택). 고객 화면에서는 받지 않아 null */
+  guestCount: number | null;
 }
 
 export interface ReserveResult {
@@ -45,7 +46,8 @@ export async function reserveBooking(input: ReserveInput, now: Date = new Date()
     p_date: input.date,
     p_guest_name: input.guestName.trim(),
     p_guest_phone: phone,
-    p_guest_count: input.guestCount,
+    // 0011 부터 null 허용(생성 타입은 int 인자를 number 로만 표기)
+    p_guest_count: input.guestCount as number,
   });
   if (error) throw toBookingError(error);
 

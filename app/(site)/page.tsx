@@ -4,7 +4,7 @@ import { Hero } from '@/components/site/Hero';
 import { Closing } from '@/components/site/Closing';
 import { Spaces, type Space } from '@/components/site/Spaces';
 import { PHOTO } from '@/lib/content/facilities';
-import { formatWon } from '@/lib/format';
+import { formatKrw, formatWon } from '@/lib/format';
 import { kstToday } from '@/lib/policy/booking-window';
 import { getProducts, unitWord } from '@/lib/products';
 import { ONE_PER_DAY_NOTICE, PARKING_NOTICE, REFUND_SUMMARY, TICKET_NOTICE } from '@/lib/site-config';
@@ -43,10 +43,9 @@ export default async function HomePage() {
     slug: p.slug,
     name: p.name,
     display: DISPLAY[p.type] ?? p.name,
-    count: `${p.unitCount}${unitWord(p.type)}`,
     maxCapacity: p.maxCapacity,
-    priceWeekday: formatWon(p.priceWeekday),
-    priceWeekend: formatWon(p.priceWeekend),
+    // 주중·주말을 나누지 않고 범위로(₩70,000 ~ ₩90,000). 언제 주말 요금인지는 '자세히 보기'에.
+    price: `${formatKrw(p.priceWeekday)} ~ ${formatKrw(p.priceWeekend)}`,
     photos: (p.content?.photos ?? []).slice(0, 3),
     details: [
       `최대 ${p.maxCapacity}인(영유아 포함), 최소 인원 제한은 없습니다.`,

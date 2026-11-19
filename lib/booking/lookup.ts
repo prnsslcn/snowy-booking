@@ -20,7 +20,7 @@ export interface LookupResult {
   status: string;
   type: string;
   guestName: string;
-  guestCount: number;
+  guestCount: number | null;
   typeName: string;
   date: string;
   amount: number;

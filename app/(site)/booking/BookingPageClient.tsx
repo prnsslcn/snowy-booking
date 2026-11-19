@@ -13,7 +13,7 @@ import { SiteFooter } from '@/components/site/SiteFooter';
 import { useLenis } from '@/components/site/SmoothScroll';
 import { Badge } from '@/components/ui/Badge';
 import { Button } from '@/components/ui/Button';
-import { Field, Input, Select } from '@/components/ui/Field';
+import { Field, Input } from '@/components/ui/Field';
 import { errorMessage } from '@/lib/booking/error-messages';
 import { PAYMENTS_FAKE, PayError, payAndConfirmFake, reserveClient } from '@/lib/client/pay';
 import { requestTossPayment } from '@/lib/client/toss-payment';
@@ -70,7 +70,6 @@ export default function BookingPageClient({ preferredType }: { preferredType: st
   const [type, setType] = useState('');
   const [name, setName] = useState('');
   const [phone, setPhone] = useState('');
-  const [count, setCount] = useState(0);
   const [agreeRefund, setAgreeRefund] = useState(false);
   const [agreeRules, setAgreeRules] = useState(false);
   const [errors, setErrors] = useState<Record<string, string>>({});
@@ -118,7 +117,6 @@ export default function BookingPageClient({ preferredType }: { preferredType: st
 
   function pickType(t: TypeAvail) {
     setType(t.type);
-    setCount((c) => (c >= 1 && c <= t.maxCapacity ? c : 0));
     moveTo(3);
   }
 
@@ -126,7 +124,6 @@ export default function BookingPageClient({ preferredType }: { preferredType: st
     const e: Record<string, string> = {};
     if (!name.trim()) e.name = '이름을 입력해 주세요.';
     if (!parseMobilePhone(phone)) e.phone = '휴대폰 번호를 정확히 입력해 주세요.';
-    if (!selected || count < 1 || count > selected.maxCapacity) e.count = '이용 인원을 선택해 주세요.';
     if (!agreeRefund || !agreeRules) e.agree = '필수 항목에 모두 동의해 주세요.';
     setErrors(e);
     return Object.keys(e).length === 0;
@@ -141,7 +138,6 @@ export default function BookingPageClient({ preferredType }: { preferredType: st
       date,
       guestName: name.trim(),
       guestPhone: phone,
-      guestCount: count,
       agreed: agreeRefund && agreeRules,
     };
     try {
@@ -269,7 +265,6 @@ export default function BookingPageClient({ preferredType }: { preferredType: st
                   {formatDateKorean(date)} · {USAGE_TIME}
                 </Chip>
                 {step >= 3 && selected && <Chip>{selected.name}</Chip>}
-                {step >= 4 && count > 0 && <Chip>{count}명</Chip>}
               </div>
             )}
 
@@ -288,9 +283,7 @@ export default function BookingPageClient({ preferredType }: { preferredType: st
             {/* 2. 공간 */}
             {step === 2 && day && (
               <div className="mt-6 space-y-3">
-                <p className="text-[15px] text-[#0a0a0a]/60">
-                  {day.weekendRate ? '주말 요금' : '주중 요금'} · 1인 1동 · 자리는 현장 배정
-                </p>
+                <p className="text-[15px] text-[#0a0a0a]/60">1인 1동 · 자리는 현장 배정</p>
                 {day.types.map((t) => {
                   const soldOut = t.remaining <= 0;
                   const thumb = thumbOf(t.type);
@@ -327,18 +320,11 @@ export default function BookingPageClient({ preferredType }: { preferredType: st
                         <p className={`mt-1 font-display text-[22px] font-extrabold tracking-[-0.02em] tabular-nums ${soldOut ? 'text-[#0a0a0a]/35' : ''}`}>
                           {formatWon(t.price)}
                         </p>
-                        <div className="mt-2">
-                          {soldOut ? (
+                        {soldOut && (
+                          <div className="mt-2">
                             <Badge tone="error">마감</Badge>
-                          ) : (
-                            <Badge tone={t.remaining <= 3 ? 'warning' : 'neutral'}>
-                              <span className="tabular-nums">
-                                {t.remaining}
-                                {t.type === 'cabana' ? '동' : '대'} 남음
-                              </span>
-                            </Badge>
-                          )}
-                        </div>
+                          </div>
+                        )}
                       </div>
                       {!soldOut && (
                         <svg
@@ -372,18 +358,6 @@ export default function BookingPageClient({ preferredType }: { preferredType: st
                     maxLength={13}
                     aria-invalid={!!errors.phone}
                   />
-                </Field>
-                <Field label="이용 인원" error={errors.count} hint={`최대 ${selected.maxCapacity}인(영유아 포함)`}>
-                  <Select value={count || ''} onChange={(e) => setCount(Number(e.target.value))} aria-invalid={!!errors.count}>
-                    <option value="" disabled>
-                      선택
-                    </option>
-                    {Array.from({ length: selected.maxCapacity }, (_, i) => i + 1).map((n) => (
-                      <option key={n} value={n}>
-                        {n}명
-                      </option>
-                    ))}
-                  </Select>
                 </Field>
 
                 <fieldset className="overflow-hidden rounded-3xl border border-black/[.08] bg-white">
@@ -426,9 +400,8 @@ export default function BookingPageClient({ preferredType }: { preferredType: st
                 <div className="rounded-3xl border border-black/[.08] bg-white px-5 md:px-6">
                   <dl className="divide-y divide-black/[.06]">
                     <SummaryRow label="이용일" value={`${formatDateKorean(date)} ${USAGE_TIME}`} />
-                    <SummaryRow label="공간" value={`${selected.name} 1${selected.type === 'cabana' ? '동' : '대'} · ${count}명`} />
+                    <SummaryRow label="공간" value={`${selected.name} 1${selected.type === 'cabana' ? '동' : '대'}`} />
                     <SummaryRow label="예약자" value={`${name.trim()} · ${formatPhone(phone)}`} />
-                    <SummaryRow label="요금" value={selected.rateKind === 'weekend' ? '주말 요금' : '주중 요금'} />
                     <div className="flex items-baseline justify-between gap-4 py-5">
                       <dt className="text-[15px] font-semibold">결제 금액</dt>
                       <dd className="font-display text-[32px] font-extrabold tracking-[-0.03em] tabular-nums md:text-[40px]">{formatWon(selected.price)}</dd>

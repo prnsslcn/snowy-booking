@@ -11,7 +11,6 @@ export interface ReserveRequest {
   date: string;
   guestName: string;
   guestPhone: string;
-  guestCount: number;
   agreed: boolean;
 }
 
