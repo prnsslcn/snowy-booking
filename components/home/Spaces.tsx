@@ -2,7 +2,7 @@
 
 import { motion, useInView } from 'framer-motion';
 import Image from 'next/image';
-import { useRef } from 'react';
+import { Fragment, useId, useRef, useState } from 'react';
 
 import { blockIn, WILL } from '@/components/home/motion';
 import { usePageTransition } from '@/components/home/PageTransition';
@@ -34,6 +34,8 @@ export interface Space {
   priceWeekday: string;
   priceWeekend: string;
   photos: SpacePhoto[];
+  /** 펼쳐 보는 세부 안내(확정 사실만) */
+  details: string[];
 }
 
 /** 사실 칸 테두리·여백 — 폰 4열 한 줄, 데스크톱 2×2 */
@@ -43,6 +45,53 @@ const CELL = [
   'border-r px-2 lg:pl-0 lg:pr-4',
   'pl-2 lg:pl-4',
 ];
+
+/*
+  grill-booking FaqAccordion 구조: 버튼 + 원형 + 아이콘(열리면 45° 회전),
+  grid-rows 0fr→1fr 트랜지션으로 높이 측정 없이 펼침 + 내용 페이드. 기본 닫힘.
+*/
+function Details({ name, items, dark }: { name: string; items: string[]; dark: boolean }) {
+  const [open, setOpen] = useState(false);
+  const id = useId();
+  const line = dark ? 'border-white/15' : 'border-black/[.12]';
+  const soft = dark ? 'text-white/70' : 'text-[#0a0a0a]/70';
+  return (
+    <div className={`border-b ${line}`}>
+      <button
+        type="button"
+        onClick={() => setOpen((v) => !v)}
+        aria-expanded={open}
+        aria-controls={id}
+        className="flex w-full items-center justify-between gap-4 py-3 text-left"
+      >
+        <span className="text-[15px] font-semibold md:text-base">{name} 자세히 보기</span>
+        <span
+          aria-hidden
+          className={`flex h-8 w-8 flex-none items-center justify-center rounded-full border ${line} transition-transform duration-500 ease-[cubic-bezier(0.16,1,0.3,1)] ${open ? 'rotate-45' : ''}`}
+        >
+          <svg width="14" height="14" viewBox="0 0 16 16" fill="none">
+            <path d="M8 3v10M3 8h10" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" />
+          </svg>
+        </span>
+      </button>
+      <div
+        id={id}
+        className={`grid transition-[grid-template-rows] duration-500 ease-[cubic-bezier(0.16,1,0.3,1)] ${open ? 'grid-rows-[1fr]' : 'grid-rows-[0fr]'}`}
+      >
+        <div className={`overflow-hidden transition-opacity duration-500 ease-[cubic-bezier(0.16,1,0.3,1)] ${open ? 'opacity-100' : 'opacity-0'}`} inert={!open}>
+          <ul className={`space-y-1.5 pb-4 text-[13px] leading-relaxed md:text-sm ${soft}`}>
+            {items.map((t) => (
+              <li key={t} className="flex gap-2">
+                <span className={`mt-[0.6em] h-1 w-1 flex-none rounded-full ${dark ? 'bg-white/60' : 'bg-[#0a0a0a]/60'}`} />
+                <span>{t}</span>
+              </li>
+            ))}
+          </ul>
+        </div>
+      </div>
+    </div>
+  );
+}
 
 function SpacePanel({ space, index, total, dark }: { space: Space; index: number; total: number; dark: boolean }) {
   const { ref, top, radius } = useStickyCover<HTMLElement>();
@@ -75,17 +124,16 @@ function SpacePanel({ space, index, total, dark }: { space: Space; index: number
   return (
     <motion.section
       ref={ref}
-      id={index === 0 ? 'spaces' : undefined}
       data-nav-theme={dark ? 'dark' : 'light'}
       aria-labelledby={`space-${space.slug}`}
-      className={`sticky flex h-[100dvh] min-h-[600px] flex-col px-5 pb-6 pt-[104px] md:px-8 md:pb-8 lg:px-10 lg:pb-10 lg:pt-28 ${dark ? 'bg-[#0a0a0a]' : 'bg-[#fafaf8]'} ${ink}`}
+      className={`sticky flex min-h-[max(100dvh,600px)] flex-col px-5 pb-6 pt-[104px] md:px-8 md:pb-8 lg:px-10 lg:pb-10 lg:pt-28 ${dark ? 'bg-[#0a0a0a]' : 'bg-[#fafaf8]'} ${ink}`}
       style={{ top, zIndex: 30 + index, borderTopLeftRadius: radius, borderTopRightRadius: radius }}
     >
       <div ref={bodyRef} className="flex min-h-0 flex-1 flex-col gap-5 lg:grid lg:grid-cols-[0.9fr_1.1fr] lg:gap-14">
         {/* 좌: 이름 · 사실 · 버튼 */}
         <div className="flex flex-none flex-col lg:min-h-0">
           {/* 폰: 이름 왼쪽 · 번호 오른쪽 한 줄 / 데스크톱: 번호 위, 이름 아래 */}
-          <div className="flex flex-row-reverse items-end justify-between gap-4 lg:block">
+          <div className="flex flex-row-reverse items-end justify-between gap-4 lg:order-1 lg:block">
             <motion.p
               className={`flex-none pb-1 font-mono text-xs tracking-[.22em] lg:mb-4 lg:pb-0 ${soft}`}
               style={WILL}
@@ -103,12 +151,12 @@ function SpacePanel({ space, index, total, dark }: { space: Space; index: number
               <span className="sr-only">{space.name}</span>
             </motion.h2>
           </div>
-          <motion.p className="mt-2 text-lg font-semibold md:text-2xl lg:mt-3" style={WILL} {...blockIn(8, '14%', 0.78, 0.18, inView)} aria-hidden>
+          <motion.p className="mt-2 text-lg font-semibold md:text-2xl lg:order-1 lg:mt-3" style={WILL} {...blockIn(8, '14%', 0.78, 0.18, inView)} aria-hidden>
             {space.name}
           </motion.p>
 
           <motion.dl
-            className={`mt-4 grid grid-cols-4 border-t ${rule} md:mt-6 lg:mt-auto lg:grid-cols-2`}
+            className={`mt-4 grid grid-cols-4 border-t ${rule} md:mt-6 lg:order-3 lg:mt-auto lg:grid-cols-2`}
             style={WILL}
             {...blockIn(8, '14%', 0.78, 0.28, inView)}
           >
@@ -122,23 +170,23 @@ function SpacePanel({ space, index, total, dark }: { space: Space; index: number
               </div>
             ))}
           </motion.dl>
-          <motion.p className={`mt-2.5 text-[12px] lg:mt-3 lg:text-[13px] ${soft}`} style={WILL} {...blockIn(8, '14%', 0.78, 0.34, inView)}>
+          <motion.p className={`mt-2.5 text-[12px] lg:order-3 lg:mt-3 lg:text-[13px] ${soft}`} style={WILL} {...blockIn(8, '14%', 0.78, 0.34, inView)}>
             1{space.type === 'cabana' ? '동' : '대'} 1일 · 10:00–17:00 당일 이용
           </motion.p>
 
-          <motion.div className="mt-4 flex flex-wrap items-center gap-5 lg:mt-6" style={WILL} {...blockIn(8, '14%', 0.78, 0.4, inView)}>
+          <motion.div className="mt-4 flex flex-wrap items-center gap-5 lg:order-3 lg:mt-6" style={WILL} {...blockIn(8, '14%', 0.78, 0.4, inView)}>
             <a
-              href="/booking"
+              href={`/booking?type=${space.slug}`}
               onClick={go}
               className={`inline-flex items-center rounded-full px-6 py-3 text-[15px] font-semibold transition-transform duration-300 ease-[cubic-bezier(0.16,1,0.3,1)] active:scale-[0.97] lg:px-7 lg:py-3.5 lg:text-base ${dark ? 'bg-white text-[#0a0a0a]' : 'bg-[#0a0a0a] text-white'}`}
             >
               예약하기
             </a>
-            <a href={`/facilities/${space.slug}`} onClick={go} className="group text-sm font-medium">
-              <span className="relative inline-block py-1 after:absolute after:bottom-0 after:left-0 after:h-[1.5px] after:w-0 after:bg-current after:transition-[width] after:duration-500 after:ease-[cubic-bezier(0.16,1,0.3,1)] group-hover:after:w-full">
-                {space.name} 자세히 보기
-              </span>
-            </a>
+          </motion.div>
+
+          {/* 세부 안내 — 폰: 버튼 아래 / 데스크톱: 이름과 요금 사이 빈 칸에서 펼침 */}
+          <motion.div className="mt-3 lg:order-2 lg:mt-8" style={WILL} {...blockIn(8, '14%', 0.78, 0.46, inView)}>
+            <Details name={space.name} items={space.details} dark={dark} />
           </motion.div>
         </div>
 
@@ -168,7 +216,11 @@ export function Spaces({ spaces }: { spaces: Space[] }) {
   return (
     <>
       {spaces.map((s, i) => (
-        <SpacePanel key={s.type} space={s} index={i} total={spaces.length} dark={i % 2 === 0} />
+        <Fragment key={s.type}>
+          {/* nav 앵커(#cabana 등): sticky 장은 붙은 위치를 보고하므로 흐름 위치를 가진 0높이 표식으로 스크롤 */}
+          <div id={s.slug} aria-hidden className="h-0" />
+          <SpacePanel space={s} index={i} total={spaces.length} dark={i % 2 === 0} />
+        </Fragment>
       ))}
     </>
   );

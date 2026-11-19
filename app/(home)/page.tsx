@@ -7,6 +7,7 @@ import { PHOTO } from '@/lib/content/facilities';
 import { formatWon } from '@/lib/format';
 import { kstToday } from '@/lib/policy/booking-window';
 import { getProducts, unitWord } from '@/lib/products';
+import { ONE_PER_DAY_NOTICE, PARKING_NOTICE, REFUND_SUMMARY, TICKET_NOTICE } from '@/lib/site-config';
 import { getSiteSettings } from '@/lib/site-settings';
 
 /*
@@ -47,6 +48,14 @@ export default async function HomePage() {
     priceWeekday: formatWon(p.priceWeekday),
     priceWeekend: formatWon(p.priceWeekend),
     photos: (p.content?.photos ?? []).slice(0, 3),
+    details: [
+      `최대 ${p.maxCapacity}인(영유아 포함), 최소 인원 제한은 없습니다.`,
+      '이용 시간은 10:00–17:00입니다. 조기 입실·연장 이용은 없습니다.',
+      `주말 요금(${formatWon(p.priceWeekend)})은 금·토·일, 공휴일과 그 전날, 동계 성수기에 적용됩니다.`,
+      `${ONE_PER_DAY_NOTICE} 자리는 이용 당일 현장에서 배정합니다.`,
+      `취소·환불: ${REFUND_SUMMARY}`,
+      `${TICKET_NOTICE} ${PARKING_NOTICE}`,
+    ],
   }));
 
   return (

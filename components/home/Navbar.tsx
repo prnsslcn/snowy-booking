@@ -17,10 +17,11 @@ import { SCROLL_OPTS, useLenis } from '@/components/home/SmoothScroll';
 
 type NavTheme = 'light' | 'dark';
 
+/** 상품 링크는 홈의 공간 장으로(#cabana 등 — Spaces 의 0높이 표식) */
 export const NAV_ITEMS = [
-  { label: '카바나', href: '/facilities/cabana' },
-  { label: '카라반', href: '/facilities/caravan' },
-  { label: '단체카라반', href: '/facilities/caravan-group' },
+  { label: '카바나', href: '#cabana' },
+  { label: '카라반', href: '#caravan' },
+  { label: '단체카라반', href: '#caravan-group' },
 ] as const;
 const LOOKUP = { label: '예약 조회', href: '/booking/lookup' };
 const BOOK = { label: '예약하기', href: '/booking' };
@@ -109,6 +110,9 @@ export function Navbar() {
     if (e.metaKey || e.ctrlKey || e.shiftKey || e.button !== 0) return; // 새 탭 열기는 그대로
     e.preventDefault();
     setOpen(false);
+    // 모바일 메뉴가 열려 있던 동안 Lenis 가 멈춰 있다. start() 는 진행 중 애니메이션을 reset 하므로
+    // 메뉴 닫힘 effect 보다 먼저 여기서 켜고 나서 스크롤한다(effect 의 start 는 그때 no-op).
+    lenis?.start();
     if (href === '/' || href === '#top') {
       lenis?.scrollTo(0, SCROLL_OPTS);
       return;
