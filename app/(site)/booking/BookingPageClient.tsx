@@ -210,9 +210,9 @@ export default function BookingPageClient({ preferredType }: { preferredType: st
 
         {/* 진행 막대 — 단계마다 차오름. 지난 단계 이름은 눌러서 되돌아감 */}
         <motion.nav aria-label="예약 단계" style={WILL} {...blockIn(8, '14%', 0.78, 0.28, ready)}>
-          <div className="relative h-[3px] overflow-hidden rounded-full bg-black/[.08]">
+          <div className="relative h-[3px] overflow-hidden rounded-full bg-ice-100">
             <motion.div
-              className="absolute inset-y-0 left-0 rounded-full bg-[#0a0a0a]"
+              className="absolute inset-y-0 left-0 rounded-full bg-gradient-to-r from-ice-400 to-ice-600"
               initial={{ width: '0%' }}
               animate={{ width: ready ? `${(step / STEPS.length) * 100}%` : '0%' }}
               transition={{ duration: 0.9, ease: BAR_EASE }}
@@ -305,8 +305,8 @@ export default function BookingPageClient({ preferredType }: { preferredType: st
                         soldOut
                           ? 'cursor-not-allowed border-black/[.06]'
                           : isSel
-                            ? 'border-[#0a0a0a] ring-1 ring-[#0a0a0a]'
-                            : 'border-black/[.08] hover:border-black/30 active:scale-[0.985]'
+                            ? 'border-ice-600 ring-1 ring-ice-600'
+                            : 'border-black/[.08] hover:border-ice-400 active:scale-[0.985]'
                       }`}
                     >
                       {thumb && (
@@ -344,7 +344,7 @@ export default function BookingPageClient({ preferredType }: { preferredType: st
                         <svg
                           aria-hidden
                           viewBox="0 0 16 16"
-                          className="mr-1 h-5 w-5 flex-none text-[#0a0a0a]/35 transition-transform duration-300 ease-[cubic-bezier(0.16,1,0.3,1)] group-hover:translate-x-0.5 group-hover:text-[#0a0a0a]"
+                          className="mr-1 h-5 w-5 flex-none text-[#0a0a0a]/35 transition-transform duration-300 ease-[cubic-bezier(0.16,1,0.3,1)] group-hover:translate-x-0.5 group-hover:text-ice-600"
                           fill="none"
                         >
                           <path d="M6 3.5 10.5 8 6 12.5" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round" />
@@ -462,7 +462,7 @@ export default function BookingPageClient({ preferredType }: { preferredType: st
 }
 
 function Chip({ children }: { children: ReactNode }) {
-  return <span className="inline-flex items-center rounded-full bg-black/[.05] px-3 py-1.5 text-[13px] font-medium tabular-nums text-[#0a0a0a]/75">{children}</span>;
+  return <span className="inline-flex items-center rounded-full bg-ice-50 px-3 py-1.5 text-[13px] font-medium tabular-nums text-ice-700">{children}</span>;
 }
 
 function CheckRow({ checked, onChange, strong, children }: { checked: boolean; onChange: (v: boolean) => void; strong?: boolean; children: ReactNode }) {
@@ -471,8 +471,8 @@ function CheckRow({ checked, onChange, strong, children }: { checked: boolean; o
       <input type="checkbox" checked={checked} onChange={(e) => onChange(e.target.checked)} className="peer sr-only" />
       <span
         aria-hidden
-        className={`mt-0.5 flex h-[22px] w-[22px] flex-none items-center justify-center rounded-[7px] border transition-[background-color,border-color,transform] duration-300 ease-[cubic-bezier(0.16,1,0.3,1)] peer-focus-visible:outline-2 peer-focus-visible:outline-offset-2 peer-focus-visible:outline-[#0a0a0a] peer-active:scale-90 ${
-          checked ? 'border-[#0a0a0a] bg-[#0a0a0a] text-white' : 'border-black/20 bg-white text-transparent'
+        className={`mt-0.5 flex h-[22px] w-[22px] flex-none items-center justify-center rounded-[7px] border transition-[background-color,border-color,transform] duration-300 ease-[cubic-bezier(0.16,1,0.3,1)] peer-focus-visible:outline-2 peer-focus-visible:outline-offset-2 peer-focus-visible:outline-ice-600 peer-active:scale-90 ${
+          checked ? 'border-glacier bg-glacier text-white' : 'border-black/20 bg-white text-transparent'
         }`}
       >
         <svg viewBox="0 0 16 16" className="h-3.5 w-3.5" fill="none">

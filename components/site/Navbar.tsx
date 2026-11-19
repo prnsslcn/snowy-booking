@@ -157,7 +157,9 @@ export function Navbar() {
           style={{ color: isDark ? '#ffffff' : '#0a0a0a' }}
         >
           <a href="/" onClick={(e) => go(e, '/')} className="-my-1 flex flex-none items-center" aria-label="스노위랜드 홈">
-            <Logo />
+            <span className="transition-colors duration-300" style={{ color: isDark ? '#ffffff' : '#33689f' }}>
+              <Logo />
+            </span>
           </a>
 
           <div className="ml-auto flex items-center gap-5 md:gap-6">
@@ -197,7 +199,7 @@ export function Navbar() {
             role="dialog"
             aria-modal="true"
             aria-label="메뉴"
-            className="fixed inset-0 z-[220] flex flex-col items-center justify-center gap-7 bg-[#0a0a0a]/98 text-white backdrop-blur-3xl"
+            className="fixed inset-0 z-[220] flex flex-col items-center justify-center gap-7 bg-glacier/[.98] text-white backdrop-blur-3xl"
             initial={{ clipPath: 'inset(0 0 100% 0)' }}
             animate={{ clipPath: 'inset(0 0 0% 0)' }}
             exit={{ clipPath: 'inset(0 0 100% 0)' }}
@@ -207,7 +209,7 @@ export function Navbar() {
             <button
               type="button"
               onClick={() => setOpen(false)}
-              className="absolute right-5 top-5 flex h-10 w-10 items-center justify-center rounded-full bg-white/[.05]"
+              className="absolute right-5 top-5 flex h-10 w-10 items-center justify-center rounded-full bg-white/[.08]"
               aria-label="메뉴 닫기"
               autoFocus
             >
@@ -234,7 +236,7 @@ export function Navbar() {
               <a
                 href={BOOK.href}
                 onClick={(e) => go(e, BOOK.href)}
-                className="mt-4 inline-block rounded-full bg-white px-8 py-4 text-lg font-semibold text-[#0a0a0a]"
+                className="mt-4 inline-block rounded-full bg-white px-8 py-4 text-lg font-semibold text-glacier-deep"
               >
                 {BOOK.label}
               </a>

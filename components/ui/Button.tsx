@@ -12,9 +12,9 @@ const base =
   'inline-flex items-center justify-center gap-2 rounded-full text-[16px] font-semibold whitespace-nowrap select-none transition-[transform,background-color,border-color,color,opacity] duration-300 ease-[cubic-bezier(0.16,1,0.3,1)] active:scale-[0.97] disabled:pointer-events-none disabled:opacity-40 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-current';
 
 const variants: Record<Variant, string> = {
-  primary: 'bg-[#0a0a0a] text-white hover:bg-[#2a2a2a]',
+  primary: 'bg-glacier text-white hover:bg-glacier-deep',
   secondary: 'border border-black/15 bg-transparent text-[#0a0a0a] hover:border-black/40',
-  onDark: 'bg-white text-[#0a0a0a] hover:bg-white/85',
+  onDark: 'bg-white text-glacier-deep hover:bg-ice-100',
   onDarkSecondary: 'border border-white/20 bg-transparent text-white hover:border-white/50',
   danger: 'border border-[#d4351c]/40 bg-transparent text-[#d4351c] hover:border-[#d4351c]',
   dangerOnDark: 'border border-[#ff8a75]/40 bg-transparent text-[#ff8a75] hover:border-[#ff8a75]',

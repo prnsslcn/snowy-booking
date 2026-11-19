@@ -81,7 +81,7 @@ export function Calendar({
 
       <div className="grid grid-cols-7 text-center">
         {WEEKDAYS.map((w, i) => (
-          <div key={w} className={`pb-2 pt-1 text-[12px] font-medium ${i === 0 ? 'text-[#d4351c]' : i === 6 ? 'text-sky-700' : 'text-[#0a0a0a]/45'}`}>
+          <div key={w} className={`pb-2 pt-1 text-[12px] font-medium ${i === 0 ? 'text-[#d4351c]' : i === 6 ? 'text-ice-600' : 'text-[#0a0a0a]/45'}`}>
             {w}
           </div>
         ))}
@@ -106,9 +106,9 @@ export function Calendar({
               aria-label={`${view.m + 1}월 ${d}일${closedLike ? (status === 'closed' ? ' 휴장' : ' 마감') : ''}`}
               className={`relative m-0.5 flex h-12 flex-col items-center justify-center rounded-2xl text-[16px] transition-[transform,background-color] duration-300 ease-[cubic-bezier(0.16,1,0.3,1)] md:h-14 ${
                 selected
-                  ? 'bg-[#0a0a0a] font-semibold text-white'
+                  ? 'bg-glacier font-semibold text-white'
                   : selectable
-                    ? `font-semibold text-[#0a0a0a] hover:bg-black/[.05] active:scale-[0.94] ${isToday ? 'ring-1 ring-inset ring-black/40' : ''}`
+                    ? `font-semibold text-[#0a0a0a] hover:bg-ice-50 active:scale-[0.94] ${isToday ? 'ring-1 ring-inset ring-ice-400' : ''}`
                     : closedLike
                       ? 'cursor-default bg-black/[.03] text-[#0a0a0a]/30'
                       : 'cursor-default text-[#0a0a0a]/20'
@@ -117,7 +117,7 @@ export function Calendar({
               <span className="leading-none tabular-nums">{d}</span>
               {closedLike && <span className="mt-1 text-[10px] font-normal leading-none text-[#0a0a0a]/45">{status === 'closed' ? '휴장' : '마감'}</span>}
               {selectable && info?.weekendRate && (
-                <span className={`absolute bottom-1.5 h-1 w-1 rounded-full ${selected ? 'bg-white' : 'bg-sky-600'}`} />
+                <span className={`absolute bottom-1.5 h-1 w-1 rounded-full ${selected ? 'bg-ice-200' : 'bg-ice-500'}`} />
               )}
             </button>
           );
@@ -126,7 +126,7 @@ export function Calendar({
 
       <div className="mt-3 flex items-center gap-5 border-t border-black/[.06] px-2 pt-3 text-[12px] text-[#0a0a0a]/50">
         <span className="flex items-center gap-1.5">
-          <span className="h-1 w-1 rounded-full bg-sky-600" /> 주말 요금
+          <span className="h-1 w-1 rounded-full bg-ice-500" /> 주말 요금
         </span>
         <span className="flex items-center gap-1.5">
           <span className="h-3 w-3 rounded-[4px] bg-black/[.05]" /> 휴장·마감

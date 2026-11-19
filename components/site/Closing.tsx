@@ -88,7 +88,7 @@ export function Closing({ headline, body, z }: { headline: string; body: string[
           <a
             href="/booking"
             onClick={go}
-            className="inline-flex w-fit items-center rounded-full bg-[#0a0a0a] px-7 py-3 text-base font-semibold md:px-8 md:py-4 md:text-lg text-white transition-transform duration-300 ease-[cubic-bezier(0.16,1,0.3,1)] active:scale-[0.97]"
+            className="inline-flex w-fit items-center rounded-full bg-glacier px-7 py-3 text-base font-semibold md:px-8 md:py-4 md:text-lg text-white transition-transform duration-300 ease-[cubic-bezier(0.16,1,0.3,1)] active:scale-[0.97]"
           >
             예약하기
           </a>

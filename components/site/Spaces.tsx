@@ -10,7 +10,7 @@ import { useStickyCover } from '@/components/site/useStickyCover';
 
 /*
   공간 안내 — aftc 홈의 "덮는 장" 구조를 상품마다 한 장씩.
-  Hero(밝음) → 카바나(어두움) → 카라반(밝음) → 단체카라반(어두움) → 마지막 장(밝음).
+  Hero(밝음) → 카바나(겨울 파랑) → 카라반(옅은 얼음) → 단체카라반(겨울 파랑) → 마지막 장(밝음).
   각 장은 화면에 붙고, 다음 장이 위 모서리 48px 로 올라와 덮은 뒤 모서리가 펴진다.
   장은 한 화면(100dvh) 안에 맞춘다 — 남는 높이는 사진 칸이 줄어 흡수. 위 여백은 nav blur 꼬리(약 104px)보다 아래.
   글·사진은 blockIn 으로 순서대로. 내용은 DB 값(수량·인원·요금)과 실제 사진만.
@@ -53,8 +53,8 @@ const CELL = [
 function Details({ name, items, dark }: { name: string; items: string[]; dark: boolean }) {
   const [open, setOpen] = useState(false);
   const id = useId();
-  const line = dark ? 'border-white/15' : 'border-black/[.12]';
-  const soft = dark ? 'text-white/70' : 'text-[#0a0a0a]/70';
+  const line = dark ? 'border-white/20' : 'border-black/[.12]';
+  const soft = dark ? 'text-ice-50/80' : 'text-[#0a0a0a]/70';
   return (
     <div className={`border-b ${line}`}>
       <button
@@ -82,7 +82,7 @@ function Details({ name, items, dark }: { name: string; items: string[]; dark: b
           <ul className={`space-y-1.5 pb-4 text-[13px] leading-relaxed md:text-sm ${soft}`}>
             {items.map((t) => (
               <li key={t} className="flex gap-2">
-                <span className={`mt-[0.6em] h-1 w-1 flex-none rounded-full ${dark ? 'bg-white/60' : 'bg-[#0a0a0a]/60'}`} />
+                <span className={`mt-[0.6em] h-1 w-1 flex-none rounded-full ${dark ? 'bg-ice-300' : 'bg-ice-500'}`} />
                 <span>{t}</span>
               </li>
             ))}
@@ -105,8 +105,8 @@ function SpacePanel({ space, index, total, dark }: { space: Space; index: number
   const landscape = main?.orientation === 'landscape';
 
   const ink = dark ? 'text-[#fafaf8]' : 'text-[#0a0a0a]';
-  const soft = dark ? 'text-white/55' : 'text-[#0a0a0a]/55';
-  const rule = dark ? 'border-white/15' : 'border-black/[.12]';
+  const soft = dark ? 'text-ice-100/65' : 'text-[#0a0a0a]/55';
+  const rule = dark ? 'border-white/20' : 'border-ice-700/15';
 
   const go = (e: React.MouseEvent<HTMLAnchorElement>) => {
     if (e.metaKey || e.ctrlKey || e.shiftKey || e.button !== 0) return;
@@ -126,7 +126,7 @@ function SpacePanel({ space, index, total, dark }: { space: Space; index: number
       ref={ref}
       data-nav-theme={dark ? 'dark' : 'light'}
       aria-labelledby={`space-${space.slug}`}
-      className={`sticky flex min-h-[max(100dvh,600px)] flex-col px-5 pb-6 pt-[104px] md:px-8 md:pb-8 lg:px-10 lg:pb-10 lg:pt-28 ${dark ? 'bg-[#0a0a0a]' : 'bg-[#fafaf8]'} ${ink}`}
+      className={`sticky flex min-h-[max(100dvh,600px)] flex-col px-5 pb-6 pt-[104px] md:px-8 md:pb-8 lg:px-10 lg:pb-10 lg:pt-28 ${dark ? 'bg-glacier' : 'bg-ice-50'} ${ink}`}
       style={{ top, zIndex: 30 + index, borderTopLeftRadius: radius, borderTopRightRadius: radius }}
     >
       <div ref={bodyRef} className="flex min-h-0 flex-1 flex-col gap-5 lg:grid lg:grid-cols-[0.9fr_1.1fr] lg:gap-14">
@@ -178,7 +178,7 @@ function SpacePanel({ space, index, total, dark }: { space: Space; index: number
             <a
               href={`/booking?type=${space.slug}`}
               onClick={go}
-              className={`inline-flex items-center rounded-full px-6 py-3 text-[15px] font-semibold transition-transform duration-300 ease-[cubic-bezier(0.16,1,0.3,1)] active:scale-[0.97] lg:px-7 lg:py-3.5 lg:text-base ${dark ? 'bg-white text-[#0a0a0a]' : 'bg-[#0a0a0a] text-white'}`}
+              className={`inline-flex items-center rounded-full px-6 py-3 text-[15px] font-semibold transition-transform duration-300 ease-[cubic-bezier(0.16,1,0.3,1)] active:scale-[0.97] lg:px-7 lg:py-3.5 lg:text-base ${dark ? 'bg-white text-glacier-deep' : 'bg-glacier text-white'}`}
             >
               예약하기
             </a>

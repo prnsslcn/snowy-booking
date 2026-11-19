@@ -11,7 +11,7 @@ const tones: Record<Surface, Record<Tone, string>> = {
     success: 'bg-emerald-600/10 text-emerald-700',
     warning: 'bg-amber-500/15 text-amber-700',
     error: 'bg-red-600/10 text-red-700',
-    info: 'bg-sky-600/10 text-sky-700',
+    info: 'bg-ice-100 text-ice-700',
     manual: 'bg-violet-600/10 text-violet-700',
   },
   dark: {
@@ -19,7 +19,7 @@ const tones: Record<Surface, Record<Tone, string>> = {
     success: 'bg-emerald-500/15 text-emerald-300',
     warning: 'bg-amber-400/15 text-amber-300',
     error: 'bg-red-500/15 text-red-300',
-    info: 'bg-sky-400/15 text-sky-300',
+    info: 'bg-ice-300/15 text-ice-200',
     manual: 'bg-violet-400/15 text-violet-300',
   },
 };

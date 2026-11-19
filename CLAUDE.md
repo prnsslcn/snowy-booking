@@ -378,9 +378,9 @@ pending_payment ──(결제 승인)──▶ confirmed ──(취소 요청)�
 
 - **완료:** 설계 문서(`docs/schema.md`, `docs/booking-flow.md`) · 마이그레이션 0001~0010(운영 DB 반영됨) · 고객 예약·결제(fake)·조회·취소·환불 흐름 · Vercel 프로덕션 배포(`snowy-booking.vercel.app`)
 - **고객 UI 4차(2026-11-20) — 사용자 프로젝트 aftc(`~/Desktop/dev/aftc`) 홈 구조 이식** (taste-skill 키트·DESIGN.md 방식은 폐기, 파일 삭제):
-  - **라우트 그룹 하나** `app/(site)`(홈·예약·조회·결과·/off) — 최상위 레이아웃 1개, `site.css`(Tailwind), Outfit(영문 디스플레이, next/font) + Pretendard(CDN), 라이트 `#fafaf8` / 다크 `#0a0a0a`
+  - **라우트 그룹 하나** `app/(site)`(홈·예약·조회·결과·/off) — 최상위 레이아웃 1개, `site.css`(Tailwind), Outfit(영문 디스플레이, next/font) + Pretendard(CDN), 라이트 `#fafaf8` + 얼음 팔레트(`site.css` `glacier` #1f4469 = 상품 장 바탕·주요 버튼, `ice-50~700` = 포인트·옅은 면). 검정 바탕은 쓰지 않음
   - `components/site/`: `Navbar`(fixed, 3겹 progressive blur, 섹션 `data-nav-theme` 감지로 글자색 반전, 모바일 풀스크린 clip-path 메뉴) · `PageTransition`(블라인드 enter/leave → router.push, `#앵커`는 enter 뒤 스크롤) · `SmoothScroll`(Lenis) · `TLink`(사이트 안 링크는 이걸로 — 블라인드 전환) · `Hero` · `Spaces`(상품 장: sticky + 다음 장이 위 모서리 48px 로 덮음, 밝음/어두움 반전, FAQ식 '자세히 보기') · `Closing`(마지막 장) · `PageTitle`/`SubPage`/`SiteFooter`(하위 화면) · `useStickyCover` · `motion.ts`(blockIn)
-  - 예약하기: 진행 막대(단계마다 차오름) + 단계 내용 방향별 blur 슬라이드. 조회: aftc 공지사항 화면처럼 다크 + 선 목록
+  - 예약하기: 진행 막대(단계마다 차오름) + 단계 내용 방향별 blur 슬라이드. 조회: aftc 공지사항 화면처럼 라이트 + 선 목록
   - nav 상품 링크는 홈 앵커. sticky 장은 붙은 위치를 보고하므로 앵커는 장 앞 0높이 표식(`Spaces`)
   - Lenis `start()`는 진행 중 스크롤을 reset → 모바일 메뉴에서 앵커 이동 시 scrollTo 전에 먼저 start
   - `components/ui/`(Button·Field·Badge)는 새 톤(알약 버튼, 둥근 입력칸 light/dark). 관리자 화면도 이 톤으로

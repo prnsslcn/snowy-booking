@@ -6,10 +6,10 @@ import type { InputHTMLAttributes, ReactNode, SelectHTMLAttributes } from 'react
 type Tone = 'light' | 'dark';
 
 const fieldBase =
-  'h-14 w-full rounded-[14px] border px-4 text-[16px] outline-none transition-[border-color,background-color] duration-200';
+  'h-14 w-full rounded-[14px] border px-4 text-[16px] outline-none transition-[border-color,background-color,box-shadow] duration-200';
 const fieldTone: Record<Tone, string> = {
   light:
-    'border-black/[.12] bg-white text-[#0a0a0a] placeholder:text-black/30 focus:border-[#0a0a0a] aria-[invalid=true]:border-[#d4351c]',
+    'border-black/[.12] bg-white text-[#0a0a0a] placeholder:text-black/30 focus:border-ice-600 focus:ring-4 focus:ring-ice-200/50 aria-[invalid=true]:border-[#d4351c]',
   dark: 'border-white/[.12] bg-white/[.04] text-white placeholder:text-white/30 focus:border-white/60 focus:bg-white/[.06] aria-[invalid=true]:border-[#ff8a75]',
 };
 

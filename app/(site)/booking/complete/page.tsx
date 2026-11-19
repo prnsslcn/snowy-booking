@@ -36,10 +36,10 @@ export default async function CompletePage({ searchParams }: { searchParams: Pro
 
       {data && (
         <div className="mt-8">
-          <div className="rounded-3xl bg-[#0a0a0a] px-6 py-8 text-white md:px-8 md:py-10">
-            <p className="text-[13px] font-medium text-white/55">예약번호</p>
+          <div className="rounded-3xl bg-glacier px-6 py-8 text-white md:px-8 md:py-10">
+            <p className="text-[13px] font-medium text-ice-200/80">예약번호</p>
             <p className="mt-3 font-display text-[64px] font-extrabold leading-none tracking-[0.12em] tabular-nums md:text-[80px]">{data.lookup_code}</p>
-            <p className="mt-4 text-[13px] text-white/55">조회·취소 시 휴대폰 번호와 함께 입력합니다.</p>
+            <p className="mt-4 text-[13px] text-ice-200/80">조회·취소 시 휴대폰 번호와 함께 입력합니다.</p>
           </div>
           <dl className="mt-6 divide-y divide-black/[.06] border-y border-black/[.08]">
             {[
