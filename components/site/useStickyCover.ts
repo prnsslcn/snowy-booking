@@ -13,6 +13,8 @@ export function useStickyCover<T extends HTMLElement>(): {
   ref: React.RefObject<T | null>;
   top: number;
   radius: MotionValue<string>;
+  /** 장이 아래에서 올라와 화면 맨 위에 닿기까지 0→1 */
+  progress: MotionValue<number>;
 } {
   const ref = useRef<T>(null);
   const [top, setTop] = useState(0);
@@ -32,5 +34,5 @@ export function useStickyCover<T extends HTMLElement>(): {
 
   const { scrollYProgress } = useScroll({ target: ref, offset: ['start end', 'start start'] });
   const radius = useTransform(scrollYProgress, [0.85, 1], [48, 0], { clamp: true });
-  return { ref, top, radius: useTransform(radius, (r) => `${r}px`) };
+  return { ref, top, radius: useTransform(radius, (r) => `${r}px`), progress: scrollYProgress };
 }

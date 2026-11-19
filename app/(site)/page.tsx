@@ -2,6 +2,7 @@ import { redirect } from 'next/navigation';
 
 import { Hero } from '@/components/site/Hero';
 import { Closing } from '@/components/site/Closing';
+import { SectionSnap } from '@/components/site/SectionSnap';
 import { Spaces, type Space } from '@/components/site/Spaces';
 import { PHOTO } from '@/lib/content/facilities';
 import { formatKrw, formatWon } from '@/lib/format';
@@ -59,11 +60,13 @@ export default async function HomePage() {
 
   return (
     <>
+      <SectionSnap />
       <div className="relative">
         <div className="sticky top-0 h-[100dvh] overflow-hidden">
           <Hero src={PHOTO.hero.src} phoneSrc={PHOTO.heroPhone.src} alt={PHOTO.hero.alt} notice={notice} />
         </div>
         <Spaces spaces={spaces} />
+        <div data-snap aria-hidden className="h-0" />
         <Closing headline={headline} body={body} z={30 + spaces.length} />
       </div>
     </>

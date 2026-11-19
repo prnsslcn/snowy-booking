@@ -1,8 +1,8 @@
 'use client';
 
-import { motion, useInView } from 'framer-motion';
+import { motion, useInView, useMotionValueEvent } from 'framer-motion';
 import Image from 'next/image';
-import { Fragment, useId, useRef, useState } from 'react';
+import { Fragment, useEffect, useId, useRef, useState } from 'react';
 
 import { blockIn, WILL } from '@/components/site/motion';
 import { usePageTransition } from '@/components/site/PageTransition';
@@ -43,9 +43,24 @@ const CELL = ['border-r pr-3 lg:pr-4', 'pl-3 lg:pl-4'];
 /*
   grill-booking FaqAccordion 구조: 버튼 + 원형 + 아이콘(열리면 45° 회전),
   grid-rows 0fr→1fr 트랜지션으로 높이 측정 없이 펼침 + 내용 페이드. 기본 닫힘.
+  장이 화면을 꽉 채우면(SpacePanel) 저절로 한 번 펼쳐진다 — 높이는 천천히 열리고 줄은 위에서부터 차례로 떠오른다.
+  열림 상태는 장이 들고 있고, 사용자가 누르면 그대로 접고 펼 수 있다.
 */
-function Details({ name, items, dark }: { name: string; items: string[]; dark: boolean }) {
-  const [open, setOpen] = useState(false);
+const OPEN_EASE = 'ease-[cubic-bezier(0.22,1,0.36,1)]';
+
+function Details({
+  name,
+  items,
+  dark,
+  open,
+  onToggle,
+}: {
+  name: string;
+  items: string[];
+  dark: boolean;
+  open: boolean;
+  onToggle: () => void;
+}) {
   const id = useId();
   const line = dark ? 'border-white/20' : 'border-black/[.12]';
   const soft = dark ? 'text-ice-50/80' : 'text-[#0a0a0a]/70';
@@ -53,7 +68,7 @@ function Details({ name, items, dark }: { name: string; items: string[]; dark: b
     <div className={`border-b ${line}`}>
       <button
         type="button"
-        onClick={() => setOpen((v) => !v)}
+        onClick={onToggle}
         aria-expanded={open}
         aria-controls={id}
         className="flex w-full items-center justify-between gap-4 py-3 text-left"
@@ -61,7 +76,7 @@ function Details({ name, items, dark }: { name: string; items: string[]; dark: b
         <span className="text-[15px] font-semibold md:text-base">{name} 자세히 보기</span>
         <span
           aria-hidden
-          className={`flex h-8 w-8 flex-none items-center justify-center rounded-full border ${line} transition-transform duration-500 ease-[cubic-bezier(0.16,1,0.3,1)] ${open ? 'rotate-45' : ''}`}
+          className={`flex h-8 w-8 flex-none items-center justify-center rounded-full border ${line} transition-transform duration-700 ${OPEN_EASE} ${open ? 'rotate-45' : ''}`}
         >
           <svg width="14" height="14" viewBox="0 0 16 16" fill="none">
             <path d="M8 3v10M3 8h10" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" />
@@ -70,12 +85,16 @@ function Details({ name, items, dark }: { name: string; items: string[]; dark: b
       </button>
       <div
         id={id}
-        className={`grid transition-[grid-template-rows] duration-500 ease-[cubic-bezier(0.16,1,0.3,1)] ${open ? 'grid-rows-[1fr]' : 'grid-rows-[0fr]'}`}
+        className={`grid transition-[grid-template-rows] duration-[900ms] ${OPEN_EASE} ${open ? 'grid-rows-[1fr]' : 'grid-rows-[0fr]'}`}
       >
-        <div className={`overflow-hidden transition-opacity duration-500 ease-[cubic-bezier(0.16,1,0.3,1)] ${open ? 'opacity-100' : 'opacity-0'}`} inert={!open}>
+        <div className="overflow-hidden" inert={!open}>
           <ul className={`space-y-1.5 pb-4 text-[13px] leading-relaxed md:text-sm ${soft}`}>
-            {items.map((t) => (
-              <li key={t} className="flex gap-2">
+            {items.map((t, i) => (
+              <li
+                key={t}
+                className={`flex gap-2 transition-[opacity,transform,filter] duration-700 ${OPEN_EASE} ${open ? 'translate-y-0 opacity-100 blur-[0px]' : '-translate-y-1.5 opacity-0 blur-[3px]'}`}
+                style={{ transitionDelay: open ? `${180 + i * 70}ms` : '0ms' }}
+              >
                 <span className={`mt-[0.6em] h-1 w-1 flex-none rounded-full ${dark ? 'bg-ice-300' : 'bg-ice-500'}`} />
                 <span>{t}</span>
               </li>
@@ -88,11 +107,24 @@ function Details({ name, items, dark }: { name: string; items: string[]; dark: b
 }
 
 function SpacePanel({ space, index, total, dark }: { space: Space; index: number; total: number; dark: boolean }) {
-  const { ref, top, radius } = useStickyCover<HTMLElement>();
+  const { ref, top, radius, progress } = useStickyCover<HTMLElement>();
   const bodyRef = useRef<HTMLDivElement>(null);
   const seen = useInView(bodyRef, { once: true, margin: '0px 0px -20% 0px' });
   const { ready, leaveTo } = usePageTransition();
   const inView = seen && ready;
+
+  // 장이 화면 맨 위에 닿아 꽉 채우면 자세히 보기를 한 번 저절로 펼친다(살짝 쉬었다가).
+  // 데스크톱(lg)만 — 폰은 펼치면 사진 칸이 거의 사라져서 누를 때만 펼친다.
+  const [open, setOpen] = useState(false);
+  const autoDone = useRef(false);
+  const autoTimer = useRef(0);
+  useMotionValueEvent(progress, 'change', (v) => {
+    if (autoDone.current || !ready || v < 0.995) return;
+    if (!window.matchMedia('(min-width: 1024px)').matches) return;
+    autoDone.current = true;
+    autoTimer.current = window.setTimeout(() => setOpen(true), 350);
+  });
+  useEffect(() => () => window.clearTimeout(autoTimer.current), []);
 
   const [main, ...rest] = space.photos;
   const side = rest.slice(0, 2);
@@ -178,7 +210,7 @@ function SpacePanel({ space, index, total, dark }: { space: Space; index: number
 
           {/* 세부 안내 — 폰: 버튼 아래 / 데스크톱: 이름과 요금 사이 빈 칸에서 펼침 */}
           <motion.div className="mt-3 lg:order-2 lg:mt-8" style={WILL} {...blockIn(8, '14%', 0.78, 0.46, inView)}>
-            <Details name={space.name} items={space.details} dark={dark} />
+            <Details name={space.name} items={space.details} dark={dark} open={open} onToggle={() => { autoDone.current = true; setOpen((v) => !v); }} />
           </motion.div>
         </div>
 
@@ -210,7 +242,7 @@ export function Spaces({ spaces }: { spaces: Space[] }) {
       {spaces.map((s, i) => (
         <Fragment key={s.type}>
           {/* nav 앵커(#cabana 등): sticky 장은 붙은 위치를 보고하므로 흐름 위치를 가진 0높이 표식으로 스크롤 */}
-          <div id={s.slug} aria-hidden className="h-0" />
+          <div id={s.slug} data-snap aria-hidden className="h-0" />
           <SpacePanel space={s} index={i} total={spaces.length} dark={i % 2 === 0} />
         </Fragment>
       ))}
