@@ -7,7 +7,7 @@ type Surface = 'light' | 'dark';
 
 const tones: Record<Surface, Record<Tone, string>> = {
   light: {
-    neutral: 'bg-black/[.06] text-[#0a0a0a]/65',
+    neutral: 'bg-black/[.06] text-ink/65',
     success: 'bg-emerald-600/10 text-emerald-700',
     warning: 'bg-amber-500/15 text-amber-700',
     error: 'bg-red-600/10 text-red-700',

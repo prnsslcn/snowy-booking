@@ -9,7 +9,7 @@ const fieldBase =
   'h-14 w-full rounded-[14px] border px-4 text-[16px] outline-none transition-[border-color,background-color,box-shadow] duration-200';
 const fieldTone: Record<Tone, string> = {
   light:
-    'border-black/[.12] bg-white text-[#0a0a0a] placeholder:text-black/30 focus:border-ice-600 focus:ring-4 focus:ring-ice-200/50 aria-[invalid=true]:border-[#d4351c]',
+    'border-black/[.12] bg-white text-ink placeholder:text-black/30 focus:border-ice-600 focus:ring-4 focus:ring-ice-200/50 aria-[invalid=true]:border-[#d4351c]',
   dark: 'border-white/[.12] bg-white/[.04] text-white placeholder:text-white/30 focus:border-white/60 focus:bg-white/[.06] aria-[invalid=true]:border-[#ff8a75]',
 };
 
@@ -33,12 +33,12 @@ export function Field({
   const dark = tone === 'dark';
   return (
     <label className="block">
-      <span className={`mb-2 block text-[14px] font-medium ${dark ? 'text-white/70' : 'text-[#0a0a0a]/70'}`}>{label}</span>
+      <span className={`mb-2 block text-[14px] font-medium ${dark ? 'text-white/70' : 'text-ink/70'}`}>{label}</span>
       {children}
       {error ? (
         <span className={`mt-1.5 block text-[13px] ${dark ? 'text-[#ff8a75]' : 'text-[#d4351c]'}`}>{error}</span>
       ) : hint ? (
-        <span className={`mt-1.5 block text-[13px] ${dark ? 'text-white/45' : 'text-[#0a0a0a]/50'}`}>{hint}</span>
+        <span className={`mt-1.5 block text-[13px] ${dark ? 'text-white/45' : 'text-ink/50'}`}>{hint}</span>
       ) : null}
     </label>
   );
@@ -61,7 +61,7 @@ export function Select({
       </select>
       <svg
         aria-hidden
-        className={`pointer-events-none absolute right-4 top-1/2 h-4 w-4 -translate-y-1/2 ${tone === 'dark' ? 'text-white' : 'text-[#0a0a0a]'}`}
+        className={`pointer-events-none absolute right-4 top-1/2 h-4 w-4 -translate-y-1/2 ${tone === 'dark' ? 'text-white' : 'text-ink'}`}
         viewBox="0 0 16 16"
         fill="none"
       >

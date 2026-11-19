@@ -154,7 +154,7 @@ export function Navbar() {
 
         <div
           className="relative z-10 flex items-center px-4 py-3 transition-colors duration-300 md:px-6 md:py-4 lg:px-10"
-          style={{ color: isDark ? '#ffffff' : '#0a0a0a' }}
+          style={{ color: isDark ? '#ffffff' : '#0e1a2b' }}
         >
           <a href="/" onClick={(e) => go(e, '/')} className="-my-1 flex flex-none items-center" aria-label="스노위 카바나·카라반 홈">
             <span className="transition-colors duration-300" style={{ color: isDark ? '#ffffff' : '#33689f' }}>
@@ -181,7 +181,7 @@ export function Navbar() {
             <button
               type="button"
               onClick={() => setOpen(true)}
-              className={`-mr-1 p-1.5 transition-colors lg:hidden ${isDark ? 'text-white/80 hover:text-white' : 'text-[#0a0a0a]/70 hover:text-[#0a0a0a]'}`}
+              className={`-mr-1 p-1.5 transition-colors lg:hidden ${isDark ? 'text-white/80 hover:text-white' : 'text-ink/70 hover:text-ink'}`}
               aria-label="메뉴 열기"
               aria-expanded={open}
             >

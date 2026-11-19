@@ -32,7 +32,7 @@ export default async function CompletePage({ searchParams }: { searchParams: Pro
 
   return (
     <SubPage display="Confirmed" sub="예약이 확정되었습니다">
-      <p className="text-[15px] text-[#0a0a0a]/60">예약 내용은 문자로도 발송됩니다.</p>
+      <p className="text-[15px] text-ink/60">예약 내용은 문자로도 발송됩니다.</p>
 
       {data && (
         <div className="mt-8">
@@ -48,12 +48,12 @@ export default async function CompletePage({ searchParams }: { searchParams: Pro
               ['결제 금액', formatWon(data.amount)],
             ].map(([k, v]) => (
               <div key={k} className="flex justify-between gap-4 py-4">
-                <dt className="text-[14px] text-[#0a0a0a]/55">{k}</dt>
+                <dt className="text-[14px] text-ink/55">{k}</dt>
                 <dd className="text-right text-[15px] font-medium tabular-nums">{v}</dd>
               </div>
             ))}
           </dl>
-          <p className="mt-4 text-[13px] text-[#0a0a0a]/55">자리(호수)는 이용 당일 현장에서 배정됩니다. {TICKET_NOTICE}</p>
+          <p className="mt-4 text-[13px] text-ink/55">자리(호수)는 이용 당일 현장에서 배정됩니다. {TICKET_NOTICE}</p>
         </div>
       )}
 

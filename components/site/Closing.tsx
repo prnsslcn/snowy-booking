@@ -1,36 +1,85 @@
 'use client';
 
 import { motion, useInView } from 'framer-motion';
+import Image from 'next/image';
 import { useRef } from 'react';
 
 import { blockIn, WILL } from '@/components/site/motion';
 import { usePageTransition } from '@/components/site/PageTransition';
 import { useStickyCover } from '@/components/site/useStickyCover';
+import { FACILITIES, type FacilityPhoto } from '@/lib/content/facilities';
 
 /*
-  마지막 장 — 소개 글 + 위치·이용 시간·예약 + 사업자 정보를 한 화면에.
-  앞 장(단체카라반, 어두움)을 밝은 장으로 덮는다. 사업자 정보는 전자상거래법 제10조에 따라 필수.
+  마지막 장 — 사진 흐름 + 큰 푸터. 앞 장(단체카라반)을 밝은 장으로 덮는다.
+  - 위: 시설 사진이 두 줄로 서로 반대 방향으로 천천히 흐른다(마우스 올리면 멈춤, 모션 줄이기면 정지)
+  - 가운데: 메뉴 묶음(공간 · 예약 · 약관 3종) + 사업자 정보(전자상거래법 제10조 필수)
+  - 맨 아래: 화면 폭을 채우는 큰 "Snowy" — 아래 끝이 살짝 잘리며 장을 닫는다
+  지어낸 문구 없이 사진·이름·메뉴·사업자 정보만.
 */
 
-function Lines({ text }: { text: string }) {
-  const lines = text.split('\n');
+// 설비 사진(감지기·온도조절기)은 흐름에서 뺀다
+const SKIP = new Set(['/images/facilities/cabana-3.jpg', '/images/facilities/caravan-4.jpg']);
+const ALL = FACILITIES.flatMap((f) => f.photos).filter((p) => !SKIP.has(p.src));
+// 두 줄로 나누되 상품이 섞이도록 번갈아
+const ROWS: FacilityPhoto[][] = [ALL.filter((_, i) => i % 2 === 0), ALL.filter((_, i) => i % 2 === 1)];
+
+function MarqueeRow({ photos, reverse, seconds }: { photos: FacilityPhoto[]; reverse?: boolean; seconds: number }) {
+  // 한 묶음 = 사진 ×2(화면 폭보다 길게), 트랙 = 묶음 ×2 → -50% 까지 흘리면 이음매 없음
+  const set = [...photos, ...photos];
   return (
-    <>
-      {lines.map((line, i) => (
-        <span key={i}>
-          {line}
-          {i < lines.length - 1 && <br className="hidden md:inline" />}
-          {i < lines.length - 1 && ' '}
-        </span>
-      ))}
-    </>
+    <div className="marquee-row overflow-hidden">
+      <div
+        className="marquee-track flex w-max gap-2.5 md:gap-3"
+        style={{ animation: `${reverse ? 'marquee-right' : 'marquee-left'} ${seconds}s linear infinite` }}
+      >
+        {[...set, ...set].map((p, i) => (
+          <div
+            key={i}
+            aria-hidden={i >= photos.length || undefined}
+            className={`relative h-[132px] flex-none overflow-hidden rounded-xl md:h-[200px] md:rounded-2xl lg:h-[236px] ${
+              p.orientation === 'landscape' ? 'aspect-[4/3]' : 'aspect-[3/4]'
+            }`}
+          >
+            <Image src={p.src} alt={i < photos.length ? p.alt : ''} fill sizes="(min-width: 1024px) 320px, 180px" className="object-cover" />
+          </div>
+        ))}
+      </div>
+    </div>
   );
 }
 
-export function Closing({ headline, body, z }: { headline: string; body: string[]; z: number }) {
+const NAV: { title: string; links: { label: string; href: string; internal?: boolean }[] }[] = [
+  {
+    title: 'Spaces',
+    links: [
+      { label: '카바나', href: '/#cabana', internal: true },
+      { label: '카라반', href: '/#caravan', internal: true },
+      { label: '단체카라반', href: '/#caravan-group', internal: true },
+    ],
+  },
+  {
+    title: 'Booking',
+    links: [
+      { label: '예약하기', href: '/booking', internal: true },
+      { label: '예약 조회·취소', href: '/booking/lookup', internal: true },
+    ],
+  },
+  {
+    title: 'Policy',
+    links: [
+      { label: '이용약관', href: '/terms' },
+      { label: '개인정보처리방침', href: '/privacy' },
+      { label: '취소·환불정책', href: '/refund-policy' },
+    ],
+  },
+];
+
+export function Closing({ z }: { z: number }) {
   const { ref, radius } = useStickyCover<HTMLElement>();
   const bodyRef = useRef<HTMLDivElement>(null);
-  const seen = useInView(bodyRef, { once: true, margin: '0px 0px -15% 0px' });
+  const markRef = useRef<HTMLDivElement>(null);
+  const seen = useInView(bodyRef, { once: true, margin: '0px 0px -10% 0px' });
+  const markSeen = useInView(markRef, { once: true, margin: '0px 0px -5% 0px' });
   const { ready, leaveTo } = usePageTransition();
   const inView = seen && ready;
 
@@ -45,68 +94,64 @@ export function Closing({ headline, body, z }: { headline: string; body: string[
       ref={ref}
       id="contact"
       data-nav-theme="light"
-      className="relative flex min-h-[100dvh] flex-col bg-[#fafaf8] px-5 pb-5 pt-[104px] text-[#0a0a0a] md:pb-6 md:px-8 lg:px-10 lg:pt-28"
+      className="relative flex min-h-[100dvh] flex-col overflow-hidden bg-ice-50 pt-[104px] text-ink lg:pt-28"
       style={{ zIndex: z, borderTopLeftRadius: radius, borderTopRightRadius: radius }}
     >
-      <div ref={bodyRef} className="grid flex-1 content-start gap-7 md:gap-12 lg:grid-cols-[1.25fr_0.75fr] lg:content-stretch lg:gap-20">
-        {/* 소개 */}
-        <div className="flex flex-col gap-5 md:gap-10">
-          <motion.h2
-            className="font-display text-[1.45rem] font-black leading-[1.3] tracking-[-0.025em] md:text-[2.5rem]"
-            style={WILL}
-            {...blockIn(11, '18%', 0.82, 0.08, inView)}
-          >
-            <Lines text={headline} />
-          </motion.h2>
-          <div className="flex max-w-3xl flex-col gap-3 md:gap-6">
-            {body.map((p, i) => (
-              <motion.p
-                key={i}
-                className="text-[14px] leading-[1.6] text-[#0a0a0a]/70 md:text-[1.1rem] md:leading-[1.65]"
-                style={WILL}
-                {...blockIn(8, '14%', 0.78, 0.2 + i * 0.12, inView)}
-              >
-                {p}
-              </motion.p>
-            ))}
-          </div>
-        </div>
+      <div ref={bodyRef}>
+        {/* 사진 흐름 */}
+        <motion.div className="flex flex-col gap-2.5 md:gap-3" style={WILL} {...blockIn(8, '8%', 0.9, 0.05, inView)}>
+          <MarqueeRow photos={ROWS[0]} seconds={70} />
+          <MarqueeRow photos={ROWS[1]} seconds={80} reverse />
+        </motion.div>
 
-        {/* 위치 · 이용 시간 · 예약 */}
-        <motion.div className="flex flex-col gap-4 md:gap-6 lg:justify-end" style={WILL} {...blockIn(8, '14%', 0.78, 0.44, inView)}>
-          <address className="font-display text-[1.35rem] font-extrabold not-italic leading-[1.15] tracking-[-0.03em] md:text-[2.5rem]">
-            홍천 비발디파크
-            <br />
-            스노위랜드
-          </address>
-          <dl className="grid grid-cols-[auto_1fr] gap-x-6 gap-y-1 text-[14px] text-[#0a0a0a]/70 md:gap-y-1.5 md:text-[15px]">
-            <dt>시즌 중 매일</dt>
-            <dd className="tabular-nums">10:00–17:00</dd>
-            <dt>당일 예약</dt>
-            <dd className="tabular-nums">16:00까지</dd>
-          </dl>
-          <a
-            href="/booking"
-            onClick={go}
-            className="inline-flex w-fit items-center rounded-full bg-glacier px-7 py-3 text-base font-semibold md:px-8 md:py-4 md:text-lg text-white transition-transform duration-300 ease-[cubic-bezier(0.16,1,0.3,1)] active:scale-[0.97]"
-          >
-            예약하기
-          </a>
+        {/* 메뉴 묶음 */}
+        <nav aria-label="사이트 메뉴" className="mt-12 grid grid-cols-2 gap-x-6 gap-y-8 px-5 md:mt-20 md:grid-cols-3 md:px-8 lg:px-10">
+          {NAV.map((g, i) => (
+            <motion.div key={g.title} style={WILL} {...blockIn(8, '14%', 0.78, 0.2 + i * 0.08, inView)}>
+              <p className="font-display text-[13px] font-semibold tracking-[0.02em] text-ice-600 md:text-sm">{g.title}</p>
+              <ul className="mt-3 space-y-2 md:mt-4 md:space-y-2.5">
+                {g.links.map((l) => (
+                  <li key={l.href}>
+                    <a
+                      href={l.href}
+                      onClick={l.internal ? go : undefined}
+                      className={`group inline-block text-[15px] md:text-lg ${l.href === '/privacy' ? 'font-bold' : 'font-medium'}`}
+                    >
+                      <span className="relative after:absolute after:-bottom-0.5 after:left-0 after:h-px after:w-0 after:bg-current after:transition-[width] after:duration-500 after:ease-[cubic-bezier(0.16,1,0.3,1)] group-hover:after:w-full">
+                        {l.label}
+                      </span>
+                    </a>
+                  </li>
+                ))}
+              </ul>
+            </motion.div>
+          ))}
+        </nav>
+
+        {/* 사업자 정보 */}
+        <motion.div
+          className="mx-5 mt-12 border-t border-black/[.1] pt-4 text-[11px] leading-relaxed text-ink/50 md:mx-8 md:mt-20 md:pt-5 md:text-[13px] lg:mx-10"
+          style={WILL}
+          {...blockIn(8, '14%', 0.78, 0.45, inView)}
+        >
+          <p>© 2026 주식회사 에이비씨웍스글로벌</p>
+          <p className="mt-1">
+            대표 황혜진 · 사업자등록번호 442-87-01602 · 통신판매업신고 제2021-서울강서-1055호 · 서울특별시 강서구 마곡중앙로 171, 5층 513호 씨(마곡동) · campingclub2020@naver.com
+          </p>
         </motion.div>
       </div>
 
-      {/* 사업자 정보 */}
-      <div className="mt-8 flex flex-col gap-1.5 border-t border-black/[.12] pt-4 text-[11px] leading-relaxed md:mt-12 md:gap-2 md:pt-5 text-[#0a0a0a]/50 md:text-[13px]">
-        <p className="flex flex-wrap gap-x-4 gap-y-1">
-          <span>© 2026 주식회사 에이비씨웍스글로벌</span>
-          <a href="/terms" className="text-[#0a0a0a]/80 hover:text-[#0a0a0a]">이용약관</a>
-          <a href="/privacy" className="font-semibold text-[#0a0a0a]/80 hover:text-[#0a0a0a]">개인정보처리방침</a>
-          <a href="/refund-policy" className="text-[#0a0a0a]/80 hover:text-[#0a0a0a]">취소·환불정책</a>
-          <a href="/booking/lookup" onClick={go} className="text-[#0a0a0a]/80 hover:text-[#0a0a0a]">예약 조회·취소</a>
-        </p>
-        <p>
-          대표 황혜진 · 사업자등록번호 442-87-01602 · 통신판매업신고 제2021-서울강서-1055호 · 서울특별시 강서구 마곡중앙로 171, 5층 513호 씨(마곡동) · campingclub2020@naver.com
-        </p>
+      {/* 큰 Snowy — 아래 끝이 살짝 잘리며 장을 닫는다 */}
+      <div ref={markRef} aria-hidden className="mt-auto overflow-hidden px-3 pt-10 md:px-5 md:pt-14">
+        <motion.p
+          className="select-none font-display font-extrabold text-glacier"
+          style={{ fontSize: '33.4vw', lineHeight: 1, letterSpacing: '-0.045em', marginBottom: '-0.1em' }}
+          initial={{ y: '40%', opacity: 0 }}
+          animate={markSeen && ready ? { y: '0%', opacity: 1 } : undefined}
+          transition={{ duration: 1.4, ease: [0.22, 1, 0.36, 1] }}
+        >
+          Snowy
+        </motion.p>
       </div>
     </motion.footer>
   );

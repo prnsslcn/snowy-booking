@@ -55,7 +55,7 @@ export function Calendar({
   return (
     <div className="rounded-3xl border border-black/[.08] bg-white p-3 md:p-5">
       <div className="flex items-center justify-between px-2 pb-3 pt-1">
-        <span className="font-display text-[22px] font-extrabold tracking-[-0.03em] tabular-nums text-[#0a0a0a]">
+        <span className="font-display text-[22px] font-extrabold tracking-[-0.03em] tabular-nums text-ink">
           {view.y}. {pad(view.m + 1)}
         </span>
         <div className="flex gap-1">
@@ -69,7 +69,7 @@ export function Calendar({
               onClick={() => move(b.d)}
               disabled={!b.ok}
               aria-label={b.label}
-              className="flex h-10 w-10 items-center justify-center rounded-full border border-black/[.08] text-[#0a0a0a] transition-[transform,border-color] duration-300 ease-[cubic-bezier(0.16,1,0.3,1)] hover:border-black/30 active:scale-[0.94] disabled:opacity-25"
+              className="flex h-10 w-10 items-center justify-center rounded-full border border-black/[.08] text-ink transition-[transform,border-color] duration-300 ease-[cubic-bezier(0.16,1,0.3,1)] hover:border-black/30 active:scale-[0.94] disabled:opacity-25"
             >
               <svg viewBox="0 0 16 16" className="h-4 w-4" fill="none" aria-hidden>
                 <path d={b.path} stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round" />
@@ -81,7 +81,7 @@ export function Calendar({
 
       <div className="grid grid-cols-7 text-center">
         {WEEKDAYS.map((w, i) => (
-          <div key={w} className={`pb-2 pt-1 text-[12px] font-medium ${i === 0 ? 'text-[#d4351c]' : i === 6 ? 'text-ice-600' : 'text-[#0a0a0a]/45'}`}>
+          <div key={w} className={`pb-2 pt-1 text-[12px] font-medium ${i === 0 ? 'text-[#d4351c]' : i === 6 ? 'text-ice-600' : 'text-ink/45'}`}>
             {w}
           </div>
         ))}
@@ -108,20 +108,20 @@ export function Calendar({
                 selected
                   ? 'bg-glacier font-semibold text-white'
                   : selectable
-                    ? `font-semibold text-[#0a0a0a] hover:bg-ice-50 active:scale-[0.94] ${isToday ? 'ring-1 ring-inset ring-ice-400' : ''}`
+                    ? `font-semibold text-ink hover:bg-ice-50 active:scale-[0.94] ${isToday ? 'ring-1 ring-inset ring-ice-400' : ''}`
                     : closedLike
-                      ? 'cursor-default bg-black/[.03] text-[#0a0a0a]/30'
-                      : 'cursor-default text-[#0a0a0a]/20'
+                      ? 'cursor-default bg-black/[.03] text-ink/30'
+                      : 'cursor-default text-ink/20'
               }`}
             >
               <span className="leading-none tabular-nums">{d}</span>
-              {closedLike && <span className="mt-1 text-[10px] font-normal leading-none text-[#0a0a0a]/45">{status === 'closed' ? '휴장' : '마감'}</span>}
+              {closedLike && <span className="mt-1 text-[10px] font-normal leading-none text-ink/45">{status === 'closed' ? '휴장' : '마감'}</span>}
             </button>
           );
         })}
       </div>
 
-      <div className="mt-3 flex items-center gap-5 border-t border-black/[.06] px-2 pt-3 text-[12px] text-[#0a0a0a]/50">
+      <div className="mt-3 flex items-center gap-5 border-t border-black/[.06] px-2 pt-3 text-[12px] text-ink/50">
         <span className="flex items-center gap-1.5">
           <span className="h-3 w-3 rounded-[4px] bg-black/[.05]" /> 휴장·마감
         </span>

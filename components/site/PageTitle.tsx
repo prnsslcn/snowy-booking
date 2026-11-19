@@ -25,7 +25,7 @@ export function PageTitle({ display, sub, dark = false, aside }: { display: stri
         </motion.h1>
         <motion.p
           aria-hidden
-          className={`mt-4 font-medium ${dark ? 'text-white/60' : 'text-[#0a0a0a]/60'}`}
+          className={`mt-4 font-medium ${dark ? 'text-white/60' : 'text-ink/60'}`}
           style={{ fontSize: 'clamp(1rem, 1.3vw, 1.25rem)', ...WILL }}
           {...blockIn(8, '14%', 0.78, 0.2, ready)}
         >

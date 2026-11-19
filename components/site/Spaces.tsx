@@ -62,8 +62,8 @@ function Details({
   onToggle: () => void;
 }) {
   const id = useId();
-  const line = dark ? 'border-white/20' : 'border-black/[.12]';
-  const soft = dark ? 'text-ice-50/80' : 'text-[#0a0a0a]/70';
+  const line = dark ? 'border-white/20' : 'border-ice-700/20';
+  const soft = dark ? 'text-ice-50/80' : 'text-glacier/75';
   return (
     <div className={`border-b ${line}`}>
       <button
@@ -130,8 +130,8 @@ function SpacePanel({ space, index, total, dark }: { space: Space; index: number
   const side = rest.slice(0, 2);
   const landscape = main?.orientation === 'landscape';
 
-  const ink = dark ? 'text-[#fafaf8]' : 'text-[#0a0a0a]';
-  const soft = dark ? 'text-ice-100/65' : 'text-[#0a0a0a]/55';
+  const ink = dark ? 'text-ice-50' : 'text-glacier';
+  const soft = dark ? 'text-ice-100/65' : 'text-glacier/60';
   const rule = dark ? 'border-white/20' : 'border-ice-700/15';
 
   const go = (e: React.MouseEvent<HTMLAnchorElement>) => {

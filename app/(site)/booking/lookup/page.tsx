@@ -116,7 +116,7 @@ export default function LookupPage() {
   const canSubmit = code.length === 4 && phone.replace(/\D/g, '').length >= 10;
 
   return (
-    <main data-nav-theme="light" className="flex min-h-[100dvh] flex-col bg-[#fafaf8] text-[#0a0a0a]">
+    <main data-nav-theme="light" className="flex min-h-[100dvh] flex-col bg-ice-50 text-ink">
       <div className="mx-auto w-full max-w-4xl flex-1 px-6 pb-16 pt-32 md:px-10">
         <PageTitle display="Reservation" sub="예약 조회·취소" />
 
@@ -153,7 +153,7 @@ export default function LookupPage() {
             {loading ? '조회 중…' : '조회하기'}
           </Button>
         </motion.form>
-        <motion.p className="mt-3 text-[13px] text-[#0a0a0a]/50" style={WILL} {...blockIn(8, '14%', 0.78, 0.4, ready)}>
+        <motion.p className="mt-3 text-[13px] text-ink/50" style={WILL} {...blockIn(8, '14%', 0.78, 0.4, ready)}>
           예약 시 입력한 휴대폰 번호와 문자로 받은 예약번호 4자리를 입력해 주세요.
         </motion.p>
 
@@ -205,7 +205,7 @@ export default function LookupPage() {
                   )}
                   <div className="min-w-0 flex-1">
                     <p className="truncate text-lg font-semibold md:text-xl">{result.typeName} 1{result.type === 'cabana' ? '동' : '대'}</p>
-                    <p className="mt-1 text-[14px] text-[#0a0a0a]/55">
+                    <p className="mt-1 text-[14px] text-ink/55">
                       {formatDateKorean(result.date)} · {USAGE_TIME}
                     </p>
                   </div>
@@ -221,11 +221,11 @@ export default function LookupPage() {
               {result.refundPreview && (
                 <div className="mt-8 flex flex-col gap-5 md:flex-row md:items-end md:justify-between">
                   <div>
-                    <p className="text-[15px] text-[#0a0a0a]/75">
+                    <p className="text-[15px] text-ink/75">
                       지금 취소하면 <b className="font-semibold tabular-nums text-ice-700">{formatWon(result.refundPreview.amount)}</b> 환불
-                      <span className="text-[#0a0a0a]/45"> ({Math.round(result.refundPreview.rate * 100)}%)</span>
+                      <span className="text-ink/45"> ({Math.round(result.refundPreview.rate * 100)}%)</span>
                     </p>
-                    <p className="mt-1 text-[13px] text-[#0a0a0a]/50">{REFUND_SUMMARY} · 날짜 변경은 취소 후 다시 예약</p>
+                    <p className="mt-1 text-[13px] text-ink/50">{REFUND_SUMMARY} · 날짜 변경은 취소 후 다시 예약</p>
                   </div>
                   <Button variant="danger" onClick={cancel} disabled={cancelling}>
                     {cancelling ? '취소 처리 중…' : '예약 취소하기'}
@@ -244,7 +244,7 @@ export default function LookupPage() {
 function Row({ label, value }: { label: string; value: string }) {
   return (
     <li className="flex items-center justify-between gap-4 py-4">
-      <span className="text-[14px] text-[#0a0a0a]/55">{label}</span>
+      <span className="text-[14px] text-ink/55">{label}</span>
       <span className="text-right text-[15px] font-medium tabular-nums md:text-base">{value}</span>
     </li>
   );

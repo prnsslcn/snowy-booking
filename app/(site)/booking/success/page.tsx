@@ -42,13 +42,13 @@ export default function PaymentSuccessPage() {
   return !error ? (
     <SubPage display="Confirming" sub="결제 확인 중">
       <div className="flex items-center gap-4">
-        <div className="h-8 w-8 animate-spin rounded-full border-[3px] border-black/10 border-t-[#0a0a0a] [animation-duration:700ms]" />
-        <p className="text-[15px] text-[#0a0a0a]/70">창을 닫지 마세요.</p>
+        <div className="h-8 w-8 animate-spin rounded-full border-[3px] border-black/10 border-t-ink [animation-duration:700ms]" />
+        <p className="text-[15px] text-ink/70">창을 닫지 마세요.</p>
       </div>
     </SubPage>
   ) : (
     <SubPage display="Not paid" sub="결제를 완료하지 못했습니다">
-      <p className="text-[15px] text-[#0a0a0a]/70">{error}</p>
+      <p className="text-[15px] text-ink/70">{error}</p>
       <TLink href="/booking" className={buttonClass('primary', 'block', 'mt-10')}>
         다시 예약하기
       </TLink>

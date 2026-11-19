@@ -5,11 +5,11 @@ import { TLink } from '@/components/site/TLink';
  * 사업자 정보는 전자상거래법 제10조에 따라 결제 사이트에 필수.
  */
 export function SiteFooter({ dark = false }: { dark?: boolean }) {
-  const text = dark ? 'text-white/45' : 'text-[#0a0a0a]/50';
-  const link = dark ? 'text-white/75 hover:text-white' : 'text-[#0a0a0a]/80 hover:text-[#0a0a0a]';
+  const text = dark ? 'text-white/45' : 'text-ink/50';
+  const link = dark ? 'text-white/75 hover:text-white' : 'text-ink/80 hover:text-ink';
   const rule = dark ? 'border-white/[.08]' : 'border-black/[.12]';
   return (
-    <footer className={`mt-auto px-5 pb-6 pt-16 md:px-8 lg:px-10 ${dark ? 'bg-[#0a0a0a]' : 'bg-[#fafaf8]'}`}>
+    <footer className={`mt-auto px-5 pb-6 pt-16 md:px-8 lg:px-10 ${dark ? 'bg-ink' : 'bg-ice-50'}`}>
       <div className={`flex flex-col gap-1.5 border-t ${rule} pt-5 text-[12px] leading-relaxed md:gap-2 md:text-[13px] ${text}`}>
         <p className="flex flex-wrap gap-x-4 gap-y-1">
           <span>© 2026 주식회사 에이비씨웍스글로벌</span>

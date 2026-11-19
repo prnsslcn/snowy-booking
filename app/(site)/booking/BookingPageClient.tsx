@@ -180,13 +180,13 @@ export default function BookingPageClient({ preferredType }: { preferredType: st
       : '';
 
   return (
-    <main data-nav-theme="light" className="flex min-h-[100dvh] flex-col bg-[#fafaf8] text-[#0a0a0a]">
+    <main data-nav-theme="light" className="flex min-h-[100dvh] flex-col bg-ice-50 text-ink">
       <div className="mx-auto w-full max-w-3xl flex-1 px-5 pb-10 pt-28 md:px-8 md:pt-32">
         <PageTitle
           display="Booking"
           sub="예약하기"
           aside={
-            <span className="mb-1 flex-none overflow-hidden font-mono text-xs tracking-[.22em] text-[#0a0a0a]/50" aria-hidden>
+            <span className="mb-1 flex-none overflow-hidden font-mono text-xs tracking-[.22em] text-ink/50" aria-hidden>
               <AnimatePresence mode="popLayout" initial={false}>
                 <motion.span
                   key={step}
@@ -227,7 +227,7 @@ export default function BookingPageClient({ preferredType }: { preferredType: st
                     disabled={!done}
                     aria-current={active ? 'step' : undefined}
                     className={`flex items-center gap-1.5 text-left text-[13px] transition-colors duration-500 ${
-                      active ? 'font-semibold text-[#0a0a0a]' : done ? 'font-medium text-[#0a0a0a]/60 hover:text-[#0a0a0a]' : 'text-[#0a0a0a]/30'
+                      active ? 'font-semibold text-ink' : done ? 'font-medium text-ink/60 hover:text-ink' : 'text-ink/30'
                     }`}
                   >
                     <span className="font-mono text-[11px] tabular-nums">0{n}</span>
@@ -271,7 +271,7 @@ export default function BookingPageClient({ preferredType }: { preferredType: st
             {/* 1. 날짜 */}
             {step === 1 && (
               <div className="mt-6">
-                <p className="mb-5 text-[15px] text-[#0a0a0a]/60">오늘부터 1개월 이내 · 당일 예약 {CUTOFF}까지</p>
+                <p className="mb-5 text-[15px] text-ink/60">오늘부터 1개월 이내 · 당일 예약 {CUTOFF}까지</p>
                 {avail ? (
                   <Calendar value={date} onSelect={pickDate} days={dayMap} today={avail.today} minDate={avail.minDate} maxDate={avail.maxDate} />
                 ) : (
@@ -283,7 +283,7 @@ export default function BookingPageClient({ preferredType }: { preferredType: st
             {/* 2. 공간 */}
             {step === 2 && day && (
               <div className="mt-6 space-y-3">
-                <p className="text-[15px] text-[#0a0a0a]/60">1인 1동 · 자리는 현장 배정</p>
+                <p className="text-[15px] text-ink/60">1인 1동 · 자리는 현장 배정</p>
                 {day.types.map((t) => {
                   const soldOut = t.remaining <= 0;
                   const thumb = thumbOf(t.type);
@@ -314,10 +314,10 @@ export default function BookingPageClient({ preferredType }: { preferredType: st
                       )}
                       <div className="min-w-0 flex-1">
                         <div className="flex flex-wrap items-baseline gap-x-2">
-                          <span className={`text-[18px] font-bold ${soldOut ? 'text-[#0a0a0a]/35' : ''}`}>{t.name}</span>
-                          <span className="text-[13px] text-[#0a0a0a]/50">최대 {t.maxCapacity}인</span>
+                          <span className={`text-[18px] font-bold ${soldOut ? 'text-ink/35' : ''}`}>{t.name}</span>
+                          <span className="text-[13px] text-ink/50">최대 {t.maxCapacity}인</span>
                         </div>
-                        <p className={`mt-1 font-display text-[22px] font-extrabold tracking-[-0.02em] tabular-nums ${soldOut ? 'text-[#0a0a0a]/35' : ''}`}>
+                        <p className={`mt-1 font-display text-[22px] font-extrabold tracking-[-0.02em] tabular-nums ${soldOut ? 'text-ink/35' : ''}`}>
                           {formatWon(t.price)}
                         </p>
                         {soldOut && (
@@ -330,7 +330,7 @@ export default function BookingPageClient({ preferredType }: { preferredType: st
                         <svg
                           aria-hidden
                           viewBox="0 0 16 16"
-                          className="mr-1 h-5 w-5 flex-none text-[#0a0a0a]/35 transition-transform duration-300 ease-[cubic-bezier(0.16,1,0.3,1)] group-hover:translate-x-0.5 group-hover:text-ice-600"
+                          className="mr-1 h-5 w-5 flex-none text-ink/35 transition-transform duration-300 ease-[cubic-bezier(0.16,1,0.3,1)] group-hover:translate-x-0.5 group-hover:text-ice-600"
                           fill="none"
                         >
                           <path d="M6 3.5 10.5 8 6 12.5" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round" />
@@ -375,11 +375,11 @@ export default function BookingPageClient({ preferredType }: { preferredType: st
                   <div className="border-t border-black/[.06]">
                     <CheckRow checked={agreeRefund} onChange={setAgreeRefund}>
                       [필수] 취소·환불 규정
-                      <span className="mt-0.5 block text-[13px] text-[#0a0a0a]/50">{REFUND_SUMMARY}</span>
+                      <span className="mt-0.5 block text-[13px] text-ink/50">{REFUND_SUMMARY}</span>
                     </CheckRow>
                     <CheckRow checked={agreeRules} onChange={setAgreeRules}>
                       [필수] 이용 수칙
-                      <span className="mt-0.5 block text-[13px] text-[#0a0a0a]/50">
+                      <span className="mt-0.5 block text-[13px] text-ink/50">
                         이용 시간 {USAGE_TIME}, 최대 인원 준수. {TICKET_NOTICE} {PARKING_NOTICE}
                       </span>
                     </CheckRow>
@@ -408,7 +408,7 @@ export default function BookingPageClient({ preferredType }: { preferredType: st
                     </div>
                   </dl>
                 </div>
-                <ul className="space-y-1 text-[13px] text-[#0a0a0a]/55">
+                <ul className="space-y-1 text-[13px] text-ink/55">
                   <li>취소·환불: {REFUND_SUMMARY}</li>
                   <li>결제창에서 10분 안에 결제를 마쳐 주세요. 시간이 지나면 선점한 자리가 풀립니다.</li>
                 </ul>
@@ -452,7 +452,7 @@ function CheckRow({ checked, onChange, strong, children }: { checked: boolean; o
           <path d="m3.5 8.5 3 3 6-7" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
         </svg>
       </span>
-      <span className={`text-[15px] ${strong ? 'font-bold' : 'text-[#0a0a0a]/80'}`}>{children}</span>
+      <span className={`text-[15px] ${strong ? 'font-bold' : 'text-ink/80'}`}>{children}</span>
     </label>
   );
 }
@@ -460,7 +460,7 @@ function CheckRow({ checked, onChange, strong, children }: { checked: boolean; o
 function SummaryRow({ label, value }: { label: string; value: string }) {
   return (
     <div className="flex items-start justify-between gap-4 py-4">
-      <dt className="flex-none text-[14px] text-[#0a0a0a]/55">{label}</dt>
+      <dt className="flex-none text-[14px] text-ink/55">{label}</dt>
       <dd className="text-right text-[15px] font-medium">{value}</dd>
     </div>
   );
@@ -469,7 +469,7 @@ function SummaryRow({ label, value }: { label: string; value: string }) {
 /** 모바일 하단 고정 주요 버튼. 오류는 버튼 바로 위(가려지지 않게). */
 function BottomBar({ error, children }: { error?: string; children: ReactNode }) {
   return (
-    <div className="sticky bottom-0 z-30 -mx-5 border-t border-black/[.06] bg-[#fafaf8]/95 px-5 pb-[calc(env(safe-area-inset-bottom)+16px)] pt-4 backdrop-blur md:static md:mx-0 md:border-0 md:bg-transparent md:px-0 md:pb-0 md:pt-2 md:backdrop-blur-none">
+    <div className="sticky bottom-0 z-30 -mx-5 border-t border-black/[.06] bg-ice-50/95 px-5 pb-[calc(env(safe-area-inset-bottom)+16px)] pt-4 backdrop-blur md:static md:mx-0 md:border-0 md:bg-transparent md:px-0 md:pb-0 md:pt-2 md:backdrop-blur-none">
       <AnimatePresence>
         {error && (
           <motion.p

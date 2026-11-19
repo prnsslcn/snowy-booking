@@ -52,7 +52,7 @@ function freeze(el: HTMLElement): () => void {
     zIndex: '5',
     overflowY: 'scroll',
     scrollbarWidth: 'none',
-    background: '#fafaf8',
+    background: '#f0f5fa',
     pointerEvents: 'none',
   } satisfies Partial<CSSStyleDeclaration>);
   const clone = el.cloneNode(true) as HTMLElement;
@@ -206,7 +206,7 @@ export function PageTransition({ navbar, children }: { navbar?: ReactNode; child
       {navbar}
       <motion.div
         ref={sheetRef}
-        className={`flex flex-1 flex-col ${sheeting ? 'relative z-10 overflow-clip bg-[#fafaf8] shadow-[0_-12px_40px_rgba(10,20,40,0.12)]' : ''}`}
+        className={`flex flex-1 flex-col ${sheeting ? 'relative z-10 overflow-clip bg-ice-50 shadow-[0_-12px_40px_rgba(10,20,40,0.12)]' : ''}`}
         style={sheeting ? { y: sheetY, borderTopLeftRadius: sheetRadiusPx, borderTopRightRadius: sheetRadiusPx } : undefined}
       >
         <motion.div animate={content} initial={{ y: initial ? '10vh' : 0 }} className="flex flex-1 flex-col">
@@ -225,7 +225,7 @@ export function PageTransition({ navbar, children }: { navbar?: ReactNode; child
           <motion.div
             animate={blind}
             initial={{ scaleY: 1, borderRadius: '0px 0px 0vw 0vw', originY: 0 }}
-            className="absolute inset-0 bg-[#fafaf8]"
+            className="absolute inset-0 bg-ice-50"
           />
         </div>
       )}

@@ -19,8 +19,8 @@ export default async function PaymentFailPage({
 
   return (
     <SubPage display="Not paid" sub="결제가 완료되지 않았습니다">
-      <p className="text-[15px] text-[#0a0a0a]/70">{message ?? '결제가 취소되었거나 실패했습니다.'}</p>
-      <p className="mt-1 text-[13px] text-[#0a0a0a]/50">결제된 금액은 없습니다.</p>
+      <p className="text-[15px] text-ink/70">{message ?? '결제가 취소되었거나 실패했습니다.'}</p>
+      <p className="mt-1 text-[13px] text-ink/50">결제된 금액은 없습니다.</p>
       <TLink href="/booking" className={buttonClass('primary', 'block', 'mt-10')}>
         다시 예약하기
       </TLink>

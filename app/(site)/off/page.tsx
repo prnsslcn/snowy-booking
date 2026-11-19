@@ -13,7 +13,7 @@ export default async function OffPage() {
   const s = await getSiteSettings();
   return (
     <SubPage display="Closed" sub={s.closedTitle}>
-      <p className="whitespace-pre-line text-[15px] leading-relaxed text-[#0a0a0a]/70">{s.closedMessage}</p>
+      <p className="whitespace-pre-line text-[15px] leading-relaxed text-ink/70">{s.closedMessage}</p>
       <TLink href="/booking/lookup" className={buttonClass('secondary', 'block', 'mt-10')}>
         기존 예약 조회·취소
       </TLink>

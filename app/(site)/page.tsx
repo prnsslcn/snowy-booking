@@ -7,13 +7,13 @@ import { Spaces, type Space } from '@/components/site/Spaces';
 import { PHOTO } from '@/lib/content/facilities';
 import { formatKrw, formatWon } from '@/lib/format';
 import { kstToday } from '@/lib/policy/booking-window';
-import { getProducts, unitWord } from '@/lib/products';
+import { getProducts } from '@/lib/products';
 import { ONE_PER_DAY_NOTICE, PARKING_NOTICE, REFUND_SUMMARY, TICKET_NOTICE } from '@/lib/site-config';
 import { getSiteSettings } from '@/lib/site-settings';
 
 /*
   홈 — aftc 구조: 화면에 붙는 장을 다음 장이 덮으며 밝음/어두움이 번갈아 바뀐다.
-  Hero(밝음, 사진) → 공간 안내 3장(어두움·밝음·어두움) → 마지막 장(밝음: 소개 글 + 위치·시간·예약 + 사업자 정보).
+  Hero(밝음, 사진) → 공간 안내 3장(어두움·밝음·어두움) → 마지막 장(밝음: 사진 흐름 + 메뉴·약관 + 사업자 정보 + 큰 Snowy).
   글은 확정 사실만(위치·수량·인원·요금·이용 시간·예약 규정). 수량·인원·요금은 DB 값.
 */
 export const dynamic = 'force-dynamic';
@@ -28,16 +28,6 @@ export default async function HomePage() {
   const n = settings.noticePopup;
   const today = kstToday();
   const notice = n.enabled && n.title && (!n.from || n.from <= today) && (!n.to || n.to >= today) ? n.title : null;
-
-  const minPrice = Math.min(...products.map((p) => p.priceWeekday));
-  const lineup = products.map((p) => `${p.name} ${p.unitCount}${unitWord(p.type)}(최대 ${p.maxCapacity}인)`).join(', ');
-
-  // '·' 앞뒤 줄바꿈 방지(WORD JOINER) — '카바나·' 에서 끊기지 않게
-  const headline = '홍천 비발디파크 스노위랜드 안의\n카바나\u2060·\u2060카라반을 당일 이용으로 예약합니다.';
-  const body = [
-    `${lineup}. 시즌 중 매일 10:00부터 17:00까지 이용하며, 요금은 1동(1대) 1일 기준 ${formatWon(minPrice)}부터입니다. 금·토·일과 공휴일, 공휴일 전날, 동계 성수기에는 주말 요금이 적용됩니다.`,
-    '예약은 오늘부터 1개월 이내 날짜로 할 수 있고, 당일 예약은 16:00까지 받습니다. 전액 선결제이며, 1인(휴대폰 번호 기준) 1일 1동만 예약할 수 있습니다. 스노위랜드 입장권은 포함되지 않습니다.',
-  ];
 
   const spaces: Space[] = products.map((p) => ({
     type: p.type,
@@ -67,7 +57,7 @@ export default async function HomePage() {
         </div>
         <Spaces spaces={spaces} />
         <div data-snap aria-hidden className="h-0" />
-        <Closing headline={headline} body={body} z={30 + spaces.length} />
+        <Closing z={30 + spaces.length} />
       </div>
     </>
   );

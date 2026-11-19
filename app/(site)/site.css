@@ -1,11 +1,12 @@
 @import "tailwindcss";
 
-/* 홈(새 디자인) — aftc 구조 이식: 라이트 #fafaf8 / 다크 #0a0a0a, Outfit(영문 디스플레이) + Pretendard(본문) */
+/* 홈(새 디자인) — aftc 구조 이식: 바탕 얼음빛 #f0f5fa(ice-50) / 글자 #0e1a2b(ink, 푸른 기운의 아주 진한 남색), Outfit(영문 디스플레이) + Pretendard(본문) */
 /*
   얼음(ice) 팔레트 — 모노톤 위에 포인트로. glacier = 전체 화면 장 바탕(채도 낮춘 깊은 겨울 파랑).
   ice-50/100 = 옅은 얼음 면, ice-500~700 = 포인트(선택·진행·버튼).
 */
 @theme {
+  --color-ink: #0e1a2b;
   --color-glacier: #1f4469;
   --color-glacier-deep: #18385a;
   --color-ice-50: #f0f5fa;
@@ -25,8 +26,8 @@
 }
 
 :root {
-  --background: #fafaf8;
-  --foreground: #0a0a0a;
+  --background: #f0f5fa;
+  --foreground: #0e1a2b;
   --font-pretendard: "Pretendard", system-ui, sans-serif;
 }
 
@@ -48,5 +49,28 @@
     background: var(--background);
     color: var(--foreground);
     font-family: var(--font-pretendard);
+  }
+}
+
+/* 홈 마지막 장 사진 흐름 — 같은 묶음을 두 번 이어 붙이고 -50% 까지 흘려 이음매 없이 반복 */
+@keyframes marquee-left {
+  to {
+    transform: translate3d(-50%, 0, 0);
+  }
+}
+@keyframes marquee-right {
+  from {
+    transform: translate3d(-50%, 0, 0);
+  }
+  to {
+    transform: translate3d(0, 0, 0);
+  }
+}
+.marquee-row:hover .marquee-track {
+  animation-play-state: paused;
+}
+@media (prefers-reduced-motion: reduce) {
+  .marquee-track {
+    animation: none !important;
   }
 }
