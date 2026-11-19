@@ -14,6 +14,8 @@ import { SCROLL_OPTS, useLenis } from '@/components/site/SmoothScroll';
     지금 화면을 덮는다. 위 모서리 48px 는 마지막 15% 에서 펴진다(useStickyCover 와 같은 규칙).
     지금 화면은 DOM 복제본으로 그 자리(스크롤 위치·sticky 상태 그대로)에 남겨 두고, 덮이는 동안 살짝 어두워진다.
     복제본은 스크롤 위치를 가진 별도 스크롤 상자 안에 넣어 sticky 장도 보던 모습 그대로 보인다.
+  - 새 화면의 등장 애니메이션(blockIn 등, ready 게이트)은 종이가 절반 넘게 올라왔을 때 시작한다
+    (ENTER_AT) — 종이에 실린 채 글이 흐림이 풀리며 떠오르도록.
   - 주소에 #앵커가 있으면 종이가 다 올라온 뒤 그 자리로 스크롤.
 */
 const D = 1.2;
@@ -21,6 +23,8 @@ const EASE: [number, number, number, number] = [0.87, 0, 0.13, 1];
 const SHEET_D = 1.1;
 const SHEET_EASE: [number, number, number, number] = [0.76, 0, 0.24, 1];
 const RADIUS = 48;
+/** 종이 진행도가 이 값을 넘으면 새 화면 등장 애니메이션 시작 */
+const ENTER_AT = 0.55;
 
 interface Ctx {
   ready: boolean;
@@ -69,6 +73,8 @@ export function PageTransition({ navbar, children }: { navbar?: ReactNode; child
   const [active, setActive] = useState(true);
   const [initial, setInitial] = useState(true);
   const [sheeting, setSheeting] = useState(false);
+  // 종이 전환 중 새 화면 등장 애니메이션 대기
+  const [entering, setEntering] = useState(false);
   const busy = useRef(false);
   const sheetRef = useRef<HTMLDivElement>(null);
   const content = useAnimationControls();
@@ -156,6 +162,7 @@ export function PageTransition({ navbar, children }: { navbar?: ReactNode; child
       unfreeze = freeze(el);
       sheetP.set(0);
       setSheeting(true);
+      setEntering(true);
       await frame();
     }
 
@@ -172,7 +179,19 @@ export function PageTransition({ navbar, children }: { navbar?: ReactNode; child
     // 3) 종이가 올라와 덮는다
     if (!reduce && el) {
       // 매 프레임 nav 글자색을 다시 판단하게 한다(종이가 nav 줄을 지나는 순간 바뀜)
-      await animate(sheetP, 1, { duration: SHEET_D, ease: SHEET_EASE, onUpdate: () => window.dispatchEvent(new Event('scroll')) });
+      let entered = false;
+      await animate(sheetP, 1, {
+        duration: SHEET_D,
+        ease: SHEET_EASE,
+        onUpdate: (v) => {
+          window.dispatchEvent(new Event('scroll'));
+          if (!entered && v >= ENTER_AT) {
+            entered = true;
+            setEntering(false);
+          }
+        },
+      });
+      setEntering(false);
       unfreeze();
       setSheeting(false);
       // nav 글자색 다시 판단(복제본이 사라졌으므로)
@@ -183,7 +202,7 @@ export function PageTransition({ navbar, children }: { navbar?: ReactNode; child
   }
 
   return (
-    <TransitionContext.Provider value={{ ready: !active, leaveTo: (href) => void leaveTo(href) }}>
+    <TransitionContext.Provider value={{ ready: !active && !entering, leaveTo: (href) => void leaveTo(href) }}>
       {navbar}
       <motion.div
         ref={sheetRef}

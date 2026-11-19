@@ -17,12 +17,12 @@ import { SmoothScroll } from '@/components/site/SmoothScroll';
 const outfit = Outfit({ subsets: ['latin'], variable: '--font-outfit', display: 'swap' });
 
 export const metadata: Metadata = {
-  title: { default: '스노위랜드: 홍천 비발디파크의 카바나·카라반 당일 이용', template: '%s · 스노위랜드' },
+  title: { default: '스노위 카바나·카라반: 홍천 비발디파크 스노위랜드 당일 이용', template: '%s · 스노위 카바나·카라반' },
   description: '홍천 비발디파크 스노위랜드 안 카바나·카라반·단체카라반을 매일 10:00–17:00 당일 이용으로 온라인 예약합니다.',
   openGraph: {
     type: 'website',
     locale: 'ko_KR',
-    title: '스노위랜드: 홍천 비발디파크의 카바나·카라반 당일 이용',
+    title: '스노위 카바나·카라반: 홍천 비발디파크 스노위랜드 당일 이용',
     description: '카바나·카라반·단체카라반 당일 이용 온라인 예약',
     images: ['/images/facilities/caravan-group-1.jpg'],
   },
