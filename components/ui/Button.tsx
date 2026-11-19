@@ -6,10 +6,10 @@ import type { ButtonHTMLAttributes } from 'react';
  * 링크 버튼은 <TLink className={buttonClass(...)}> 로.
  */
 type Variant = 'primary' | 'secondary' | 'onDark' | 'onDarkSecondary' | 'danger' | 'dangerOnDark';
-type Size = 'md' | 'block';
+type Size = 'sm' | 'md' | 'block';
 
 const base =
-  'inline-flex items-center justify-center gap-2 rounded-full text-[16px] font-semibold whitespace-nowrap select-none transition-[transform,background-color,border-color,color,opacity] duration-300 ease-[cubic-bezier(0.16,1,0.3,1)] active:scale-[0.97] disabled:pointer-events-none disabled:opacity-40 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-current';
+  'inline-flex items-center justify-center gap-2 rounded-full font-semibold whitespace-nowrap select-none transition-[transform,background-color,border-color,color,opacity] duration-300 ease-[cubic-bezier(0.16,1,0.3,1)] active:scale-[0.97] disabled:pointer-events-none disabled:opacity-40 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-current';
 
 const variants: Record<Variant, string> = {
   primary: 'bg-glacier text-white hover:bg-glacier-deep',
@@ -21,8 +21,9 @@ const variants: Record<Variant, string> = {
 };
 
 const sizes: Record<Size, string> = {
-  md: 'h-12 px-7',
-  block: 'h-14 w-full px-7',
+  sm: 'h-10 px-5 text-[14px]',
+  md: 'h-12 px-7 text-[16px]',
+  block: 'h-14 w-full px-7 text-[16px]',
 };
 
 export function buttonClass(variant: Variant = 'primary', size: Size = 'md', className = '') {

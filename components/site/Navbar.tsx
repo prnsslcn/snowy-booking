@@ -7,6 +7,7 @@ import { Fragment, useEffect, useState } from 'react';
 
 import { usePageTransition } from '@/components/site/PageTransition';
 import { SCROLL_OPTS, useLenis } from '@/components/site/SmoothScroll';
+import { LOCATION_ENABLED } from '@/lib/site-config';
 
 /*
   aftc Navbar 이식.
@@ -24,6 +25,11 @@ export const NAV_ITEMS = [
   { label: '카라반', href: '#caravan' },
   { label: '단체카라반', href: '#caravan-group' },
 ] as const;
+/** 안내 화면 */
+const INFO_ITEMS = [
+  { label: '이용 안내', href: '/guide' },
+  ...(LOCATION_ENABLED ? [{ label: '오시는 길', href: '/location' }] : []),
+];
 const LOOKUP = { label: '예약 조회', href: '/booking/lookup' };
 const BOOK = { label: '예약하기', href: '/booking' };
 
@@ -171,6 +177,14 @@ export function Navbar() {
               ))}
             </div>
             <span aria-hidden className="hidden h-4 w-px bg-current opacity-20 lg:block" />
+            <div className="hidden items-center gap-6 lg:flex xl:gap-7">
+              {INFO_ITEMS.map((item) => (
+                <a key={item.href} href={item.href} onClick={(e) => go(e, item.href)} className={link}>
+                  <span className={underline(pathname === item.href)}>{item.label}</span>
+                </a>
+              ))}
+            </div>
+            <span aria-hidden className="hidden h-4 w-px bg-current opacity-20 lg:block" />
             <a href={LOOKUP.href} onClick={(e) => go(e, LOOKUP.href)} className={`${link} hidden lg:inline`}>
               <span className={underline(pathname === LOOKUP.href)}>{LOOKUP.label}</span>
             </a>
@@ -219,10 +233,10 @@ export function Navbar() {
               </svg>
             </button>
 
-            {[...NAV_ITEMS, LOOKUP].map((item, i) => (
+            {[...NAV_ITEMS, ...INFO_ITEMS, LOOKUP].map((item, i) => (
               <Fragment key={item.href}>
-                {/* 상품 링크와 예약 조회 사이 얇은 구분선 */}
-                {item === LOOKUP && (
+                {/* 상품 링크와 안내·예약 조회 사이 얇은 구분선 */}
+                {item === INFO_ITEMS[0] && (
                   <motion.span
                     aria-hidden
                     className="-my-2 h-px w-36 bg-white/25"

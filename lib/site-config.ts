@@ -18,6 +18,18 @@ export function siteUrl(): string | null {
   return process.env.NEXT_PUBLIC_SITE_URL?.replace(/\/$/, '') || null;
 }
 
+/** 오시는 길(/location) 공개 여부 — false 면 메뉴에서 숨기고 주소로 들어와도 404(운영자 확인 전까지 꺼 둠) */
+export const LOCATION_ENABLED = false;
+
+/** 위치 — 비발디파크(스노위랜드) 도로명 주소. 소노호텔앤리조트 공식 오시는 길 기준 */
+export const PLACE_NAME = '홍천 비발디파크 스노위랜드';
+export const ADDRESS = '강원특별자치도 홍천군 서면 한치골길 262';
+const MAP_QUERY = encodeURIComponent('비발디파크 스노위랜드');
+export const MAP_LINKS = [
+  { label: '네이버 지도', href: `https://map.naver.com/p/search/${MAP_QUERY}` },
+  { label: '카카오맵', href: `https://map.kakao.com/?q=${MAP_QUERY}` },
+] as const;
+
 export const ONE_PER_DAY_NOTICE = '1인(휴대폰번호 기준) 1일 1동만 예약할 수 있습니다.';
 export const TICKET_NOTICE = '스노위랜드 입장권은 포함되어 있지 않습니다.';
 export const PARKING_NOTICE = '주차는 비발디파크 리조트 주차장을 이용해 주세요.';

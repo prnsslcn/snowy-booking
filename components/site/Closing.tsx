@@ -8,6 +8,7 @@ import { blockIn, WILL } from '@/components/site/motion';
 import { usePageTransition } from '@/components/site/PageTransition';
 import { useStickyCover } from '@/components/site/useStickyCover';
 import { FACILITIES, type FacilityPhoto } from '@/lib/content/facilities';
+import { LOCATION_ENABLED } from '@/lib/site-config';
 
 /*
   마지막 장 — 사진 흐름 + 큰 푸터. 앞 장(단체카라반)을 밝은 장으로 덮는다.
@@ -58,6 +59,13 @@ const NAV: { title: string; links: { label: string; href: string; internal?: boo
     ],
   },
   {
+    title: 'Visit',
+    links: [
+      { label: '이용 안내', href: '/guide', internal: true },
+      ...(LOCATION_ENABLED ? [{ label: '오시는 길', href: '/location', internal: true }] : []),
+    ],
+  },
+  {
     title: 'Booking',
     links: [
       { label: '예약하기', href: '/booking', internal: true },
@@ -105,7 +113,7 @@ export function Closing({ z }: { z: number }) {
         </motion.div>
 
         {/* 메뉴 묶음 */}
-        <nav aria-label="사이트 메뉴" className="mt-12 grid grid-cols-2 gap-x-6 gap-y-8 px-5 md:mt-20 md:grid-cols-3 md:px-8 lg:px-10">
+        <nav aria-label="사이트 메뉴" className="mt-12 grid grid-cols-2 gap-x-6 gap-y-8 px-5 md:mt-20 md:grid-cols-4 md:px-8 lg:px-10">
           {NAV.map((g, i) => (
             <motion.div key={g.title} style={WILL} {...blockIn(8, '14%', 0.78, 0.2 + i * 0.08, inView)}>
               <p className="font-display text-[13px] font-semibold tracking-[0.02em] text-ice-600 md:text-sm">{g.title}</p>
