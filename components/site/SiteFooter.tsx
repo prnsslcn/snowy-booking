@@ -13,15 +13,15 @@ export function SiteFooter({ dark = false }: { dark?: boolean }) {
       <div className={`flex flex-col gap-1.5 border-t ${rule} pt-5 text-[12px] leading-relaxed md:gap-2 md:text-[13px] ${text}`}>
         <p className="flex flex-wrap gap-x-4 gap-y-1">
           <span>© 2026 주식회사 에이비씨웍스글로벌</span>
-          <a href="/terms" className={link}>
+          <TLink href="/terms" className={link}>
             이용약관
-          </a>
-          <a href="/privacy" className={`font-semibold ${link}`}>
+          </TLink>
+          <TLink href="/privacy" className={`font-semibold ${link}`}>
             개인정보처리방침
-          </a>
-          <a href="/refund-policy" className={link}>
+          </TLink>
+          <TLink href="/refund-policy" className={link}>
             취소·환불정책
-          </a>
+          </TLink>
           <TLink href="/booking/lookup" className={link}>
             예약 조회·취소
           </TLink>

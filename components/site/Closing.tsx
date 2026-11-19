@@ -67,9 +67,9 @@ const NAV: { title: string; links: { label: string; href: string; internal?: boo
   {
     title: 'Policy',
     links: [
-      { label: '이용약관', href: '/terms' },
-      { label: '개인정보처리방침', href: '/privacy' },
-      { label: '취소·환불정책', href: '/refund-policy' },
+      { label: '이용약관', href: '/terms', internal: true },
+      { label: '개인정보처리방침', href: '/privacy', internal: true },
+      { label: '취소·환불정책', href: '/refund-policy', internal: true },
     ],
   },
 ];

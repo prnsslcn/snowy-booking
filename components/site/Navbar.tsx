@@ -3,7 +3,7 @@
 
 import { AnimatePresence, motion, useAnimationControls } from 'framer-motion';
 import { usePathname } from 'next/navigation';
-import { useEffect, useState } from 'react';
+import { Fragment, useEffect, useState } from 'react';
 
 import { usePageTransition } from '@/components/site/PageTransition';
 import { SCROLL_OPTS, useLenis } from '@/components/site/SmoothScroll';
@@ -220,16 +220,27 @@ export function Navbar() {
             </button>
 
             {[...NAV_ITEMS, LOOKUP].map((item, i) => (
-              <motion.div
-                key={item.href}
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ duration: 0.4, delay: 0.1 + i * 0.05, ease: MENU_EASE }}
-              >
-                <a href={item.href} onClick={(e) => go(e, item.href)} className="text-2xl font-bold">
-                  {item.label}
-                </a>
-              </motion.div>
+              <Fragment key={item.href}>
+                {/* 상품 링크와 예약 조회 사이 얇은 구분선 */}
+                {item === LOOKUP && (
+                  <motion.span
+                    aria-hidden
+                    className="-my-2 h-px w-36 bg-white/25"
+                    initial={{ opacity: 0, scaleX: 0 }}
+                    animate={{ opacity: 1, scaleX: 1 }}
+                    transition={{ duration: 0.5, delay: 0.1 + i * 0.05, ease: MENU_EASE }}
+                  />
+                )}
+                <motion.div
+                  initial={{ opacity: 0, y: 20 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ duration: 0.4, delay: 0.1 + i * 0.05, ease: MENU_EASE }}
+                >
+                  <a href={item.href} onClick={(e) => go(e, item.href)} className="text-2xl font-bold">
+                    {item.label}
+                  </a>
+                </motion.div>
+              </Fragment>
             ))}
 
             <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ duration: 0.4, delay: 0.4 }}>
