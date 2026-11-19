@@ -41,7 +41,15 @@ export default async function BookingsPage({ searchParams }: { searchParams: Pro
 
   return (
     <>
-      <AdminTitle title="예약 관리" sub={filters.q ? `'${filters.q}' 검색 결과 ${total}건` : `이용일 ${filters.from ?? kstToday()}부터 · ${total}건`} />
+      <AdminTitle
+        title="예약 관리"
+        sub={filters.q ? `'${filters.q}' 검색 결과 ${total}건` : `이용일 ${filters.from ?? kstToday()}부터 · ${total}건`}
+        aside={
+          <Link href="/admin/bookings/new" className={buttonClass('primary', 'sm')}>
+            + 유선·무상 예약
+          </Link>
+        }
+      />
 
       {/* 필터 — GET 폼(주소에 남아 새로고침·공유해도 그대로) */}
       <form className="mb-5 grid grid-cols-2 gap-2 rounded-3xl bg-white p-4 md:grid-cols-[1.4fr_1fr_0.8fr_0.9fr_0.9fr_auto] md:items-end md:gap-3 md:p-5">
@@ -77,10 +85,10 @@ export default async function BookingsPage({ searchParams }: { searchParams: Pro
           <input type="date" name="to" defaultValue={filters.to} className={input} />
         </label>
         <div className="col-span-2 flex gap-2 md:col-span-1">
-          <button type="submit" className={buttonClass('primary', 'sm', 'h-11 flex-1 md:flex-none')}>
+          <button type="submit" className={buttonClass('primary', 'sm', 'flex-1 md:flex-none')}>
             조회
           </button>
-          <Link href="/admin/bookings" className={buttonClass('secondary', 'sm', 'h-11')}>
+          <Link href="/admin/bookings" className={buttonClass('secondary', 'sm')}>
             초기화
           </Link>
         </div>

@@ -12,6 +12,7 @@ import { createClient } from '@/lib/supabase/client';
 */
 export const ADMIN_NAV = [
   { href: '/admin', label: '대시보드' },
+  { href: '/admin/board', label: '현장 배정' },
   { href: '/admin/bookings', label: '예약 관리' },
 ] as const;
 

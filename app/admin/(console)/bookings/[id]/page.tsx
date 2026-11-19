@@ -5,10 +5,14 @@ import type { ReactNode } from 'react';
 
 import { AdminTitle } from '@/components/admin/AdminShell';
 import { BookingActions } from '@/components/admin/BookingActions';
+import { OfflineEditor } from '@/components/admin/OfflineEditor';
+import { OnSiteActions } from '@/components/admin/OnSiteActions';
 import { Badge } from '@/components/ui/Badge';
+import { moveTargets } from '@/lib/admin/board';
 import { getBooking } from '@/lib/admin/bookings';
 import { PAY_METHOD_LABEL, PAYMENT_STATUS_LABEL, SOURCE_LABEL, statusBadge, unitOrType } from '@/lib/admin/labels';
 import { formatDateKorean, formatDateTimeKorean, formatPhone, formatWon } from '@/lib/format';
+import { kstToday } from '@/lib/policy/booking-window';
 import { refundAmount, refundRate } from '@/lib/policy/refund';
 
 export const metadata: Metadata = { title: '예약 상세' };
@@ -20,6 +24,15 @@ const ACTION_LABEL: Record<string, string> = {
   refund_retry: '환불 재시도',
   refund_failed: '토스 취소 실패',
   manual_refund: '계좌 직접 환불 기록',
+  check_in: '입실 처리',
+  check_out: '퇴실 처리',
+  undo_check: '입실·퇴실 되돌리기',
+  reassign_unit: '유닛 변경',
+  swap_units: '유닛 맞바꾸기',
+  create_offline: '유선 예약 등록',
+  create_comp: '무상 예약 등록',
+  update_offline: '유선 예약 수정',
+  cancel_offline: '예약 취소',
 };
 const NOTI_LABEL: Record<string, string> = { confirm: '예약 확정', cancel: '취소·환불', reminder: '리마인더', change: '변경' };
 
@@ -51,7 +64,9 @@ export default async function BookingDetailPage({ params }: { params: Promise<{ 
   if (!b) notFound();
 
   const s = statusBadge({ status: b.status, cancel_error: b.cancelError, refund_method: b.refundMethod });
-  const snap = (b.priceSnapshot ?? {}) as { rate_kind?: string; unit_price?: number };
+  const snap = (b.priceSnapshot ?? {}) as { rate_kind?: string; unit_price?: number; base_amount?: number; extras?: { label: string; amount: number }[] };
+  const today = kstToday();
+  const targets = ['confirmed', 'checked_in', 'checked_out'].includes(b.status) ? await moveTargets(b.id) : [];
   const err = b.cancelError as { code?: string; message?: string; at?: string } | null;
   const now = new Date();
 
@@ -88,6 +103,12 @@ export default async function BookingDetailPage({ params }: { params: Promise<{ 
                 ['예약번호', b.lookupCode ? <span className="font-mono">{b.lookupCode}</span> : '—'],
                 ['경로', SOURCE_LABEL[b.source] ?? b.source],
                 ['금액', `${formatWon(b.amount)}${snap.rate_kind ? ` (${snap.rate_kind === 'weekend' ? '주말' : '주중'} 요금)` : ''}`],
+                ...((snap.extras ?? []).length
+                  ? ([
+                      ['기본 금액', formatWon(snap.base_amount ?? b.amount)],
+                      ...(snap.extras ?? []).map((e) => [`· ${e.label}`, `${e.amount > 0 ? '+' : ''}${formatWon(e.amount)}`]),
+                    ] as [string, ReactNode][])
+                  : []),
                 ...(b.offlinePaymentMethod ? ([['결제수단', PAY_METHOD_LABEL[b.offlinePaymentMethod]]] as [string, ReactNode][]) : []),
                 ...(b.note ? ([['메모', b.note]] as [string, ReactNode][]) : []),
                 ['주문번호', <span key="o" className="font-mono text-[12px]">{b.orderId}</span>],
@@ -130,7 +151,11 @@ export default async function BookingDetailPage({ params }: { params: Promise<{ 
         </div>
 
         <div className="space-y-4">
-          <Card title="처리">
+          <Card title="현장">
+            <OnSiteActions bookingId={b.id} status={b.status} date={b.date} today={today} unitLabel={b.unitLabel} targets={targets} />
+          </Card>
+
+          <Card title={b.source === 'online' ? '취소·환불' : b.source === 'offline' ? '유선 예약 수정·취소' : '무상 예약 취소'}>
             {b.source === 'online' ? (
               <BookingActions
                 bookingId={b.id}
@@ -140,7 +165,18 @@ export default async function BookingDetailPage({ params }: { params: Promise<{ 
                 policyRate={refundRate(b.date, now)}
               />
             ) : (
-              <p className="text-[14px] text-ink/50">유선·무상 예약의 수정·취소는 다음 단계에서 추가합니다.</p>
+              <OfflineEditor
+                bookingId={b.id}
+                source={b.source}
+                status={b.status}
+                baseAmount={snap.base_amount ?? b.amount}
+                extras={snap.extras ?? []}
+                paymentMethod={(b.offlinePaymentMethod as 'cash' | 'card' | 'transfer' | null) ?? null}
+                guestName={b.guestName}
+                guestPhone={b.guestPhone}
+                guestCount={b.guestCount}
+                note={b.note}
+              />
             )}
           </Card>
 

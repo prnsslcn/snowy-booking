@@ -3,6 +3,7 @@
 import { revalidatePath } from 'next/cache';
 
 import { getAdminUser } from '@/lib/admin/auth';
+import { adminErrorMessage } from '@/lib/admin/errors';
 import { RefundError, refundBooking } from '@/lib/booking/refund';
 import { createAdminClient } from '@/lib/supabase/admin';
 import type { Json } from '@/types/database';
@@ -92,4 +93,133 @@ export async function manualRefundAction(bookingId: string, amount: number, note
   await log(admin.email, 'manual_refund', bookingId, { amount, note });
   refresh(bookingId);
   return { ok: true };
+}
+
+// ── 2단계: 현장 배정 · 입실/퇴실 · 유선/무상 예약 ─────────────────────────────
+
+async function rpcAction(
+  action: string,
+  bookingId: string | null,
+  call: () => PromiseLike<{ error: { message: string } | null; data?: unknown }>,
+  detail: Record<string, unknown> = {},
+): Promise<ActionResult<unknown>> {
+  const admin = await getAdminUser();
+  if (!admin) return { ok: false, error: '로그인이 필요합니다.' };
+  const { error, data } = await call();
+  if (error) return { ok: false, error: adminErrorMessage(error.message) };
+  await log(admin.email, action, bookingId, detail);
+  if (bookingId) refresh(bookingId);
+  revalidatePath('/admin/board');
+  return { ok: true, data };
+}
+
+export async function checkInAction(bookingId: string) {
+  return rpcAction('check_in', bookingId, () => createAdminClient().rpc('admin_check_in', { p_booking_id: bookingId }));
+}
+
+export async function checkOutAction(bookingId: string) {
+  return rpcAction('check_out', bookingId, () => createAdminClient().rpc('admin_check_out', { p_booking_id: bookingId }));
+}
+
+export async function undoCheckAction(bookingId: string) {
+  return rpcAction('undo_check', bookingId, () => createAdminClient().rpc('admin_undo_check', { p_booking_id: bookingId }));
+}
+
+/** 같은 상품·같은 날짜의 다른 유닛으로 — 비어 있으면 옮기고, 예약이 있으면 서로 맞바꾼다 */
+export async function moveUnitAction(bookingId: string, unitId: string, swapWithBookingId: string | null) {
+  if (swapWithBookingId) {
+    return rpcAction('swap_units', bookingId, async () => {
+      const res = await createAdminClient().rpc('admin_swap_units', { p_booking_a: bookingId, p_booking_b: swapWithBookingId });
+      if (!res.error) refresh(swapWithBookingId);
+      return res;
+    }, { with: swapWithBookingId });
+  }
+  return rpcAction('reassign_unit', bookingId, () => createAdminClient().rpc('admin_reassign_unit', { p_booking_id: bookingId, p_new_unit_id: unitId }), { unitId });
+}
+
+export interface OfflineInput {
+  type: string;
+  date: string;
+  source: 'offline' | 'comp';
+  guestName: string;
+  guestPhone: string;
+  guestCount: number;
+  /** null = 정상가 */
+  amount: number | null;
+  paymentMethod: 'cash' | 'card' | 'transfer' | null;
+  note: string;
+}
+
+/** 유선·무상 예약 등록 — 즉시 확정, 빈 유닛 자동 가배정. 문자 발송 없음(CLAUDE.md §14) */
+export async function createOfflineAction(input: OfflineInput): Promise<ActionResult<{ id: string }>> {
+  const admin = await getAdminUser();
+  if (!admin) return { ok: false, error: '로그인이 필요합니다.' };
+  const { data, error } = await createAdminClient().rpc('admin_create_booking', {
+    p_type: input.type,
+    p_date: input.date,
+    p_source: input.source,
+    p_guest_name: input.guestName,
+    p_guest_phone: input.guestPhone,
+    p_guest_count: input.guestCount,
+    ...(input.amount !== null && input.source === 'offline' ? { p_amount: input.amount } : {}),
+    ...(input.source === 'offline' && input.paymentMethod ? { p_payment_method: input.paymentMethod } : {}),
+    ...(input.note.trim() ? { p_note: input.note } : {}),
+  });
+  if (error) return { ok: false, error: adminErrorMessage(error.message) };
+  const row = Array.isArray(data) ? data[0] : data;
+  if (!row) return { ok: false, error: '예약 결과가 비어 있습니다.' };
+  await log(admin.email, input.source === 'comp' ? 'create_comp' : 'create_offline', row.booking_id, {
+    type: input.type,
+    date: input.date,
+    amount: row.amount,
+    unit: row.unit_label,
+  });
+  refresh(row.booking_id);
+  revalidatePath('/admin/board');
+  return { ok: true, data: { id: row.booking_id } };
+}
+
+export interface OfflineUpdate {
+  baseAmount: number;
+  extras: { label: string; amount: number }[];
+  paymentMethod: 'cash' | 'card' | 'transfer';
+  guestName: string;
+  guestPhone: string;
+  guestCount: number;
+  note: string;
+}
+
+/** 유선 예약 내용 변경 — 최종 금액 = 기본 금액 + 현장 조정 합계 */
+export async function updateOfflineAction(bookingId: string, u: OfflineUpdate) {
+  return rpcAction(
+    'update_offline',
+    bookingId,
+    () =>
+      createAdminClient().rpc('admin_update_offline_booking', {
+        p_booking_id: bookingId,
+        p_base_amount: u.baseAmount,
+        p_extras: u.extras as unknown as Json,
+        p_payment_method: u.paymentMethod,
+        p_guest_name: u.guestName,
+        p_guest_phone: u.guestPhone,
+        p_guest_count: u.guestCount,
+        p_note: u.note,
+      }),
+    { baseAmount: u.baseAmount, extras: u.extras },
+  );
+}
+
+/** 유선·무상 취소(토스 없음) */
+export async function cancelOfflineAction(bookingId: string) {
+  return rpcAction('cancel_offline', bookingId, () => createAdminClient().rpc('admin_cancel_offline_booking', { p_booking_id: bookingId }));
+}
+
+/** 정상가 조회(유선 예약 화면 미리보기) — DB price_for(주중/주말 판정 포함) */
+export async function quotePriceAction(type: string, date: string): Promise<ActionResult<{ price: number; rateKind: string }>> {
+  const admin = await getAdminUser();
+  if (!admin) return { ok: false, error: '로그인이 필요합니다.' };
+  const { data, error } = await createAdminClient().rpc('price_for', { p_type: type, p_date: date });
+  if (error) return { ok: false, error: adminErrorMessage(error.message) };
+  const row = Array.isArray(data) ? data[0] : data;
+  return row ? { ok: true, data: { price: row.unit_price, rateKind: row.rate_kind } } : { ok: false, error: '요금을 찾을 수 없습니다.' };
 }
