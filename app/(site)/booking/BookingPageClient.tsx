@@ -52,7 +52,7 @@ interface AvailResponse {
 }
 
 const STEPS = ['날짜', '상품', '예약자 정보', '결제'];
-const TITLES = ['이용할 날짜를 골라 주세요', '이용할 곳을 골라 주세요', '예약자 정보를 입력해 주세요', '결제 내용을 확인해 주세요'];
+const TITLES = ['이용할 날짜를 골라 주세요', '상품을 선택해 주세요', '예약자 정보를 입력해 주세요', '결제 내용을 확인해 주세요'];
 const CUTOFF = `${String(SAME_DAY_CUTOFF_HOUR).padStart(2, '0')}:00`;
 const EASE = [0.22, 1, 0.36, 1] as const;
 const BAR_EASE = [0.65, 0, 0.35, 1] as const;
