@@ -1,0 +1,19 @@
+@import "tailwindcss";
+
+@import "../tokens.css";
+
+/* 관리자 화면 — 손님 화면과 같은 토큰(app/tokens.css). 부드러운 스크롤·화면 전환 없음(CLAUDE.md §8). */
+@layer base {
+  *,
+  *::before,
+  *::after {
+    word-break: keep-all;
+  }
+
+  html,
+  body {
+    background: var(--background);
+    color: var(--foreground);
+    font-family: var(--font-pretendard);
+  }
+}

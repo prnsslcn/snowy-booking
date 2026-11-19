@@ -57,3 +57,4 @@ supabase/.branches
 # taste-skill 점검 산출물
 /.taste-skill
 /shots
+/.next-local/

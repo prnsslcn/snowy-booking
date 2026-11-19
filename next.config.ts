@@ -14,6 +14,8 @@ const supabaseAnonKey =
   process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || process.env.SUPABASE_ANON_KEY || "";
 
 const nextConfig: NextConfig = {
+  // 로컬에서 운영 DB용 dev 서버와 로컬 DB용 dev 서버를 함께 띄울 때 빌드 폴더를 나눈다(NEXT_DIST_DIR=.next-local)
+  ...(process.env.NEXT_DIST_DIR ? { distDir: process.env.NEXT_DIST_DIR } : {}),
   // 개발 중 좌측 하단 Next.js 인디케이터 숨김
   devIndicators: false,
   env: {

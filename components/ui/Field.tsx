@@ -5,16 +5,23 @@ import type { InputHTMLAttributes, ReactNode, SelectHTMLAttributes } from 'react
  */
 type Tone = 'light' | 'dark';
 
+/** 크기 — md: 손님 화면(높이 56) / sm: 관리자 필터 등(높이 44, 폰은 16px 유지해 iOS 확대 방지) */
+type FieldSize = 'md' | 'sm';
+const fieldSize: Record<FieldSize, string> = {
+  md: 'h-14 rounded-[14px] px-4 text-[16px]',
+  sm: 'h-11 rounded-xl px-3.5 text-[16px] md:text-[14px]',
+};
+
 const fieldBase =
-  'h-14 w-full rounded-[14px] border px-4 text-[16px] outline-none transition-[border-color,background-color,box-shadow] duration-200';
+  'w-full border outline-none transition-[border-color,background-color,box-shadow] duration-200';
 const fieldTone: Record<Tone, string> = {
   light:
     'border-black/[.12] bg-white text-ink placeholder:text-black/30 focus:border-ice-600 focus:ring-4 focus:ring-ice-200/50 aria-[invalid=true]:border-[#d4351c]',
   dark: 'border-white/[.12] bg-white/[.04] text-white placeholder:text-white/30 focus:border-white/60 focus:bg-white/[.06] aria-[invalid=true]:border-[#ff8a75]',
 };
 
-export function fieldClass(tone: Tone = 'light', className = '') {
-  return `${fieldBase} ${fieldTone[tone]} ${className}`;
+export function fieldClass(tone: Tone = 'light', className = '', size: FieldSize = 'md') {
+  return `${fieldBase} ${fieldSize[size]} ${fieldTone[tone]} ${className}`;
 }
 
 export function Field({

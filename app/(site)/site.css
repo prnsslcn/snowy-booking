@@ -1,36 +1,8 @@
 @import "tailwindcss";
 
-/* 홈(새 디자인) — aftc 구조 이식: 바탕 얼음빛 #f0f5fa(ice-50) / 글자 #0e1a2b(ink, 푸른 기운의 아주 진한 남색), Outfit(영문 디스플레이) + Pretendard(본문) */
-/*
-  얼음(ice) 팔레트 — 모노톤 위에 포인트로. glacier = 전체 화면 장 바탕(채도 낮춘 깊은 겨울 파랑).
-  ice-50/100 = 옅은 얼음 면, ice-500~700 = 포인트(선택·진행·버튼).
-*/
-@theme {
-  --color-ink: #0e1a2b;
-  --color-glacier: #1f4469;
-  --color-glacier-deep: #18385a;
-  --color-ice-50: #f0f5fa;
-  --color-ice-100: #e1ebf5;
-  --color-ice-200: #c4d7ea;
-  --color-ice-300: #9cbcdc;
-  --color-ice-400: #6f9dcb;
-  --color-ice-500: #4a80b8;
-  --color-ice-600: #33689f;
-  --color-ice-700: #275482;
-}
+@import "../tokens.css";
 
-@theme inline {
-  --font-sans: var(--font-pretendard);
-  --font-display: var(--font-outfit), var(--font-pretendard);
-  --font-mono: ui-monospace, "SF Mono", Menlo, monospace;
-}
-
-:root {
-  --background: #f0f5fa;
-  --foreground: #0e1a2b;
-  --font-pretendard: "Pretendard", system-ui, sans-serif;
-}
-
+/* 손님 화면 — aftc 구조 이식. 색·글꼴 토큰은 app/tokens.css */
 @layer base {
   *,
   *::before,

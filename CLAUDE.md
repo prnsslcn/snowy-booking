@@ -393,6 +393,7 @@ pending_payment ──(결제 승인)──▶ confirmed ──(취소 요청)�
 
 - **권한:** public 스키마 함수는 anon·authenticated 실행 불가가 원칙(0001에서 기본 권한 회수). 새 함수는 `service_role`에만 명시적 GRANT. grill-booking도 같은 문제를 0038로 수정함
 - **로컬 Supabase:** grill-booking과 동시 실행을 위해 포트 **553xx**(API 55321, DB 55322, Studio 55323). Colima 메모리 2GiB라 realtime·storage·edge·analytics 비활성
+- **두 dev 서버 동시 실행:** 3000(운영 DB)이 떠 있을 때 로컬 DB용은 `NEXT_DIST_DIR=.next-local … next dev --port 3100`(빌드 폴더 분리, `.next-local`은 gitignore·eslint 제외). 실행 중 Next가 tsconfig `include`에 `.next-local/…`를 추가하니 커밋 전 되돌릴 것. 로컬 관리자 계정: `admin@local.test` / `localadmin123`(로컬 DB에만)
 - **로컬 개발 서버는 로컬 DB로:** `.env.local`은 운영 DB를 가리키므로, 개발·테스트 시 `supabase status -o env` 값으로 `NEXT_PUBLIC_SUPABASE_*`/`SUPABASE_SERVICE_ROLE_KEY`를 덮어쓰고 `NEXT_PUBLIC_PAYMENTS_FAKE=1 TOSS_FAKE=1`로 실행
 - **검증 스크립트:** `scripts/db/run-tests.sh`(DB 스모크 + 동시성), `scripts/e2e-api.sh`(고객 API 38개, 로컬 dev 서버 필요)
 - **Vercel:** Production 변수는 기본 Secret. `NEXT_PUBLIC_*`는 **Config** 타입으로 추가해야 함(Secret이면 거부). `next.config.ts`가 `SUPABASE_URL`/`SUPABASE_ANON_KEY`도 `NEXT_PUBLIC_`으로 매핑(우회용). **`NEXT_PUBLIC_PAYMENTS_FAKE`·`TOSS_FAKE`는 Vercel에 절대 넣지 않음**
