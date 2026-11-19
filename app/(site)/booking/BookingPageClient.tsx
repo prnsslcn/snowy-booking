@@ -51,8 +51,8 @@ interface AvailResponse {
   days: DayAvail[];
 }
 
-const STEPS = ['날짜', '공간', '예약자 정보', '결제'];
-const TITLES = ['이용할 날짜를 골라 주세요', '공간을 골라 주세요', '예약자 정보를 입력해 주세요', '결제 내용을 확인해 주세요'];
+const STEPS = ['날짜', '상품', '예약자 정보', '결제'];
+const TITLES = ['이용할 날짜를 골라 주세요', '이용할 곳을 골라 주세요', '예약자 정보를 입력해 주세요', '결제 내용을 확인해 주세요'];
 const CUTOFF = `${String(SAME_DAY_CUTOFF_HOUR).padStart(2, '0')}:00`;
 const EASE = [0.22, 1, 0.36, 1] as const;
 const BAR_EASE = [0.65, 0, 0.35, 1] as const;
@@ -257,6 +257,20 @@ export default function BookingPageClient({ preferredType }: { preferredType: st
             className="mt-10 md:mt-12"
             style={WILL}
           >
+            {/* 이전 단계로 — 2단계부터 제목 위에 */}
+            {step >= 2 && (
+              <button
+                type="button"
+                onClick={() => goStep(step - 1)}
+                disabled={submitting}
+                className="group -ml-1 mb-4 inline-flex items-center gap-1 rounded-full py-1 pl-1 pr-3 text-[14px] font-medium text-ink/55 transition-[color,transform] duration-300 ease-[cubic-bezier(0.16,1,0.3,1)] hover:text-ink active:scale-[0.96] disabled:pointer-events-none disabled:opacity-40"
+              >
+                <svg aria-hidden viewBox="0 0 16 16" className="h-4 w-4 transition-transform duration-300 ease-[cubic-bezier(0.16,1,0.3,1)] group-hover:-translate-x-0.5" fill="none">
+                  <path d="M10 3.5 5.5 8 10 12.5" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round" />
+                </svg>
+                이전 단계
+              </button>
+            )}
             <h2 className="text-[22px] font-bold tracking-[-0.02em] md:text-[28px]">{TITLES[step - 1]}</h2>
 
             {step >= 2 && date && (
@@ -400,7 +414,7 @@ export default function BookingPageClient({ preferredType }: { preferredType: st
                 <div className="rounded-3xl border border-black/[.08] bg-white px-5 md:px-6">
                   <dl className="divide-y divide-black/[.06]">
                     <SummaryRow label="이용일" value={`${formatDateKorean(date)} ${USAGE_TIME}`} />
-                    <SummaryRow label="공간" value={`${selected.name} 1${selected.type === 'cabana' ? '동' : '대'}`} />
+                    <SummaryRow label="상품" value={`${selected.name} 1${selected.type === 'cabana' ? '동' : '대'}`} />
                     <SummaryRow label="예약자" value={`${name.trim()} · ${formatPhone(phone)}`} />
                     <div className="flex items-baseline justify-between gap-4 py-5">
                       <dt className="text-[15px] font-semibold">결제 금액</dt>
@@ -435,7 +449,7 @@ export default function BookingPageClient({ preferredType }: { preferredType: st
 }
 
 function Chip({ children }: { children: ReactNode }) {
-  return <span className="inline-flex items-center rounded-full bg-ice-50 px-3 py-1.5 text-[13px] font-medium tabular-nums text-ice-700">{children}</span>;
+  return <span className="inline-flex items-center rounded-full bg-ice-100 px-3 py-1.5 text-[13px] font-medium tabular-nums text-ice-700">{children}</span>;
 }
 
 function CheckRow({ checked, onChange, strong, children }: { checked: boolean; onChange: (v: boolean) => void; strong?: boolean; children: ReactNode }) {

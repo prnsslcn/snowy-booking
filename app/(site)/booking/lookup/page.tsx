@@ -175,7 +175,7 @@ export default function LookupPage() {
             <motion.p
               key="ok"
               role="status"
-              className="mt-8 rounded-2xl border border-ice-300/60 bg-ice-50 px-5 py-4 text-[14px] text-ice-700"
+              className="mt-8 rounded-2xl border border-ice-300/60 bg-ice-100 px-5 py-4 text-[14px] text-ice-700"
               initial={{ opacity: 0, y: 8 }}
               animate={{ opacity: 1, y: 0 }}
               exit={{ opacity: 0 }}
