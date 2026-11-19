@@ -1,0 +1,35 @@
+@import "tailwindcss";
+
+/* 홈(새 디자인) — aftc 구조 이식: 라이트 #fafaf8 / 다크 #0a0a0a, Outfit(영문 디스플레이) + Pretendard(본문) */
+@theme inline {
+  --font-sans: var(--font-pretendard);
+  --font-display: var(--font-outfit), var(--font-pretendard);
+  --font-mono: ui-monospace, "SF Mono", Menlo, monospace;
+}
+
+:root {
+  --background: #fafaf8;
+  --foreground: #0a0a0a;
+  --font-pretendard: "Pretendard", system-ui, sans-serif;
+}
+
+@layer base {
+  *,
+  *::before,
+  *::after {
+    word-break: keep-all;
+  }
+
+  html {
+    background: var(--background);
+    overflow-x: clip;
+    scroll-restoration: manual;
+  }
+
+  body {
+    overflow-x: clip;
+    background: var(--background);
+    color: var(--foreground);
+    font-family: var(--font-pretendard);
+  }
+}
