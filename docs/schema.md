@@ -40,7 +40,7 @@ slots를 없앤 이유: 운영일이 매일이고 시즌 기간도 아직 정해
 | price_weekend | int check > 0 | 90,000 / 120,000 / 210,000 |
 | is_active | bool | 판매 중지 스위치 |
 | sort | int | 표시 순서 |
-| slug | text unique | `/facilities/[slug]` |
+| slug | text unique | 홈 앵커 `/#slug`, 예약 미리 선택 `/booking?type=slug` |
 | updated_at | timestamptz | |
 
 - CLAUDE.md 초안의 `total_units`는 두지 않는다. 수량은 항상 `units`에서 센다(유닛 개별 등록형, 이중 관리 방지).

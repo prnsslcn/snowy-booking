@@ -157,8 +157,8 @@ snowy-booking은 **`상품 type × 날짜`** 재고형이다. 고객은 유형�
 
 | 메뉴 | 경로 | 내용 |
 |---|---|---|
-| 홈 | `/` | 시즌 소개, 핵심 안내, **예약하기 버튼 가장 강조**, 진입 공지 팝업 |
-| 시설 소개 | `/facilities/[slug]` | 카바나 / 카라반 / 단체카라반 — 사진, 인원, 편의시설, 요금 |
+| 홈 | `/` | 히어로 → 상품 장 3개 → 소개·위치·사업자 정보 마지막 장. 관리자 공지는 히어로 제목 옆 한 줄 |
+| 시설 소개 | 홈 `/#cabana` · `/#caravan` · `/#caravan-group` | 홈 안의 상품 장(사진·수량·인원·요금 + '자세히 보기' 펼침). 별도 시설 페이지 없음(2026-11-20 제거) |
 | 예약하기 | `/booking` | 날짜(달력) → 상품 유형 → 예약자 정보 → 동의 → 결제 |
 | 예약 조회·취소 | `/booking/lookup` | **휴대폰번호 + 예약번호(4자리)** 로 조회, 취소(규정대로 자동 환불) |
 | 이용 안내 | `/guide` (+ `/faq`) | 운영 기간·이용 시간, 입장·이용 방법, 주의사항, 취소·환불 규정, FAQ |
@@ -374,16 +374,18 @@ pending_payment ──(결제 승인)──▶ confirmed ──(취소 요청)�
 
 ---
 
-## 16. 진행 현황 (2026-11-17 기준)
+## 16. 진행 현황 (2026-11-20 기준)
 
 - **완료:** 설계 문서(`docs/schema.md`, `docs/booking-flow.md`) · 마이그레이션 0001~0010(운영 DB 반영됨) · 고객 예약·결제(fake)·조회·취소·환불 흐름 · Vercel 프로덕션 배포(`snowy-booking.vercel.app`)
-- **고객 UI 3차(2026-11-17) — taste-skill(`design-taste-frontend`, `npx skills` 설치) 방식, DESIGN.md 미사용:**
-  - 분류 `place`. 스크립트로 뽑은 값: palette `olive-on-bone`(bg #ecebe7 · ink/action #38450f) · type `zilla`(Zilla Slab/Rethink Sans + 한글 대체 Hahmlet/IBM Plex Sans KR) · nav-split · footer-visit · colour-band(close-photo) · buttons arrow · mark ring · rooms row · place trio · type moment address · moment `picture-develops`
-  - **라우트 그룹 2개(각자 최상위 레이아웃):** `app/(kit)` = 홈·시설 상세, 키트 CSS/JS(`public/assets`, 스킬 원본 — 수정 금지)만 사용, Tailwind 없음(클래스 이름 충돌). `app/(app)` = 예약·조회·결과·/off, Tailwind + 키트와 같은 토큰(`app/(app)/globals.css`). 그룹 간 이동은 일반 `<a>`(전체 로드)
-  - 키트 JS는 하이드레이션 뒤 `components/kit/KitScripts.tsx`로 붙임(먼저 실행되면 React #418). 사진은 `components/kit/Img.tsx`(Next 이미지 최적화 srcset, 히어로·마무리는 `<picture>` 폰 크롭)
-  - 점검: `node ~/.claude/skills/design-taste-frontend/scripts/gate.mjs http://localhost:3100/` → **GATE: PASS**(예외 3건: 한글 h1 stress, trio 높이, actionbar 쌍둥이 버튼 — `.taste-skill/waivers.json`, gitignore). 관리자 공지는 팝업 대신 히어로 h1 위 한 줄(taste: 팝업 금지)
-  - **임의 설명 문구 금지**(운영자 지시): 확정 사실(위치·수량·인원·요금·이용 시간·규정)만. 사업자 정보 표시는 법(전자상거래법)이 스킬 규칙보다 우선
-- **다음:** ① 관리자 화면(같은 디자인 토큰)(로그인·예약 관리·현장 배정/입실·점검 흐름·유선/무상·환불 재시도/계좌 환불·요금/달력/공휴일·설정) ③ 약관 3종 페이지 ④ 시설 소개·이용 안내·오시는 길
+- **고객 UI 4차(2026-11-20) — 사용자 프로젝트 aftc(`~/Desktop/dev/aftc`) 홈 구조 이식** (taste-skill 키트·DESIGN.md 방식은 폐기, 파일 삭제):
+  - **라우트 그룹 하나** `app/(site)`(홈·예약·조회·결과·/off) — 최상위 레이아웃 1개, `site.css`(Tailwind), Outfit(영문 디스플레이, next/font) + Pretendard(CDN), 라이트 `#fafaf8` / 다크 `#0a0a0a`
+  - `components/site/`: `Navbar`(fixed, 3겹 progressive blur, 섹션 `data-nav-theme` 감지로 글자색 반전, 모바일 풀스크린 clip-path 메뉴) · `PageTransition`(블라인드 enter/leave → router.push, `#앵커`는 enter 뒤 스크롤) · `SmoothScroll`(Lenis) · `TLink`(사이트 안 링크는 이걸로 — 블라인드 전환) · `Hero` · `Spaces`(상품 장: sticky + 다음 장이 위 모서리 48px 로 덮음, 밝음/어두움 반전, FAQ식 '자세히 보기') · `Closing`(마지막 장) · `PageTitle`/`SubPage`/`SiteFooter`(하위 화면) · `useStickyCover` · `motion.ts`(blockIn)
+  - 예약하기: 진행 막대(단계마다 차오름) + 단계 내용 방향별 blur 슬라이드. 조회: aftc 공지사항 화면처럼 다크 + 선 목록
+  - nav 상품 링크는 홈 앵커. sticky 장은 붙은 위치를 보고하므로 앵커는 장 앞 0높이 표식(`Spaces`)
+  - Lenis `start()`는 진행 중 스크롤을 reset → 모바일 메뉴에서 앵커 이동 시 scrollTo 전에 먼저 start
+  - `components/ui/`(Button·Field·Badge)는 새 톤(알약 버튼, 둥근 입력칸 light/dark). 관리자 화면도 이 톤으로
+  - **임의 설명 문구 금지**(운영자 지시): 확정 사실(위치·수량·인원·요금·이용 시간·규정)만. 사업자 정보 표시는 법(전자상거래법) 필수
+- **다음:** ① 관리자 화면(`components/ui` 새 톤)(로그인·예약 관리·현장 배정/입실·점검 흐름·유선/무상·환불 재시도/계좌 환불·요금/달력/공휴일·설정) ② 약관 3종 페이지 ③ 이용 안내·오시는 길
 - 관리자 DB 함수는 이미 있음(0010) — 화면만 만들면 된다. 환불 재시도 경로(토스 취소 실패 → cancel_requested → 재시도)는 관리자 화면에서 e2e 검증 예정. fake 토스는 cancelReason에 `[FAIL:CODE]`를 넣으면 실패를 시뮬레이션한다
 
 ### 운영·개발 메모
@@ -394,7 +396,7 @@ pending_payment ──(결제 승인)──▶ confirmed ──(취소 요청)�
 - **검증 스크립트:** `scripts/db/run-tests.sh`(DB 스모크 + 동시성), `scripts/e2e-api.sh`(고객 API 38개, 로컬 dev 서버 필요)
 - **Vercel:** Production 변수는 기본 Secret. `NEXT_PUBLIC_*`는 **Config** 타입으로 추가해야 함(Secret이면 거부). `next.config.ts`가 `SUPABASE_URL`/`SUPABASE_ANON_KEY`도 `NEXT_PUBLIC_`으로 매핑(우회용). **`NEXT_PUBLIC_PAYMENTS_FAKE`·`TOSS_FAKE`는 Vercel에 절대 넣지 않음**
 - git 원격은 SSH(`git@github.com:prnsslcn/snowy-booking.git`)
-- 디자인 도구: Playwright MCP, `emil-design-eng`, `design-taste-frontend`(taste) 스킬 설치됨
+- 디자인 도구: Playwright MCP, `emil-design-eng` 스킬 설치됨 (`design-taste-frontend`도 설치돼 있으나 현재 디자인에는 쓰지 않음)
 
 ### 시설 사진 (`public/images/facilities/`, 1600px·q75 웹용 사본 / 원본 `public/images/{c,m,l}N.jpg`는 gitignore)
 

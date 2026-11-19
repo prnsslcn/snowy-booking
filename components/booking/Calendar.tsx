@@ -3,8 +3,8 @@
 import { useState } from 'react';
 
 /**
- * 예약 달력(직각 칸). open 선택 가능 / closed 휴장 / locked·sold_out 마감 / unavailable 흐리게.
- * 선택: 파란 면. 오늘: 1px 선. 주말 요금일: 칸 아래 작은 점.
+ * 예약 달력. open 선택 가능 / closed 휴장 / locked·sold_out 마감 / unavailable 흐리게.
+ * 선택: 검은 면(둥근 칸). 오늘: 얇은 테. 주말 요금일: 숫자 아래 작은 점.
  */
 
 export type CalendarDayStatus = 'open' | 'closed' | 'locked' | 'sold_out' | 'unavailable';
@@ -43,10 +43,7 @@ export function Calendar({
 
   const firstDow = new Date(view.y, view.m, 1).getDay();
   const daysInMonth = new Date(view.y, view.m + 1, 0).getDate();
-  const cells: (number | null)[] = [
-    ...Array<null>(firstDow).fill(null),
-    ...Array.from({ length: daysInMonth }, (_, i) => i + 1),
-  ];
+  const cells: (number | null)[] = [...Array<null>(firstDow).fill(null), ...Array.from({ length: daysInMonth }, (_, i) => i + 1)];
 
   function move(delta: number) {
     setView((v) => {
@@ -56,12 +53,12 @@ export function Calendar({
   }
 
   return (
-    <div className="border border-hairline">
-      <div className="flex items-center justify-between border-b border-hairline px-4 py-2">
-        <span className="tabular text-[18px] font-medium text-ink">
-          {view.y}년 {view.m + 1}월
+    <div className="rounded-3xl border border-black/[.08] bg-white p-3 md:p-5">
+      <div className="flex items-center justify-between px-2 pb-3 pt-1">
+        <span className="font-display text-[22px] font-extrabold tracking-[-0.03em] tabular-nums text-[#0a0a0a]">
+          {view.y}. {pad(view.m + 1)}
         </span>
-        <div className="flex">
+        <div className="flex gap-1">
           {[
             { d: -1, ok: canPrev, label: '이전 달', path: 'M10 4 6 8l4 4' },
             { d: 1, ok: canNext, label: '다음 달', path: 'M6 4l4 4-4 4' },
@@ -72,19 +69,19 @@ export function Calendar({
               onClick={() => move(b.d)}
               disabled={!b.ok}
               aria-label={b.label}
-              className="pressable flex h-11 w-11 items-center justify-center rounded-full text-ink hover:bg-surface-soft disabled:opacity-25"
+              className="flex h-10 w-10 items-center justify-center rounded-full border border-black/[.08] text-[#0a0a0a] transition-[transform,border-color] duration-300 ease-[cubic-bezier(0.16,1,0.3,1)] hover:border-black/30 active:scale-[0.94] disabled:opacity-25"
             >
               <svg viewBox="0 0 16 16" className="h-4 w-4" fill="none" aria-hidden>
-                <path d={b.path} stroke="currentColor" strokeWidth="1.6" />
+                <path d={b.path} stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round" />
               </svg>
             </button>
           ))}
         </div>
       </div>
 
-      <div className="grid grid-cols-7 p-2 text-center">
+      <div className="grid grid-cols-7 text-center">
         {WEEKDAYS.map((w, i) => (
-          <div key={w} className={`pb-2 pt-1 text-[12px] ${i === 0 ? 'text-error' : i === 6 ? 'text-primary' : 'text-muted'}`}>
+          <div key={w} className={`pb-2 pt-1 text-[12px] font-medium ${i === 0 ? 'text-[#d4351c]' : i === 6 ? 'text-sky-700' : 'text-[#0a0a0a]/45'}`}>
             {w}
           </div>
         ))}
@@ -107,34 +104,32 @@ export function Calendar({
               onClick={() => onSelect(iso)}
               aria-pressed={selected}
               aria-label={`${view.m + 1}월 ${d}일${closedLike ? (status === 'closed' ? ' 휴장' : ' 마감') : ''}`}
-              className={`pressable relative m-0.5 flex h-12 flex-col items-center justify-center text-[16px] ${
+              className={`relative m-0.5 flex h-12 flex-col items-center justify-center rounded-2xl text-[16px] transition-[transform,background-color] duration-300 ease-[cubic-bezier(0.16,1,0.3,1)] md:h-14 ${
                 selected
-                  ? 'bg-primary font-medium text-white'
+                  ? 'bg-[#0a0a0a] font-semibold text-white'
                   : selectable
-                    ? `font-medium text-ink hover:bg-surface-soft ${isToday ? 'outline outline-1 -outline-offset-1 outline-ink' : ''}`
+                    ? `font-semibold text-[#0a0a0a] hover:bg-black/[.05] active:scale-[0.94] ${isToday ? 'ring-1 ring-inset ring-black/40' : ''}`
                     : closedLike
-                      ? 'cursor-default bg-surface-soft text-muted-soft'
-                      : 'cursor-default font-light text-muted-soft/60'
+                      ? 'cursor-default bg-black/[.03] text-[#0a0a0a]/30'
+                      : 'cursor-default text-[#0a0a0a]/20'
               }`}
             >
-              <span className="tabular leading-none">{d}</span>
-              {closedLike && (
-                <span className="mt-1 text-[10px] font-normal leading-none text-muted">{status === 'closed' ? '휴장' : '마감'}</span>
-              )}
+              <span className="leading-none tabular-nums">{d}</span>
+              {closedLike && <span className="mt-1 text-[10px] font-normal leading-none text-[#0a0a0a]/45">{status === 'closed' ? '휴장' : '마감'}</span>}
               {selectable && info?.weekendRate && (
-                <span className={`absolute bottom-1.5 h-1 w-1 rounded-full ${selected ? 'bg-white' : 'bg-primary'}`} />
+                <span className={`absolute bottom-1.5 h-1 w-1 rounded-full ${selected ? 'bg-white' : 'bg-sky-600'}`} />
               )}
             </button>
           );
         })}
       </div>
 
-      <div className="flex items-center gap-5 border-t border-hairline px-4 py-3 text-[12px] text-muted">
+      <div className="mt-3 flex items-center gap-5 border-t border-black/[.06] px-2 pt-3 text-[12px] text-[#0a0a0a]/50">
         <span className="flex items-center gap-1.5">
-          <span className="h-1 w-1 rounded-full bg-primary" /> 주말 요금
+          <span className="h-1 w-1 rounded-full bg-sky-600" /> 주말 요금
         </span>
         <span className="flex items-center gap-1.5">
-          <span className="h-3 w-3 bg-surface-soft" /> 휴장·마감
+          <span className="h-3 w-3 rounded-[4px] bg-black/[.05]" /> 휴장·마감
         </span>
       </div>
     </div>
