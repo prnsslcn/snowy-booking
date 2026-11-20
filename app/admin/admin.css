@@ -3,24 +3,24 @@
 @import "../tokens.css";
 
 /*
-  관리자 화면 — 손님 화면과 같은 얼음 팔레트(app/tokens.css) 위에 업무 콘솔 톤(Mercury식).
-  - 밤색(night) 메뉴 틀 + 거의 흰 바탕(canvas) + 흰 패널(가는 선, 모서리 12px, 그림자 없음)
-  - 글자는 가볍게(본문 400 · UI 500 · 제목 600), 큰 숫자는 Outfit 400
-  - 진한 버튼(primary)은 화면당 하나, 나머지는 옅은 면(tint)
+  관리자 화면 — 손님 화면과 같은 얼음 테마(app/tokens.css).
+  - 바탕 얼음빛 #f0f5fa(손님 화면과 동일) + 메뉴 틀은 상품 장과 같은 겨울 파랑(glacier)
+  - 흰 패널(모서리 16px, 얼음빛 가는 테두리, 그림자 없음) · 제목 위 Outfit 영문 머리글(홈 푸터 Spaces/Visit 처럼)
+  - 진한 버튼(glacier)은 화면당 하나, 나머지는 옅은 얼음 면
   부드러운 스크롤·화면 전환 없음(CLAUDE.md §8).
 */
 @theme {
-  --color-night: #0f1d2e;
-  --color-night-raised: #1a2c42;
-  --color-canvas: #f6f8fb;
-  --color-line: rgb(14 26 43 / 0.08);
-  --color-line-strong: rgb(14 26 43 / 0.14);
-  --color-ink-2: #536379;
-  --color-ink-3: #8a96a8;
+  --color-night: #1f4469; /* = glacier — 메뉴 틀 */
+  --color-night-raised: #18385a;
+  --color-canvas: #f0f5fa; /* = ice-50 */
+  --color-line: rgb(39 84 130 / 0.1);
+  --color-line-strong: rgb(39 84 130 / 0.18);
+  --color-ink-2: #4f6680;
+  --color-ink-3: #8a9db3;
 }
 
 :root {
-  --background: #f6f8fb;
+  --background: #f0f5fa;
   --font-pretendard: "Pretendard Variable", "Pretendard", system-ui, sans-serif;
 }
 
@@ -43,7 +43,7 @@
 @layer components {
   /* 흰 패널 */
   .panel {
-    @apply rounded-xl border border-line bg-white p-5 md:p-6;
+    @apply rounded-2xl border border-line bg-white p-5 md:p-7;
   }
   /* 패널 제목 */
   .panel-title {
@@ -53,12 +53,16 @@
   .eyebrow {
     @apply text-[12px] font-medium tracking-[0.01em] text-ink-2;
   }
+  /* 영문 머리글(Outfit, 얼음 파랑) — 홈 푸터 Spaces/Visit 와 같은 결 */
+  .kicker {
+    @apply font-display text-[13px] font-semibold tracking-[0.02em] text-ice-600;
+  }
   /* 입력칸 위 이름 */
   .field-label {
     @apply mb-1.5 block text-[12px] font-medium text-ink-2;
   }
   /* 큰 숫자 */
   .stat {
-    @apply font-display font-normal tabular-nums tracking-[-0.01em] text-ink;
+    @apply font-display font-medium tabular-nums tracking-[-0.02em];
   }
 }

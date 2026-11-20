@@ -52,7 +52,7 @@ export default async function BookingsPage({ searchParams }: { searchParams: Pro
       />
 
       {/* 필터 — GET 폼(주소에 남아 새로고침·공유해도 그대로) */}
-      <form className="mb-5 grid grid-cols-2 gap-2 rounded-xl border border-line bg-white p-4 md:grid-cols-[1.4fr_1fr_0.8fr_0.9fr_0.9fr_auto] md:items-end md:gap-3 md:p-5">
+      <form className="mb-5 grid grid-cols-2 gap-2 rounded-2xl border border-line bg-white p-4 md:grid-cols-[1.4fr_1fr_0.8fr_0.9fr_0.9fr_auto] md:items-end md:gap-3 md:p-5">
         <label className="col-span-2 md:col-span-1">
           <span className="field-label">검색</span>
           <input name="q" defaultValue={filters.q} placeholder="이름 · 휴대폰 · 예약번호 · 주문번호" className={input} />
@@ -95,7 +95,7 @@ export default async function BookingsPage({ searchParams }: { searchParams: Pro
       </form>
       <p className="-mt-2 mb-4 px-1 text-[12px] text-ink-3">검색어가 있으면 이용일과 관계없이 전체에서 찾습니다.</p>
 
-      <section className="rounded-xl border border-line bg-white p-3 md:p-5">
+      <section className="rounded-2xl border border-line bg-white p-3 md:p-5">
         {items.length ? <BookingRows items={items} /> : <p className="py-12 text-center text-[14px] text-ink-3">조건에 맞는 예약이 없습니다.</p>}
       </section>
 

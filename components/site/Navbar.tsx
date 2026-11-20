@@ -8,6 +8,7 @@ import { Fragment, useEffect, useState } from 'react';
 import { usePageTransition } from '@/components/site/PageTransition';
 import { SCROLL_OPTS, useLenis } from '@/components/site/SmoothScroll';
 import { LOCATION_ENABLED } from '@/lib/site-config';
+import { Snowflake } from '@/components/ui/Snowflake';
 
 /*
   aftc Navbar 이식.
@@ -41,21 +42,6 @@ const BLUR_LAYERS = [
 ];
 
 const MENU_EASE: [number, number, number, number] = [0.65, 0, 0.35, 1];
-
-function Snowflake({ size = 28 }: { size?: number }) {
-  // 6갈래 눈 결정 — 가지 하나를 60°씩 돌려 그림
-  return (
-    <svg width={size} height={size} viewBox="-16 -16 32 32" fill="none" stroke="currentColor" strokeWidth={1.8} strokeLinecap="round" aria-hidden>
-      {[0, 60, 120, 180, 240, 300].map((deg) => (
-        <g key={deg} transform={`rotate(${deg})`}>
-          <path d="M0 0V-13" />
-          <path d="M0 -8.5 -3.6 -11.6M0 -8.5 3.6 -11.6" />
-          <path d="M0 -4.5 -2.6 -6.8M0 -4.5 2.6 -6.8" />
-        </g>
-      ))}
-    </svg>
-  );
-}
 
 function Logo() {
   const spin = useAnimationControls();

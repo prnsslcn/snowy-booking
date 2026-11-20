@@ -41,7 +41,7 @@ export function Board({ groups, date, today }: { groups: BoardGroup[]; date: str
     <>
       <div className="space-y-5">
         {groups.map((g) => (
-          <section key={g.type} className="rounded-xl border border-line bg-white p-4 md:p-6">
+          <section key={g.type} className="rounded-2xl border border-line bg-white p-4 md:p-6">
             <div className="mb-4 flex flex-wrap items-baseline justify-between gap-2">
               <h2 className="panel-title">{g.name}</h2>
               <p className="text-[13px] tabular-nums text-ink-2">

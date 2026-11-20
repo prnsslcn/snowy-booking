@@ -93,7 +93,7 @@ export function OfflineBookingForm({ products, initialDate, initialType, today }
 
   return (
     <form onSubmit={submit} className="grid gap-4 lg:grid-cols-[1.4fr_1fr] lg:items-start">
-      <div className="space-y-5 rounded-xl border border-line bg-white p-5 md:p-7">
+      <div className="space-y-5 rounded-2xl border border-line bg-white p-5 md:p-7">
         <Field label="경로">
           <Seg name="경로" value={source} onChange={setSource} options={[['offline', '유선(현장·전화 결제)'], ['comp', '무상']]} />
         </Field>
@@ -135,7 +135,7 @@ export function OfflineBookingForm({ products, initialDate, initialType, today }
         </Field>
       </div>
 
-      <div className="space-y-3 rounded-xl border border-line bg-white p-5 md:p-7 lg:sticky lg:top-8">
+      <div className="space-y-3 rounded-2xl border border-line bg-white p-5 md:p-7 lg:sticky lg:top-8">
         <p className="text-[13px] font-medium text-ice-600">등록 내용</p>
         <p className="panel-title">
           {product?.name} · {date}

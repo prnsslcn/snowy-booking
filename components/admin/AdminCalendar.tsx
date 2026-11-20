@@ -60,7 +60,7 @@ export function AdminCalendar({ ym, days, today }: { ym: string; days: Record<st
         </div>
       </div>
 
-      <div className="rounded-xl border border-line bg-white p-2 md:p-4">
+      <div className="rounded-2xl border border-line bg-white p-2 md:p-4">
         <div className="grid grid-cols-7 text-center text-[12px] font-medium text-ink-3">
           {WEEK.map((w, i) => (
             <div key={w} className={`py-2 ${i === 0 ? 'text-[#d4351c]' : i === 6 ? 'text-ice-600' : ''}`}>

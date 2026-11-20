@@ -10,7 +10,7 @@ export const metadata: Metadata = {
   robots: { index: false, follow: false },
 };
 
-export const viewport: Viewport = { width: 'device-width', initialScale: 1, themeColor: '#0f1d2e' };
+export const viewport: Viewport = { width: 'device-width', initialScale: 1, themeColor: '#f0f5fa' };
 
 /** 관리자 최상위 레이아웃 — 손님 화면(app/(site))과 별도. */
 export default function AdminRootLayout({ children }: { children: React.ReactNode }) {

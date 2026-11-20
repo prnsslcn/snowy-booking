@@ -20,11 +20,11 @@ export default async function DashboardPage() {
 
   return (
     <>
-      <AdminTitle title="대시보드" sub={`오늘 ${formatDateKorean(d.today)}`} />
+      <AdminTitle title="대시보드" />
 
       {/* 환불 실패·처리 중 — 가장 먼저 보이게 */}
       {d.stuckRefunds.length > 0 && (
-        <section className="mb-6 rounded-xl border border-[#d4351c]/20 bg-[#d4351c]/[.04] p-5 md:p-6">
+        <section className="mb-5 rounded-2xl border border-[#d4351c]/20 bg-[#fdf3f1] p-5 md:p-7">
           <h2 className="panel-title text-[#b42d18]">환불 처리 중 {d.stuckRefunds.length}건 — 상세 화면에서 재시도하거나 계좌 환불을 기록하세요</h2>
           <div className="mt-3">
             <BookingRows items={d.stuckRefunds} compact />
@@ -33,8 +33,26 @@ export default async function DashboardPage() {
       )}
 
       <StatStrip
+        tone="glacier"
+        head={
+          <div className="flex flex-wrap items-end justify-between gap-x-6 gap-y-3">
+            <div>
+              <p className="font-display text-[13px] font-semibold tracking-[0.02em] text-ice-200">Today</p>
+              <p className="mt-1 text-[20px] font-bold tracking-[-0.02em] md:text-[24px]">{formatDateKorean(d.today)}</p>
+            </div>
+            <div className="w-full md:w-72">
+              <div className="flex justify-between text-[12px] text-ice-100/70">
+                <span>오늘 점유율</span>
+                <span className="tabular-nums">{totalUnits ? Math.round((totalSold / totalUnits) * 100) : 0}%</span>
+              </div>
+              <div className="mt-2 h-1.5 overflow-hidden rounded-full bg-ice-50/[.14]">
+                <div className="h-full rounded-full bg-ice-200" style={{ width: `${totalUnits ? (totalSold / totalUnits) * 100 : 0}%` }} />
+              </div>
+            </div>
+          </div>
+        }
         items={[
-          { label: '오늘 점유', value: `${totalSold}`, unit: `/ ${totalUnits}`, note: totalUnits ? `점유율 ${Math.round((totalSold / totalUnits) * 100)}%` : '' },
+          { label: '오늘 점유', value: `${totalSold}`, unit: `/ ${totalUnits}`, note: '확정·입실·퇴실 / 운영 유닛' },
           { label: '오늘 입실', value: `${checkedIn}`, unit: `/ ${d.todayBookings.length}`, note: '입실·퇴실 처리 / 오늘 예약' },
           { label: '7일 내 예약', value: `${d.upcoming7}`, unit: '건', note: '오늘 포함, 확정·입실' },
           { label: '이번 달 매출', value: d.monthRevenue.toLocaleString('ko-KR'), unit: '원', note: `이용일 기준 ${d.monthCount}건` },
@@ -57,7 +75,7 @@ export default async function DashboardPage() {
                   </span>
                 </div>
                 <div className="mt-2 h-1.5 overflow-hidden rounded-full bg-ice-100">
-                  <div className="h-full rounded-full bg-ice-600" style={{ width: `${closed ? 0 : pct}%` }} />
+                  <div className="h-full rounded-full bg-gradient-to-r from-ice-400 to-ice-600" style={{ width: `${closed ? 0 : pct}%` }} />
                 </div>
               </li>
             );

@@ -7,6 +7,7 @@ import { useState } from 'react';
 import { Button } from '@/components/ui/Button';
 import { fieldClass } from '@/components/ui/Field';
 import { createClient } from '@/lib/supabase/client';
+import { Snowflake } from '@/components/ui/Snowflake';
 
 /** 관리자 로그인 — Supabase Auth 이메일·비밀번호. 계정은 운영자가 직접 발급(CLAUDE.md §8). */
 export default function AdminLoginPage() {
@@ -43,8 +44,11 @@ export default function AdminLoginPage() {
       </Link>
 
       <div className="w-full max-w-[360px]">
-        <p className="font-display text-[12px] font-medium tracking-[0.04em] text-ice-600">Snowy Cabana &amp; Caravan</p>
-        <h1 className="mt-1.5 font-display text-[26px] font-semibold tracking-[-0.01em]">Admin</h1>
+        <span aria-hidden className="grid h-11 w-11 place-items-center rounded-2xl bg-white ring-1 ring-line">
+          <Snowflake size={24} className="text-ice-600" />
+        </span>
+        <p className="kicker mt-6">Snowy Cabana &amp; Caravan</p>
+        <h1 className="mt-1 font-display text-[34px] font-semibold tracking-[-0.02em]">Admin</h1>
         <form onSubmit={login} className="panel mt-6 space-y-4">
           <label className="block">
             <span className="field-label">이메일</span>

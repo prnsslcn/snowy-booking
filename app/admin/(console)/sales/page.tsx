@@ -50,7 +50,7 @@ export default async function SalesPage({ searchParams }: { searchParams: Promis
       />
 
       {/* 기간 */}
-      <div className="mb-5 rounded-xl border border-line bg-white p-4 md:p-5">
+      <div className="mb-5 rounded-2xl border border-line bg-white p-4 md:p-5">
         <div className="inline-flex max-w-full gap-0.5 overflow-x-auto rounded-full bg-canvas p-1 [scrollbar-width:none]">
           {presets.map((p) => {
             const active = from === p.from && to === p.to;
@@ -125,7 +125,7 @@ export default async function SalesPage({ searchParams }: { searchParams: Promis
                 </span>
               </div>
               <div className="mt-2 h-1.5 overflow-hidden rounded-full bg-ice-100">
-                <div className="h-full rounded-full bg-ice-600" style={{ width: `${t.capacity ? Math.min(100, (t.sold / t.capacity) * 100) : 0}%` }} />
+                <div className="h-full rounded-full bg-gradient-to-r from-ice-400 to-ice-600" style={{ width: `${t.capacity ? Math.min(100, (t.sold / t.capacity) * 100) : 0}%` }} />
               </div>
             </li>
           ))}
