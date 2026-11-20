@@ -389,7 +389,8 @@ pending_payment ──(결제 승인)──▶ confirmed ──(취소 요청)�
 - **관리자 화면(`app/admin`, 2026-11-20~):** 1단계 로그인·대시보드·예약 관리(상세·취소·환불 재시도·계좌 환불) / 2단계 현장 배정 보드(`/admin/board`: 입실·퇴실·되돌리기·유닛 이동/맞바꾸기)·유선/무상 예약 등록(`/admin/bookings/new`)·유선 수정(기본 금액+현장 조정)·취소. 서버 액션 `lib/admin/actions.ts`, DB 예외 문구 `lib/admin/errors.ts`, 처리 기록은 `admin_actions`
   - 3단계: 유닛·점검(`/admin/units`: 유닛 추가·철수, 점검 = 확인→걸린 예약 이동→재확인→잠그기) · 요금(`/admin/pricing`: 주중/주말·성수기·공휴일 직접/공공데이터 불러오기 `lib/admin/holidays.ts`) · 운영 달력(`/admin/calendar`: 휴무·잠금) · 운영 설정(`/admin/settings`: 영업 종료·시즌·공지). 액션 `lib/admin/config-actions.ts`
   - **`HOLIDAY_API_KEY`는 로컬 `.env.local`에 값이 비어 있음** — 공공데이터 불러오기는 키 넣은 뒤 확인 필요(Vercel에도 설정)
-- **다음:** ④ 매출 통계·월말보고(xlsx) (약관 3종 · 이용 안내 `/guide`(+`/faq`→`#faq`) 은 2026-11-20 게시. 오시는 길 `/location` 은 만들어 두었으나 **`LOCATION_ENABLED=false`로 비활성**(메뉴 숨김·404, 운영자 확인 후 켬). 약관은 운영자 검토 대기, 주소는 소노 공식 오시는 길 기준 `ADDRESS`)
+  - 4단계: 매출(`/admin/sales`: 이용일 기준, 프리셋·직접 기간(새로고침 시 이번 달), 온라인/유선(결제수단별)·상품별·점유율·온라인 취소율·일별) + 월말보고 xlsx(`/api/admin/report?from&to`: 요약·온라인(토스)·유선 시트). 집계 `lib/admin/sales.ts`
+- **관리자 1차 범위 완료(2026-11-20).** 남은 것: 노쇼 기준(미정), 운영 DB 관리자 계정 발급, `HOLIDAY_API_KEY` (약관 3종 · 이용 안내 `/guide`(+`/faq`→`#faq`) 은 2026-11-20 게시. 오시는 길 `/location` 은 만들어 두었으나 **`LOCATION_ENABLED=false`로 비활성**(메뉴 숨김·404, 운영자 확인 후 켬). 약관은 운영자 검토 대기, 주소는 소노 공식 오시는 길 기준 `ADDRESS`)
 - 관리자 DB 함수는 이미 있음(0010) — 화면만 만들면 된다. 환불 재시도 경로(토스 취소 실패 → cancel_requested → 재시도)는 관리자 화면에서 e2e 검증 예정. fake 토스는 cancelReason에 `[FAIL:CODE]`를 넣으면 실패를 시뮬레이션한다
 
 ### 운영·개발 메모

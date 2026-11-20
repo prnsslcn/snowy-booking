@@ -14,6 +14,7 @@ export const ADMIN_NAV = [
   { href: '/admin', label: '대시보드' },
   { href: '/admin/board', label: '현장 배정' },
   { href: '/admin/bookings', label: '예약 관리' },
+  { href: '/admin/sales', label: '매출' },
   { href: '/admin/calendar', label: '운영 달력' },
   { href: '/admin/units', label: '유닛·점검' },
   { href: '/admin/pricing', label: '요금' },
