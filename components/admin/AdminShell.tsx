@@ -4,6 +4,7 @@ import Link from 'next/link';
 import { usePathname, useRouter } from 'next/navigation';
 import { useEffect, useRef, type ReactNode } from 'react';
 
+import { DialogHost } from '@/components/ui/Dialog';
 import { createClient } from '@/lib/supabase/client';
 
 /*
@@ -53,7 +54,7 @@ function Brand({ small = false }: { small?: boolean }) {
       </span>
       <span className="leading-tight">
         {!small && <span className="block font-display text-[11px] font-medium tracking-[0.04em] text-ice-50/50">Snowy Cabana &amp; Caravan</span>}
-        <span className="block text-[15px] font-semibold text-ice-50">운영 콘솔</span>
+        <span className="block font-display text-[16px] font-semibold text-ice-50">Admin</span>
       </span>
     </Link>
   );
@@ -125,6 +126,7 @@ export function AdminShell({ email, children }: { email: string; children: React
       <main className="min-w-0 px-4 py-6 md:px-8 md:py-9 xl:px-10">
         <div className="mx-auto max-w-[1180px]">{children}</div>
       </main>
+      <DialogHost />
     </div>
   );
 }

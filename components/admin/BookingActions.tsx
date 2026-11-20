@@ -4,6 +4,7 @@ import { useRouter } from 'next/navigation';
 import { useState, useTransition } from 'react';
 
 import { Button } from '@/components/ui/Button';
+import { confirmDialog } from '@/components/ui/Dialog';
 import { fieldClass } from '@/components/ui/Field';
 import { cancelBookingAction, manualRefundAction } from '@/lib/admin/actions';
 import { formatWon } from '@/lib/format';
@@ -40,8 +41,8 @@ export function BookingActions({
   const canPolicy = status === 'confirmed' || stuck;
   const canFull = canPolicy || status === 'checked_in' || status === 'checked_out';
 
-  function run(fn: () => Promise<{ ok: boolean; error?: string; data?: { refunded: number } }>, confirmMsg: string) {
-    if (!confirm(confirmMsg)) return;
+  async function run(fn: () => Promise<{ ok: boolean; error?: string; data?: { refunded: number } }>, confirmMsg: string) {
+    if (!(await confirmDialog(confirmMsg, { danger: true }))) return;
     setError('');
     setNotice('');
     start(async () => {

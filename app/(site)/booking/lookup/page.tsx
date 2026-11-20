@@ -10,6 +10,7 @@ import { usePageTransition } from '@/components/site/PageTransition';
 import { SiteFooter } from '@/components/site/SiteFooter';
 import { Badge } from '@/components/ui/Badge';
 import { Button } from '@/components/ui/Button';
+import { confirmDialog } from '@/components/ui/Dialog';
 import { Field, Input } from '@/components/ui/Field';
 import { errorMessage } from '@/lib/booking/error-messages';
 import { thumbOf } from '@/lib/content/facilities';
@@ -90,7 +91,7 @@ export default function LookupPage() {
       refund > 0
         ? `예약을 취소할까요?\n환불 예정 금액: ${formatWon(refund)}`
         : '이용일 당일 취소는 환불되지 않습니다.\n그래도 예약을 취소할까요?';
-    if (!confirm(msg)) return;
+    if (!(await confirmDialog(msg, { confirmLabel: '예약 취소', cancelLabel: '닫기', danger: true }))) return;
     setCancelling(true);
     setError('');
     try {

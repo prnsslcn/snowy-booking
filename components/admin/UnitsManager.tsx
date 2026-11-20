@@ -4,6 +4,7 @@ import { useRouter } from 'next/navigation';
 import { useState, useTransition } from 'react';
 
 import { Button } from '@/components/ui/Button';
+import { confirmDialog, promptDialog } from '@/components/ui/Dialog';
 import { fieldClass } from '@/components/ui/Field';
 import { moveUnitAction } from '@/lib/admin/actions';
 import type { BlackoutRow, UnitRow } from '@/lib/admin/config';
@@ -93,8 +94,11 @@ export function UnitsManager({ types, units, blackouts, today }: { types: { type
                   <button
                     type="button"
                     disabled={pending}
-                    onClick={() =>
-                      confirm(u.isActive ? `${u.label}을(를) 운영에서 뺄까요? (영구 철수)` : `${u.label}을(를) 다시 운영할까요?`) &&
+                    onClick={async () =>
+                      (await confirmDialog(u.isActive ? `${u.label}을(를) 운영에서 뺄까요?\n영구 철수입니다. 일시 점검은 아래 '점검 기간'으로 등록하세요.` : `${u.label}을(를) 다시 운영할까요?`, {
+                        confirmLabel: u.isActive ? '운영 중지' : '다시 운영',
+                        danger: u.isActive,
+                      })) &&
                       act(() => setUnitActiveAction(u.id, !u.isActive), u.isActive ? `${u.label} 운영 중지` : `${u.label} 다시 운영`)
                     }
                     className={`h-9 rounded-full border px-3.5 text-[13px] font-medium tabular-nums transition-colors ${
@@ -109,8 +113,8 @@ export function UnitsManager({ types, units, blackouts, today }: { types: { type
                 <button
                   type="button"
                   disabled={pending}
-                  onClick={() => {
-                    const label = prompt('새 유닛 이름', nextLabel(t.type));
+                  onClick={async () => {
+                    const label = await promptDialog('새 유닛 이름', nextLabel(t.type), { confirmLabel: '추가' });
                     if (label) act(() => addUnitAction(t.type, label), `${label} 추가`);
                   }}
                   className="h-9 rounded-full bg-ice-100 px-3.5 text-[13px] font-medium text-ice-600"
@@ -247,7 +251,7 @@ export function UnitsManager({ types, units, blackouts, today }: { types: { type
                 <button
                   type="button"
                   disabled={pending}
-                  onClick={() => confirm(`${b.unitLabel} 점검(${b.from} ~ ${b.to})을 풀까요?`) && act(() => deleteBlackoutAction(b.id), '점검을 풀었습니다.')}
+                  onClick={async () => (await confirmDialog(`${b.unitLabel} 점검(${b.from} ~ ${b.to})을 풀까요?`, { confirmLabel: '점검 풀기' })) && act(() => deleteBlackoutAction(b.id), '점검을 풀었습니다.')}
                   className="text-[13px] font-medium text-[#b42d18]"
                 >
                   점검 풀기

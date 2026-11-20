@@ -4,6 +4,7 @@ import { useRouter } from 'next/navigation';
 import { useState, useTransition } from 'react';
 
 import { Button } from '@/components/ui/Button';
+import { confirmDialog } from '@/components/ui/Dialog';
 import { Field, fieldClass } from '@/components/ui/Field';
 import { cancelOfflineAction, updateOfflineAction } from '@/lib/admin/actions';
 import { PAY_METHOD_LABEL } from '@/lib/admin/labels';
@@ -172,7 +173,7 @@ export function OfflineEditor({
           variant="dangerTint"
           size="cs" className="w-full"
           disabled={pending}
-          onClick={() => confirm(`${source === 'comp' ? '무상' : '유선'} 예약을 취소할까요?\n토스 결제가 없어 환불 처리는 하지 않습니다.`) && run(() => cancelOfflineAction(bookingId), '취소했습니다.')}
+          onClick={async () => (await confirmDialog(`${source === 'comp' ? '무상' : '유선'} 예약을 취소할까요?\n토스 결제가 없어 환불 처리는 하지 않습니다.`, { confirmLabel: '예약 취소', cancelLabel: '닫기', danger: true })) && run(() => cancelOfflineAction(bookingId), '취소했습니다.')}
         >
           예약 취소
         </Button>

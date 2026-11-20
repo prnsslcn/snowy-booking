@@ -4,6 +4,7 @@ import { useRouter } from 'next/navigation';
 import { useState, useTransition } from 'react';
 
 import { Button } from '@/components/ui/Button';
+import { confirmDialog } from '@/components/ui/Dialog';
 import { fieldClass } from '@/components/ui/Field';
 import { checkInAction, checkOutAction, moveUnitAction, undoCheckAction } from '@/lib/admin/actions';
 
@@ -78,12 +79,12 @@ export function OnSiteActions({
       {options.length > 0 && (
         <form
           className="flex gap-2 border-t border-line pt-4"
-          onSubmit={(e) => {
+          onSubmit={async (e) => {
             e.preventDefault();
             const t = options.find((o) => o.unitId === target);
             if (!t) return;
             const msg = t.bookingId ? `${unitLabel ?? '이 유닛'} ↔ ${t.label}(${t.guestName}) 맞바꿀까요?` : `${t.label}(으)로 옮길까요?`;
-            if (!confirm(msg)) return;
+            if (!(await confirmDialog(msg))) return;
             run(() => moveUnitAction(bookingId, t.unitId, t.bookingId));
             setTarget('');
           }}

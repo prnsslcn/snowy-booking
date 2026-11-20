@@ -7,6 +7,7 @@ import './site.css';
 import { Navbar } from '@/components/site/Navbar';
 import { PageTransition } from '@/components/site/PageTransition';
 import { SmoothScroll } from '@/components/site/SmoothScroll';
+import { DialogHost } from '@/components/ui/Dialog';
 
 /*
   홈 — aftc(ABC 비행교육원) 홈 구조 이식: 픽셀아트 Hero(sticky) → 위로 덮는 다크 #intro,
@@ -47,6 +48,7 @@ export default function HomeLayout({ children }: { children: React.ReactNode }) 
         <SmoothScroll>
           <PageTransition navbar={<Navbar />}>{children}</PageTransition>
         </SmoothScroll>
+        <DialogHost />
       </body>
     </html>
   );

@@ -6,6 +6,7 @@ import { useState, useTransition } from 'react';
 
 import { Badge } from '@/components/ui/Badge';
 import { Button, buttonClass } from '@/components/ui/Button';
+import { confirmDialog } from '@/components/ui/Dialog';
 import { fieldClass } from '@/components/ui/Field';
 import { checkInAction, checkOutAction, moveUnitAction, undoCheckAction } from '@/lib/admin/actions';
 import type { BoardCell, BoardGroup } from '@/lib/admin/board';
@@ -189,12 +190,12 @@ function Sheet({ group, cell, date, today, onClose }: { group: BoardGroup; cell:
         {others.length > 0 && b.status !== 'pending_payment' && (
           <form
             className="mt-5 flex gap-2 border-t border-line pt-5"
-            onSubmit={(e) => {
+            onSubmit={async (e) => {
               e.preventDefault();
               const t = others.find((c) => c.unitId === target);
               if (!t) return;
               const msg = t.booking ? `${cell.label} ↔ ${t.label}(${t.booking.guestName}) 맞바꿀까요?` : `${t.label}(으)로 옮길까요?`;
-              if (!confirm(msg)) return;
+              if (!(await confirmDialog(msg))) return;
               run(() => moveUnitAction(b.id, t.unitId, t.booking?.id ?? null));
             }}
           >

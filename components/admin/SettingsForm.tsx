@@ -4,6 +4,7 @@ import { useRouter } from 'next/navigation';
 import { useState, useTransition } from 'react';
 
 import { Button } from '@/components/ui/Button';
+import { confirmDialog } from '@/components/ui/Dialog';
 import { Field, fieldClass } from '@/components/ui/Field';
 import { saveSettingsAction, type SettingsInput } from '@/lib/admin/config-actions';
 
@@ -42,9 +43,16 @@ export function SettingsForm({ initial, year, defaults }: { initial: SettingsInp
   return (
     <form
       className="space-y-5"
-      onSubmit={(e) => {
+      onSubmit={async (e) => {
         e.preventDefault();
-        if (s.businessClosed !== initial.businessClosed && !confirm(s.businessClosed ? '영업 종료를 켤까요?\n홈·예약 화면이 영업 종료 안내로 바뀌고 새 예약이 막힙니다.' : '영업 종료를 끄고 다시 예약을 받을까요?')) return;
+        if (
+          s.businessClosed !== initial.businessClosed &&
+          !(await confirmDialog(s.businessClosed ? '영업 종료를 켤까요?\n홈·예약 화면이 영업 종료 안내로 바뀌고 새 예약이 막힙니다.' : '영업 종료를 끄고 다시 예약을 받을까요?', {
+            confirmLabel: s.businessClosed ? '영업 종료' : '다시 열기',
+            danger: s.businessClosed,
+          }))
+        )
+          return;
         setMsg(null);
         start(async () => {
           const r = await saveSettingsAction(s);

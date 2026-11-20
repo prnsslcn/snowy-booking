@@ -6,7 +6,7 @@ import './admin.css';
 const outfit = Outfit({ subsets: ['latin'], variable: '--font-outfit', display: 'swap' });
 
 export const metadata: Metadata = {
-  title: { default: '운영 콘솔', template: '%s · 운영 콘솔' },
+  title: { default: 'Admin', template: '%s · Admin' },
   robots: { index: false, follow: false },
 };
 

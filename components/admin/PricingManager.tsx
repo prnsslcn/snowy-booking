@@ -5,6 +5,7 @@ import { useRouter } from 'next/navigation';
 import { useState, useTransition } from 'react';
 
 import { Button, buttonClass } from '@/components/ui/Button';
+import { confirmDialog } from '@/components/ui/Dialog';
 import { fieldClass } from '@/components/ui/Field';
 import {
   addHolidayAction,
@@ -69,8 +70,8 @@ function PriceRow({ p }: { p: { type: string; name: string; weekday: number; wee
           size="cs"
           className="col-span-2 md:col-span-1"
           disabled={pending || !changed}
-          onClick={() =>
-            confirm(`${p.name} 요금을 주중 ${formatWon(Number(wd))} / 주말 ${formatWon(Number(we))}로 바꿀까요?\n이미 받은 예약 금액은 바뀌지 않습니다.`) &&
+          onClick={async () =>
+            (await confirmDialog(`${p.name} 요금을 주중 ${formatWon(Number(wd))} / 주말 ${formatWon(Number(we))}로 바꿀까요?\n이미 받은 예약 금액은 바뀌지 않습니다.`, { confirmLabel: '저장' })) &&
             act(() => updatePricesAction(p.type, Number(wd), Number(we)), '저장했습니다.')
           }
         >
@@ -125,7 +126,7 @@ export function PricingManager({
                   {p.from} ~ {p.to}
                 </span>
               </span>
-              <button type="button" disabled={peak.pending} onClick={() => confirm(`'${p.name}'을(를) 지울까요?`) && peak.act(() => deletePeakAction(p.id), '지웠습니다.')} className="text-[13px] font-medium text-[#b42d18]">
+              <button type="button" disabled={peak.pending} onClick={async () => (await confirmDialog(`'${p.name}'을(를) 지울까요?`, { confirmLabel: '삭제', danger: true })) && peak.act(() => deletePeakAction(p.id), '지웠습니다.')} className="text-[13px] font-medium text-[#b42d18]">
                 삭제
               </button>
             </li>
@@ -189,7 +190,7 @@ export function PricingManager({
                   <b className="font-semibold">{h.name}</b>
                   {h.source === 'manual' && <span className="ml-1.5 text-[11px] text-ice-600">직접</span>}
                 </span>
-                <button type="button" disabled={hol.pending} onClick={() => confirm(`${h.date} ${h.name}을(를) 지울까요?`) && hol.act(() => deleteHolidayAction(h.date), '지웠습니다.')} className="text-[13px] text-ink-3 hover:text-[#b42d18]" aria-label={`${h.name} 삭제`}>
+                <button type="button" disabled={hol.pending} onClick={async () => (await confirmDialog(`${h.date} ${h.name}을(를) 지울까요?`, { confirmLabel: '삭제', danger: true })) && hol.act(() => deleteHolidayAction(h.date), '지웠습니다.')} className="text-[13px] text-ink-3 hover:text-[#b42d18]" aria-label={`${h.name} 삭제`}>
                   ×
                 </button>
               </li>
