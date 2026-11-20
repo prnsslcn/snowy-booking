@@ -10,7 +10,7 @@ import { confirmDialog } from '@/components/ui/Dialog';
 import { fieldClass } from '@/components/ui/Field';
 import { checkInAction, checkOutAction, moveUnitAction, undoCheckAction } from '@/lib/admin/actions';
 import type { BoardCell, BoardGroup } from '@/lib/admin/board';
-import { SOURCE_LABEL, statusBadge } from '@/lib/admin/labels';
+import { statusBadge } from '@/lib/admin/labels';
 import { formatPhone } from '@/lib/format';
 
 /*
@@ -152,13 +152,12 @@ function Sheet({ group, cell, date, today, onClose }: { group: BoardGroup; cell:
               <dd>{b.guestCount}명</dd>
             </div>
           )}
-          <div className="flex justify-between">
-            <dt className="text-ink-2">경로</dt>
-            <dd>
-              {SOURCE_LABEL[b.source]}
-              {b.lookupCode && <span className="ml-2 font-mono text-ink-2">#{b.lookupCode}</span>}
-            </dd>
-          </div>
+          {b.lookupCode && (
+            <div className="flex justify-between">
+              <dt className="text-ink-2">예약번호</dt>
+              <dd className="font-mono">{b.lookupCode}</dd>
+            </div>
+          )}
           {b.note && (
             <div className="flex justify-between gap-4">
               <dt className="flex-none text-ink-2">메모</dt>

@@ -88,7 +88,6 @@ export type StatusFilter = keyof typeof STATUS_FILTERS;
 export interface ListFilters {
   q?: string;
   status?: StatusFilter;
-  source?: 'online' | 'offline' | 'comp';
   /** 이용일 범위(YYYY-MM-DD). from 미지정 시 오늘부터 */
   from?: string;
   to?: string;
@@ -117,7 +116,6 @@ export async function listBookings(f: ListFilters): Promise<{ items: BookingList
     query = query.gte('date', f.from || kstToday());
     if (f.to) query = query.lte('date', f.to);
   }
-  if (f.source) query = query.eq('source', f.source);
 
   const page = Math.max(1, f.page ?? 1);
   const { data, count, error } = await query
@@ -131,7 +129,7 @@ export async function listBookings(f: ListFilters): Promise<{ items: BookingList
 export interface BookingDetail extends BookingListItem {
   priceSnapshot: Json;
   note: string | null;
-  offlinePaymentMethod: string | null;
+
   refundedAt: string | null;
   manualRefundNote: string | null;
   checkedInAt: string | null;
@@ -156,7 +154,7 @@ export async function getBooking(id: string): Promise<BookingDetail | null> {
   const { data } = await supabase
     .from('bookings')
     .select(
-      `${LIST_COLUMNS}, price_snapshot, note, offline_payment_method, refunded_at, manual_refund_note, checked_in_at, checked_out_at, expires_at, updated_at`,
+      `${LIST_COLUMNS}, price_snapshot, note, refunded_at, manual_refund_note, checked_in_at, checked_out_at, expires_at, updated_at`,
     )
     .eq('id', id)
     .maybeSingle();
@@ -164,7 +162,6 @@ export async function getBooking(id: string): Promise<BookingDetail | null> {
   const r = data as unknown as Row & {
     price_snapshot: Json;
     note: string | null;
-    offline_payment_method: string | null;
     refunded_at: string | null;
     manual_refund_note: string | null;
     checked_in_at: string | null;
@@ -186,7 +183,6 @@ export async function getBooking(id: string): Promise<BookingDetail | null> {
     ...toItem(r),
     priceSnapshot: r.price_snapshot,
     note: r.note,
-    offlinePaymentMethod: r.offline_payment_method,
     refundedAt: r.refunded_at,
     manualRefundNote: r.manual_refund_note,
     checkedInAt: r.checked_in_at,

@@ -21,16 +21,12 @@ export function statusBadge(b: { status: string; cancel_error?: unknown; refund_
   return STATUS_LABEL[b.status] ?? { label: b.status, tone: 'neutral' };
 }
 
-export const SOURCE_LABEL: Record<string, string> = { online: '온라인', offline: '유선', comp: '무상' };
-
 export const PAYMENT_STATUS_LABEL: Record<string, string> = { ready: '결제 대기', paid: '결제 완료', cancelled: '결제 취소', partial_cancelled: '부분 취소' };
 
 /** 유닛 이름(카바나 1호 등 — 상품명 포함)이 있으면 그것, 없으면 상품명 */
 export function unitOrType(b: { unitLabel: string | null; typeName: string }): string {
   return b.unitLabel ?? b.typeName;
 }
-
-export const PAY_METHOD_LABEL: Record<string, string> = { cash: '현금', card: '카드', transfer: '계좌이체' };
 
 /** 매출에 넣는 상태(결제 완료 후 환불되지 않은 것) — CLAUDE.md §9 */
 export const REVENUE_STATUSES = ['confirmed', 'checked_in', 'checked_out'] as const;

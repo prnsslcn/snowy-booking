@@ -6,7 +6,6 @@ import { EphemeralRange } from '@/components/admin/EphemeralRange';
 import { StatStrip } from '@/components/admin/StatStrip';
 import { buttonClass } from '@/components/ui/Button';
 import { fieldClass } from '@/components/ui/Field';
-import { PAY_METHOD_LABEL } from '@/lib/admin/labels';
 import { getSales, salesRanges } from '@/lib/admin/sales';
 import { formatDateKorean, formatWon } from '@/lib/format';
 
@@ -41,7 +40,7 @@ export default async function SalesPage({ searchParams }: { searchParams: Promis
       <EphemeralRange deps={`${from}|${to}`} />
       <AdminTitle
         title="매출"
-        sub={`이용일 기준 ${from} ~ ${to} · 확정·입실·퇴실만(무상·취소·환불 제외)`}
+        sub={`이용일 기준 ${from} ~ ${to} · 확정·입실·퇴실만(취소·환불 제외)`}
         aside={
           <a href={`/api/admin/report?from=${from}&to=${to}`} className={buttonClass('primary', 'cs')}>
             월말보고 엑셀 받기
@@ -83,31 +82,17 @@ export default async function SalesPage({ searchParams }: { searchParams: Promis
       {/* 합계 */}
       <StatStrip
         items={[
-          { label: '총 매출', value: s.total.amount.toLocaleString('ko-KR'), unit: '원', note: `${s.total.count}건` },
-          {
-            label: '온라인(토스)',
-            value: s.online.amount.toLocaleString('ko-KR'),
-            unit: '원',
-            note: `${s.online.count}건`,
-          },
-          {
-            label: '유선',
-            value: s.offline.amount.toLocaleString('ko-KR'),
-            unit: '원',
-            note: `${s.offline.count}건${Object.entries(s.offline.byMethod)
-              .map(([m, v]) => ` · ${PAY_METHOD_LABEL[m] ?? m} ${formatWon(v.amount)}`)
-              .join('')}`,
-          },
+          { label: '매출', value: s.total.amount.toLocaleString('ko-KR'), unit: '원', note: '토스 결제 기준' },
+          { label: '예약', value: `${s.total.count}`, unit: '건', note: '확정·입실·퇴실' },
           {
             label: '점유율',
             value: pct(sold, cap),
-            note: (
-              <>
-                {sold} / {cap} 유닛·일
-                <br />
-                온라인 취소율 {pct(s.cancel.cancelled, s.cancel.base)} ({s.cancel.cancelled} / {s.cancel.base}건)
-              </>
-            ),
+            note: `${sold} / ${cap} 유닛·일`,
+          },
+          {
+            label: '취소율',
+            value: pct(s.cancel.cancelled, s.cancel.base),
+            note: `${s.cancel.cancelled} / ${s.cancel.base}건 (결제 후 취소·환불)`,
           },
         ]}
       />
@@ -130,7 +115,6 @@ export default async function SalesPage({ searchParams }: { searchParams: Promis
             </li>
           ))}
         </ul>
-        {s.compCount > 0 && <p className="mt-4 text-[12px] text-ink-2">무상 예약 {s.compCount}건은 매출에서 빼고 점유율에는 넣었습니다.</p>}
       </section>
 
       {/* 일별 */}
@@ -145,14 +129,9 @@ export default async function SalesPage({ searchParams }: { searchParams: Promis
                 <Link href={`/admin/board?date=${d.date}`} className="text-[14px] font-medium hover:text-glacier">
                   {formatDateKorean(d.date)}
                 </Link>
-                <div className="text-right">
-                  <p className="text-[14px] tabular-nums">
-                    {d.count}건 · <b className="font-semibold">{formatWon(d.amount)}</b>
-                  </p>
-                  <p className="text-[12px] tabular-nums text-ink-2">
-                    온라인 {d.onlineCount}건 {formatWon(d.onlineAmount)} · 유선 {d.offlineCount}건 {formatWon(d.offlineAmount)}
-                  </p>
-                </div>
+                <p className="text-[14px] tabular-nums">
+                  <span className="text-ink-2">{d.count}건</span> · <b className="font-semibold">{formatWon(d.amount)}</b>
+                </p>
               </li>
             ))}
           </ul>

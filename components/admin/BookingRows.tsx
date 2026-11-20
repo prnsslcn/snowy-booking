@@ -2,7 +2,7 @@ import Link from 'next/link';
 
 import { Badge } from '@/components/ui/Badge';
 import type { BookingListItem } from '@/lib/admin/bookings';
-import { SOURCE_LABEL, statusBadge, unitOrType } from '@/lib/admin/labels';
+import { statusBadge, unitOrType } from '@/lib/admin/labels';
 import { formatPhone, formatWon } from '@/lib/format';
 
 /*
@@ -46,7 +46,6 @@ export function BookingRows({ items, compact = false }: { items: BookingListItem
                 </td>
                 <td className="py-3 pr-3">
                   {b.guestName}
-                  {b.source !== 'online' && <span className="ml-1.5 text-[12px] text-ice-600">{SOURCE_LABEL[b.source]}</span>}
                 </td>
                 <td className="py-3 pr-3 tabular-nums text-ink/70">{b.guestPhone ? formatPhone(b.guestPhone) : '—'}</td>
                 <td className="py-3 pr-3 font-mono tabular-nums">{b.lookupCode ?? '—'}</td>
@@ -70,7 +69,6 @@ export function BookingRows({ items, compact = false }: { items: BookingListItem
                 <div className="flex items-center justify-between gap-2">
                   <span className="text-[15px] font-medium">
                     {b.guestName}
-                    {b.source !== 'online' && <span className="ml-1.5 text-[12px] font-medium text-ice-600">{SOURCE_LABEL[b.source]}</span>}
                   </span>
                   <Badge tone={s.tone}>{s.label}</Badge>
                 </div>
