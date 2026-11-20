@@ -21,7 +21,7 @@ type Pay = 'cash' | 'card' | 'transfer';
 
 function Seg<T extends string>({ value, options, onChange, name }: { value: T; options: [T, string][]; onChange: (v: T) => void; name: string }) {
   return (
-    <div role="radiogroup" aria-label={name} className="flex flex-wrap gap-2">
+    <div role="radiogroup" aria-label={name} className="inline-flex max-w-full flex-wrap gap-0.5 rounded-full bg-canvas p-1">
       {options.map(([v, l]) => (
         <button
           key={v}
@@ -29,7 +29,7 @@ function Seg<T extends string>({ value, options, onChange, name }: { value: T; o
           role="radio"
           aria-checked={value === v}
           onClick={() => onChange(v)}
-          className={`h-11 rounded-full px-5 text-[14px] font-medium transition-colors ${value === v ? 'bg-glacier text-white' : 'border border-ice-700/15 bg-white text-ink/70 hover:text-ink'}`}
+          className={`h-10 rounded-full px-4 text-[14px] font-medium transition-colors md:h-9 ${value === v ? 'bg-white text-ink shadow-[0_1px_2px_rgb(14_26_43/0.08),0_0_0_1px_rgb(14_26_43/0.06)]' : 'text-ink-2 hover:text-ink'}`}
         >
           {l}
         </button>
@@ -93,13 +93,13 @@ export function OfflineBookingForm({ products, initialDate, initialType, today }
 
   return (
     <form onSubmit={submit} className="grid gap-4 lg:grid-cols-[1.4fr_1fr] lg:items-start">
-      <div className="space-y-5 rounded-3xl bg-white p-5 md:p-7">
+      <div className="space-y-5 rounded-xl border border-line bg-white p-5 md:p-7">
         <Field label="경로">
           <Seg name="경로" value={source} onChange={setSource} options={[['offline', '유선(현장·전화 결제)'], ['comp', '무상']]} />
         </Field>
         <div className="grid gap-4 md:grid-cols-2">
           <Field label="상품">
-            <select value={type} onChange={(e) => setType(e.target.value)} className={fieldClass('light', 'appearance-none', 'sm')}>
+            <select value={type} onChange={(e) => setType(e.target.value)} className={fieldClass('light', 'appearance-none', 'cs')}>
               {products.map((p) => (
                 <option key={p.type} value={p.type}>
                   {p.name} (최대 {p.maxCapacity}인)
@@ -108,20 +108,20 @@ export function OfflineBookingForm({ products, initialDate, initialType, today }
             </select>
           </Field>
           <Field label="이용일">
-            <input type="date" min={today} value={date} onChange={(e) => setDate(e.target.value)} className={fieldClass('light', 'tabular-nums', 'sm')} />
+            <input type="date" min={today} value={date} onChange={(e) => setDate(e.target.value)} className={fieldClass('light', 'tabular-nums', 'cs')} />
           </Field>
           <Field label="예약자 이름">
-            <input value={name} onChange={(e) => setName(e.target.value)} className={fieldClass('light', '', 'sm')} />
+            <input value={name} onChange={(e) => setName(e.target.value)} className={fieldClass('light', '', 'cs')} />
           </Field>
           <Field label="휴대폰 (선택)">
-            <input value={phone} onChange={(e) => setPhone(formatPhone(e.target.value))} inputMode="numeric" maxLength={13} placeholder="010-0000-0000" className={fieldClass('light', 'tabular-nums', 'sm')} />
+            <input value={phone} onChange={(e) => setPhone(formatPhone(e.target.value))} inputMode="numeric" maxLength={13} placeholder="010-0000-0000" className={fieldClass('light', 'tabular-nums', 'cs')} />
           </Field>
           <Field label="인원" hint={product ? `최대 ${product.maxCapacity}인(영유아 포함)` : undefined}>
-            <input value={count} onChange={(e) => setCount(e.target.value.replace(/\D/g, '').slice(0, 2))} inputMode="numeric" className={fieldClass('light', 'tabular-nums', 'sm')} />
+            <input value={count} onChange={(e) => setCount(e.target.value.replace(/\D/g, '').slice(0, 2))} inputMode="numeric" className={fieldClass('light', 'tabular-nums', 'cs')} />
           </Field>
           {source === 'offline' && (
             <Field label="금액 (원)" hint={quote ? `비워 두면 정상가 ${formatWon(quote.price)} (${quote.rateKind === 'weekend' ? '주말' : '주중'})` : '비워 두면 정상가'}>
-              <input value={amount} onChange={(e) => setAmount(e.target.value.replace(/\D/g, ''))} inputMode="numeric" placeholder={quote ? String(quote.price) : ''} className={fieldClass('light', 'tabular-nums', 'sm')} />
+              <input value={amount} onChange={(e) => setAmount(e.target.value.replace(/\D/g, ''))} inputMode="numeric" placeholder={quote ? String(quote.price) : ''} className={fieldClass('light', 'tabular-nums', 'cs')} />
             </Field>
           )}
         </div>
@@ -131,21 +131,21 @@ export function OfflineBookingForm({ products, initialDate, initialType, today }
           </Field>
         )}
         <Field label="메모 (선택)">
-          <input value={note} onChange={(e) => setNote(e.target.value)} placeholder="단체명·요청 사항 등" className={fieldClass('light', '', 'sm')} />
+          <input value={note} onChange={(e) => setNote(e.target.value)} placeholder="단체명·요청 사항 등" className={fieldClass('light', '', 'cs')} />
         </Field>
       </div>
 
-      <div className="space-y-3 rounded-3xl bg-white p-5 md:p-7 lg:sticky lg:top-8">
+      <div className="space-y-3 rounded-xl border border-line bg-white p-5 md:p-7 lg:sticky lg:top-8">
         <p className="text-[13px] font-medium text-ice-600">등록 내용</p>
-        <p className="text-[17px] font-bold">
+        <p className="panel-title">
           {product?.name} · {date}
         </p>
-        <p className="font-display text-[30px] font-bold tabular-nums tracking-[-0.02em]">{finalAmount === null ? '—' : formatWon(finalAmount)}</p>
-        <p className="text-[13px] text-ink/55">{source === 'comp' ? '무상 예약(0원)' : pay ? `${PAY_METHOD_LABEL[pay]} 결제` : '결제수단을 골라 주세요'}</p>
-        <Button type="submit" size="block" disabled={pending}>
+        <p className="font-display text-[30px] font-semibold tabular-nums tracking-[-0.02em]">{finalAmount === null ? '—' : formatWon(finalAmount)}</p>
+        <p className="text-[13px] text-ink-2">{source === 'comp' ? '무상 예약(0원)' : pay ? `${PAY_METHOD_LABEL[pay]} 결제` : '결제수단을 골라 주세요'}</p>
+        <Button type="submit" size="cs" className="w-full" disabled={pending}>
           {pending ? '등록 중…' : '예약 등록'}
         </Button>
-        {error && <p role="alert" className="rounded-2xl border border-[#d4351c]/20 bg-[#d4351c]/[.05] px-4 py-3 text-[13px] text-[#b42d18]">{error}</p>}
+        {error && <p role="alert" className="rounded-lg border border-[#d4351c]/20 bg-[#d4351c]/[.05] px-4 py-3 text-[13px] text-[#b42d18]">{error}</p>}
       </div>
     </form>
   );

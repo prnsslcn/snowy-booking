@@ -42,26 +42,26 @@ export function AdminCalendar({ ym, days, today }: { ym: string; days: Record<st
   return (
     <>
       <div className="mb-4 flex items-center justify-between gap-3">
-        <p className="font-display text-[22px] font-bold tabular-nums">
+        <p className="font-display text-[22px] font-semibold tabular-nums">
           {y}. {String(m).padStart(2, '0')}
         </p>
         <div className="flex gap-2">
-          <Link href={`/admin/calendar?month=${shiftMonth(ym, -1)}`} className={buttonClass('secondary', 'sm', 'w-11 px-0')} aria-label="이전 달">
+          <Link href={`/admin/calendar?month=${shiftMonth(ym, -1)}`} className={buttonClass('tint', 'cs', 'w-11 px-0')} aria-label="이전 달">
             ‹
           </Link>
           {ym !== today.slice(0, 7) && (
-            <Link href="/admin/calendar" className={buttonClass('secondary', 'sm')}>
+            <Link href="/admin/calendar" className={buttonClass('tint', 'cs')}>
               이번 달
             </Link>
           )}
-          <Link href={`/admin/calendar?month=${shiftMonth(ym, 1)}`} className={buttonClass('secondary', 'sm', 'w-11 px-0')} aria-label="다음 달">
+          <Link href={`/admin/calendar?month=${shiftMonth(ym, 1)}`} className={buttonClass('tint', 'cs', 'w-11 px-0')} aria-label="다음 달">
             ›
           </Link>
         </div>
       </div>
 
-      <div className="rounded-3xl bg-white p-2 md:p-4">
-        <div className="grid grid-cols-7 text-center text-[12px] font-medium text-ink/45">
+      <div className="rounded-xl border border-line bg-white p-2 md:p-4">
+        <div className="grid grid-cols-7 text-center text-[12px] font-medium text-ink-3">
           {WEEK.map((w, i) => (
             <div key={w} className={`py-2 ${i === 0 ? 'text-[#d4351c]' : i === 6 ? 'text-ice-600' : ''}`}>
               {w}
@@ -81,11 +81,11 @@ export function AdminCalendar({ ym, days, today }: { ym: string; days: Record<st
                 type="button"
                 onClick={() => setSel(iso)}
                 className={`flex min-h-[64px] flex-col items-start rounded-xl border p-1.5 text-left transition-colors md:min-h-[92px] md:p-2.5 ${
-                  d.closed !== null ? 'border-ink/10 bg-ink/[.06]' : d.locked !== null ? 'border-amber-400/50 bg-amber-50' : 'border-ice-700/10 hover:border-ice-400'
+                  d.closed !== null ? 'border-ink/10 bg-ink/[.06]' : d.locked !== null ? 'border-amber-400/50 bg-amber-50' : 'border-line hover:border-ice-400'
                 } ${iso === today ? 'ring-2 ring-ice-400' : ''} ${past ? 'opacity-50' : ''} ${sel === iso ? 'border-glacier' : ''}`}
               >
                 <span className={`text-[13px] font-semibold tabular-nums md:text-[15px] ${weekendRate(iso) ? 'text-ice-600' : ''}`}>{Number(iso.slice(8))}</span>
-                {d.booked > 0 && <span className="mt-0.5 text-[11px] tabular-nums text-ink/60 md:text-[12px]">예약 {d.booked}</span>}
+                {d.booked > 0 && <span className="mt-0.5 text-[11px] tabular-nums text-ink-2 md:text-[12px]">예약 {d.booked}</span>}
                 <span className="mt-auto flex flex-wrap gap-0.5">
                   {d.closed !== null && <span className="rounded bg-ink/70 px-1 text-[10px] font-medium text-white">휴무</span>}
                   {d.locked !== null && <span className="rounded bg-amber-500 px-1 text-[10px] font-medium text-white">잠금</span>}
@@ -98,7 +98,7 @@ export function AdminCalendar({ ym, days, today }: { ym: string; days: Record<st
           })}
         </div>
       </div>
-      <ul className="mt-3 flex flex-wrap gap-x-4 gap-y-1 px-1 text-[12px] text-ink/55">
+      <ul className="mt-3 flex flex-wrap gap-x-4 gap-y-1 px-1 text-[12px] text-ink-2">
         <li>
           <span className="font-semibold text-ice-600">파란 날짜</span> 주말 요금일
         </li>
@@ -136,40 +136,40 @@ function DayPanel({ iso, info, onClose }: { iso: string; info: CalendarDayInfo; 
 
   return (
     <div className="fixed inset-0 z-50 flex items-end justify-center bg-ink/30 md:items-center" onClick={onClose}>
-      <div role="dialog" aria-modal="true" aria-label={`${iso} 설정`} className="w-full max-w-md rounded-t-3xl bg-white p-6 pb-[calc(env(safe-area-inset-bottom)+24px)] md:rounded-3xl md:pb-6" onClick={(e) => e.stopPropagation()}>
+      <div role="dialog" aria-modal="true" aria-label={`${iso} 설정`} className="w-full max-w-md rounded-t-3xl bg-white p-6 pb-[calc(env(safe-area-inset-bottom)+24px)] md:rounded-xl md:pb-6" onClick={(e) => e.stopPropagation()}>
         <p className="text-[13px] font-medium text-ice-600">{info.holiday ?? (info.peak ? '성수기' : '날짜')}</p>
-        <p className="mt-1 text-[22px] font-bold tabular-nums">
+        <p className="mt-1 text-[22px] font-semibold tabular-nums">
           {iso} ({w})
         </p>
-        <p className="mt-1 text-[13px] text-ink/55">확정 예약 {info.booked}건</p>
+        <p className="mt-1 text-[13px] text-ink-2">확정 예약 {info.booked}건</p>
 
         <div className="mt-5 space-y-4">
-          <div className="rounded-2xl border border-ice-700/10 p-4">
-            <p className="text-[15px] font-semibold">휴무 {info.closed !== null && <span className="ml-1 text-[12px] font-medium text-ink/50">설정됨</span>}</p>
-            <p className="mt-0.5 text-[12px] text-ink/50">운영하지 않는 날. 손님 달력에 &lsquo;휴장&rsquo;. 이미 있는 예약은 따로 취소해야 합니다.</p>
-            <input value={closedNote} onChange={(e) => setClosedNote(e.target.value)} placeholder="메모 (선택)" aria-label="휴무 메모" className={fieldClass('light', 'mt-3', 'sm')} />
+          <div className="rounded-lg border border-line p-4">
+            <p className="text-[15px] font-semibold">휴무 {info.closed !== null && <span className="ml-1 text-[12px] font-medium text-ink-2">설정됨</span>}</p>
+            <p className="mt-0.5 text-[12px] text-ink-2">운영하지 않는 날. 손님 달력에 &lsquo;휴장&rsquo;. 이미 있는 예약은 따로 취소해야 합니다.</p>
+            <input value={closedNote} onChange={(e) => setClosedNote(e.target.value)} placeholder="메모 (선택)" aria-label="휴무 메모" className={fieldClass('light', 'mt-3', 'cs')} />
             <div className="mt-2 flex gap-2">
-              <Button size="sm" className="flex-1" disabled={pending} onClick={() => run('closed', true, closedNote)}>
+              <Button size="cs" className="flex-1" disabled={pending} onClick={() => run('closed', true, closedNote)}>
                 {info.closed !== null ? '메모 저장' : '휴무로 지정'}
               </Button>
               {info.closed !== null && (
-                <Button size="sm" variant="secondary" className="flex-1" disabled={pending} onClick={() => run('closed', false, '')}>
+                <Button size="cs" variant="tint" className="flex-1" disabled={pending} onClick={() => run('closed', false, '')}>
                   휴무 해제
                 </Button>
               )}
             </div>
           </div>
 
-          <div className="rounded-2xl border border-ice-700/10 p-4">
-            <p className="text-[15px] font-semibold">예약 잠금 {info.locked !== null && <span className="ml-1 text-[12px] font-medium text-ink/50">설정됨</span>}</p>
-            <p className="mt-0.5 text-[12px] text-ink/50">운영은 하되 새 온라인 예약만 막습니다. 손님 달력에 &lsquo;마감&rsquo;. 관리자 유선 예약은 가능.</p>
-            <input value={lockedNote} onChange={(e) => setLockedNote(e.target.value)} placeholder="메모 (선택)" aria-label="잠금 메모" className={fieldClass('light', 'mt-3', 'sm')} />
+          <div className="rounded-lg border border-line p-4">
+            <p className="text-[15px] font-semibold">예약 잠금 {info.locked !== null && <span className="ml-1 text-[12px] font-medium text-ink-2">설정됨</span>}</p>
+            <p className="mt-0.5 text-[12px] text-ink-2">운영은 하되 새 온라인 예약만 막습니다. 손님 달력에 &lsquo;마감&rsquo;. 관리자 유선 예약은 가능.</p>
+            <input value={lockedNote} onChange={(e) => setLockedNote(e.target.value)} placeholder="메모 (선택)" aria-label="잠금 메모" className={fieldClass('light', 'mt-3', 'cs')} />
             <div className="mt-2 flex gap-2">
-              <Button size="sm" className="flex-1" disabled={pending} onClick={() => run('locked', true, lockedNote)}>
+              <Button size="cs" className="flex-1" disabled={pending} onClick={() => run('locked', true, lockedNote)}>
                 {info.locked !== null ? '메모 저장' : '잠금'}
               </Button>
               {info.locked !== null && (
-                <Button size="sm" variant="secondary" className="flex-1" disabled={pending} onClick={() => run('locked', false, '')}>
+                <Button size="cs" variant="tint" className="flex-1" disabled={pending} onClick={() => run('locked', false, '')}>
                   잠금 해제
                 </Button>
               )}
@@ -177,12 +177,12 @@ function DayPanel({ iso, info, onClose }: { iso: string; info: CalendarDayInfo; 
           </div>
         </div>
 
-        {error && <p role="alert" className="mt-4 rounded-2xl border border-[#d4351c]/20 bg-[#d4351c]/[.05] px-4 py-3 text-[13px] text-[#b42d18]">{error}</p>}
+        {error && <p role="alert" className="mt-4 rounded-lg border border-[#d4351c]/20 bg-[#d4351c]/[.05] px-4 py-3 text-[13px] text-[#b42d18]">{error}</p>}
         <div className="mt-5 flex gap-2">
-          <Link href={`/admin/board?date=${iso}`} className={buttonClass('secondary', 'sm', 'flex-1')}>
+          <Link href={`/admin/board?date=${iso}`} className={buttonClass('tint', 'cs', 'flex-1')}>
             그날 현장 배정
           </Link>
-          <button type="button" onClick={onClose} className={buttonClass('secondary', 'sm', 'flex-1')}>
+          <button type="button" onClick={onClose} className={buttonClass('tint', 'cs', 'flex-1')}>
             닫기
           </button>
         </div>

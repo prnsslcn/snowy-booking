@@ -18,7 +18,7 @@ export default async function NewOfflineBookingPage({ searchParams }: { searchPa
 
   return (
     <>
-      <Link href="/admin/bookings" className="mb-3 inline-flex items-center gap-1 text-[14px] font-medium text-ink/55 hover:text-ink">
+      <Link href="/admin/bookings" className="mb-3 inline-flex items-center gap-1 text-[14px] font-medium text-ink-2 hover:text-ink">
         ‹ 예약 목록
       </Link>
       <AdminTitle title="유선·무상 예약 등록" sub="즉시 확정되고 빈 유닛이 자동 배정됩니다. 문자는 보내지 않습니다." />

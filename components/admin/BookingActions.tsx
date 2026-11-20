@@ -52,14 +52,14 @@ export function BookingActions({
     });
   }
 
-  if (!canFull) return <p className="text-[14px] text-ink/50">이 상태에서는 처리할 작업이 없습니다.</p>;
+  if (!canFull) return <p className="text-[14px] text-ink-2">이 상태에서는 처리할 작업이 없습니다.</p>;
 
   return (
     <div className="space-y-5">
       <div className="space-y-2.5">
         {canPolicy && (
           <Button
-            size="block"
+            size="cs" className="w-full"
             disabled={pending}
             onClick={() =>
               run(
@@ -72,8 +72,8 @@ export function BookingActions({
           </Button>
         )}
         <Button
-          size="block"
-          variant="secondary"
+          size="cs" className="w-full"
+          variant="tint"
           disabled={pending}
           onClick={() =>
             run(
@@ -84,14 +84,14 @@ export function BookingActions({
         >
           {stuck ? '전액 환불로 재시도' : '전액 환불'} · {formatWon(amount)}
         </Button>
-        <p className="text-[12px] leading-relaxed text-ink/50">
+        <p className="text-[12px] leading-relaxed text-ink-2">
           규정: 이용 2일 전까지 100% · 1일 전 50% · 당일 0%. 전액 환불은 자연재해 등 예외에만 씁니다.
         </p>
       </div>
 
       {stuck && (
         <form
-          className="space-y-2.5 rounded-2xl border border-violet-600/15 bg-violet-600/[.04] p-4"
+          className="space-y-2.5 rounded-lg border border-violet-600/15 bg-violet-600/[.04] p-4"
           onSubmit={(e) => {
             e.preventDefault();
             const n = Number(manualAmount.replace(/\D/g, ''));
@@ -99,7 +99,7 @@ export function BookingActions({
           }}
         >
           <p className="text-[14px] font-semibold text-violet-800">계좌에서 직접 환불</p>
-          <p className="text-[12px] leading-relaxed text-ink/55">
+          <p className="text-[12px] leading-relaxed text-ink-2">
             토스 취소가 안 될 때(취소 한도 초과 등) 계좌이체로 돌려준 뒤 기록만 남깁니다. 토스 결제는 그대로입니다.
           </p>
           <input
@@ -107,24 +107,24 @@ export function BookingActions({
             value={manualAmount}
             onChange={(e) => setManualAmount(e.target.value.replace(/[^\d]/g, ''))}
             aria-label="환불 금액(원)"
-            className={fieldClass('light', 'tabular-nums', 'sm')}
+            className={fieldClass('light', 'tabular-nums', 'cs')}
           />
           <input
             value={manualNote}
             onChange={(e) => setManualNote(e.target.value)}
             placeholder="메모 (입금 계좌·날짜 등)"
             aria-label="메모"
-            className={fieldClass('light', '', 'sm')}
+            className={fieldClass('light', '', 'cs')}
           />
-          <Button type="submit" size="sm" variant="secondary" disabled={pending || !manualAmount}>
+          <Button type="submit" size="cs" variant="tint" disabled={pending || !manualAmount}>
             계좌 환불 기록
           </Button>
         </form>
       )}
 
-      {pending && <p className="text-[13px] text-ink/55">처리 중…</p>}
-      {error && <p role="alert" className="rounded-2xl border border-[#d4351c]/20 bg-[#d4351c]/[.05] px-4 py-3 text-[13px] text-[#b42d18]">{error}</p>}
-      {notice && <p role="status" className="rounded-2xl bg-ice-100 px-4 py-3 text-[13px] text-ice-700">{notice}</p>}
+      {pending && <p className="text-[13px] text-ink-2">처리 중…</p>}
+      {error && <p role="alert" className="rounded-lg border border-[#d4351c]/20 bg-[#d4351c]/[.05] px-4 py-3 text-[13px] text-[#b42d18]">{error}</p>}
+      {notice && <p role="status" className="rounded-lg bg-ice-100 px-4 py-3 text-[13px] text-ice-700">{notice}</p>}
     </div>
   );
 }

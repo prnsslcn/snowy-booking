@@ -17,17 +17,17 @@ export function DateNav({ date, today, basePath }: { date: string; today: string
   const go = (d: string) => router.push(`${basePath}?date=${d}`);
   return (
     <div className="flex items-center gap-2">
-      <button type="button" onClick={() => go(shift(date, -1))} aria-label="이전 날" className={buttonClass('secondary', 'sm', 'w-11 px-0')}>
+      <button type="button" onClick={() => go(shift(date, -1))} aria-label="이전 날" className={buttonClass('tint', 'cs', 'w-11 px-0')}>
         ‹
       </button>
       <div className="w-[150px]">
-        <input type="date" value={date} onChange={(e) => e.target.value && go(e.target.value)} aria-label="날짜" className={fieldClass('light', 'tabular-nums', 'sm')} />
+        <input type="date" value={date} onChange={(e) => e.target.value && go(e.target.value)} aria-label="날짜" className={fieldClass('light', 'tabular-nums', 'cs')} />
       </div>
-      <button type="button" onClick={() => go(shift(date, 1))} aria-label="다음 날" className={buttonClass('secondary', 'sm', 'w-11 px-0')}>
+      <button type="button" onClick={() => go(shift(date, 1))} aria-label="다음 날" className={buttonClass('tint', 'cs', 'w-11 px-0')}>
         ›
       </button>
       {date !== today && (
-        <button type="button" onClick={() => go(today)} className={buttonClass('secondary', 'sm')}>
+        <button type="button" onClick={() => go(today)} className={buttonClass('tint', 'cs')}>
           오늘
         </button>
       )}

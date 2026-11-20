@@ -38,8 +38,8 @@ const NOTI_LABEL: Record<string, string> = { confirm: '예약 확정', cancel: '
 
 function Card({ title, children }: { title: string; children: ReactNode }) {
   return (
-    <section className="rounded-3xl bg-white p-5 md:p-6">
-      <h2 className="mb-3 text-[15px] font-bold">{title}</h2>
+    <section className="panel">
+      <h2 className="mb-3 panel-title">{title}</h2>
       {children}
     </section>
   );
@@ -47,10 +47,10 @@ function Card({ title, children }: { title: string; children: ReactNode }) {
 
 function Rows({ rows }: { rows: [string, ReactNode][] }) {
   return (
-    <dl className="divide-y divide-ice-700/[.07]">
+    <dl className="divide-y divide-line">
       {rows.map(([k, v]) => (
         <div key={k} className="flex items-baseline justify-between gap-4 py-2.5 text-[14px]">
-          <dt className="flex-none text-ink/50">{k}</dt>
+          <dt className="flex-none text-ink-2">{k}</dt>
           <dd className="min-w-0 break-all text-right">{v}</dd>
         </div>
       ))}
@@ -72,7 +72,7 @@ export default async function BookingDetailPage({ params }: { params: Promise<{ 
 
   return (
     <>
-      <Link href="/admin/bookings" className="mb-3 inline-flex items-center gap-1 text-[14px] font-medium text-ink/55 hover:text-ink">
+      <Link href="/admin/bookings" className="mb-3 inline-flex items-center gap-1 text-[14px] font-medium text-ink-2 hover:text-ink">
         ‹ 예약 목록
       </Link>
       <AdminTitle
@@ -82,10 +82,10 @@ export default async function BookingDetailPage({ params }: { params: Promise<{ 
       />
 
       {err && (
-        <section className="mb-5 rounded-3xl border border-[#d4351c]/20 bg-[#d4351c]/[.05] p-5">
-          <p className="text-[14px] font-bold text-[#b42d18]">토스 취소 실패{err.code ? ` · ${err.code}` : ''}</p>
+        <section className="mb-5 rounded-xl border border-[#d4351c]/20 bg-[#d4351c]/[.05] p-5">
+          <p className="text-[14px] font-semibold text-[#b42d18]">토스 취소 실패{err.code ? ` · ${err.code}` : ''}</p>
           <p className="mt-1 text-[13px] leading-relaxed text-[#b42d18]/85">{err.message}</p>
-          {err.at && <p className="mt-1 text-[12px] text-ink/45">{formatDateTimeKorean(err.at)}</p>}
+          {err.at && <p className="mt-1 text-[12px] text-ink-3">{formatDateTimeKorean(err.at)}</p>}
         </section>
       )}
 
@@ -182,13 +182,13 @@ export default async function BookingDetailPage({ params }: { params: Promise<{ 
 
           <Card title="기록">
             {b.actions.length === 0 && b.notifications.length === 0 ? (
-              <p className="text-[14px] text-ink/45">기록이 없습니다.</p>
+              <p className="text-[14px] text-ink-3">기록이 없습니다.</p>
             ) : (
               <ul className="space-y-2.5 text-[13px]">
                 {b.actions.map((a, i) => (
                   <li key={`a${i}`} className="flex justify-between gap-3">
                     <span>{ACTION_LABEL[a.action] ?? a.action}</span>
-                    <span className="flex-none tabular-nums text-ink/45">{formatDateTimeKorean(a.createdAt)}</span>
+                    <span className="flex-none tabular-nums text-ink-3">{formatDateTimeKorean(a.createdAt)}</span>
                   </li>
                 ))}
                 {b.notifications.map((n, i) => (
@@ -196,7 +196,7 @@ export default async function BookingDetailPage({ params }: { params: Promise<{ 
                     <span>
                       문자 · {NOTI_LABEL[n.type] ?? n.type} ({n.recipient === 'admin' ? '관리자' : '고객'}) · {n.status}
                     </span>
-                    <span className="flex-none tabular-nums text-ink/45">{formatDateTimeKorean(n.sentAt ?? n.createdAt)}</span>
+                    <span className="flex-none tabular-nums text-ink-3">{formatDateTimeKorean(n.sentAt ?? n.createdAt)}</span>
                   </li>
                 ))}
               </ul>

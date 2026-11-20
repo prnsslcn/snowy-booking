@@ -5,11 +5,12 @@ import type { InputHTMLAttributes, ReactNode, SelectHTMLAttributes } from 'react
  */
 type Tone = 'light' | 'dark';
 
-/** 크기 — md: 손님 화면(높이 56) / sm: 관리자 필터 등(높이 44, 폰은 16px 유지해 iOS 확대 방지) */
-type FieldSize = 'md' | 'sm';
+/** 크기 — md: 손님 화면(높이 56) / sm: 높이 44 / cs: 관리자 콘솔(폰 44 · PC 40, 폰은 16px 유지해 iOS 확대 방지) */
+type FieldSize = 'md' | 'sm' | 'cs';
 const fieldSize: Record<FieldSize, string> = {
   md: 'h-14 rounded-[14px] px-4 text-[16px]',
   sm: 'h-11 rounded-xl px-3.5 text-[16px] md:text-[14px]',
+  cs: 'h-11 rounded-lg px-3 text-[16px] md:h-10 md:text-[14px]',
 };
 
 const fieldBase =

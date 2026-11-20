@@ -146,7 +146,7 @@ export function Closing({ z }: { z: number }) {
             <p>© 2026 주식회사 에이비씨웍스글로벌</p>
             {/* 관리자 진입(별도 레이아웃이라 종이 전환 없이 일반 이동) */}
             <a href="/admin" className="flex-none font-medium text-ink/45 underline-offset-4 transition-colors hover:text-ink hover:underline">
-              관리자
+              Admin
             </a>
           </div>
           <p className="mt-1">

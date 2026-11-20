@@ -35,10 +35,27 @@ function LogoutButton({ className = '' }: { className?: string }) {
         router.replace('/admin/login');
         router.refresh();
       }}
-      className={`text-[13px] font-medium text-ink/55 transition-colors hover:text-ink ${className}`}
+      className={`text-[13px] font-medium text-ice-50/60 transition-colors hover:text-ice-50 ${className}`}
     >
       로그아웃
     </button>
+  );
+}
+
+/** 밤색 틀 위 로고 — 눈송이 + 이름 */
+function Brand({ small = false }: { small?: boolean }) {
+  return (
+    <Link href="/admin" className="flex items-center gap-2.5">
+      <span aria-hidden className="grid h-8 w-8 flex-none place-items-center rounded-lg bg-ice-50/[.08]">
+        <svg viewBox="0 0 24 24" className="h-[18px] w-[18px] text-ice-300" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round">
+          <path d="M12 3v18M4.2 7.5l15.6 9M4.2 16.5l15.6-9M9.5 4.5 12 7l2.5-2.5M9.5 19.5 12 17l2.5 2.5" />
+        </svg>
+      </span>
+      <span className="leading-tight">
+        {!small && <span className="block font-display text-[11px] font-medium tracking-[0.04em] text-ice-50/50">Snowy Cabana &amp; Caravan</span>}
+        <span className="block text-[15px] font-semibold text-ice-50">운영 콘솔</span>
+      </span>
+    </Link>
   );
 }
 
@@ -52,14 +69,13 @@ export function AdminShell({ email, children }: { email: string; children: React
     if (el && nav) nav.scrollTo({ left: el.offsetLeft - (nav.clientWidth - el.clientWidth) / 2 });
   }, [pathname]);
   return (
-    <div className="min-h-[100dvh] lg:grid lg:grid-cols-[232px_1fr]">
-      {/* 데스크톱 왼쪽 메뉴 */}
-      <aside className="sticky top-0 hidden h-[100dvh] flex-col border-r border-ice-700/10 bg-white px-4 py-6 lg:flex">
-        <Link href="/admin" className="px-3">
-          <p className="font-display text-[12px] font-semibold tracking-[0.04em] text-ice-600">Snowy Cabana &amp; Caravan</p>
-          <p className="mt-1 text-[17px] font-bold">운영 콘솔</p>
-        </Link>
-        <nav className="mt-8 flex flex-col gap-1">
+    <div className="min-h-[100dvh] lg:grid lg:grid-cols-[240px_1fr]">
+      {/* 데스크톱 왼쪽 메뉴(밤색) */}
+      <aside className="sticky top-0 hidden h-[100dvh] flex-col bg-night px-3 py-5 lg:flex">
+        <div className="px-2.5">
+          <Brand />
+        </div>
+        <nav className="mt-8 flex flex-col gap-0.5">
           {ADMIN_NAV.map((n) => {
             const active = isActive(pathname, n.href);
             return (
@@ -67,30 +83,29 @@ export function AdminShell({ email, children }: { email: string; children: React
                 key={n.href}
                 href={n.href}
                 aria-current={active ? 'page' : undefined}
-                className={`rounded-xl px-3 py-2.5 text-[15px] font-medium transition-colors ${
-                  active ? 'bg-ice-100 text-glacier' : 'text-ink/65 hover:bg-ice-50 hover:text-ink'
+                className={`relative rounded-lg px-3 py-2.5 text-[14px] font-medium transition-colors ${
+                  active ? 'bg-ice-50/[.09] text-ice-50' : 'text-ice-50/55 hover:bg-ice-50/[.05] hover:text-ice-50/90'
                 }`}
               >
+                {active && <span aria-hidden className="absolute top-1/2 left-0 h-4 w-[3px] -translate-y-1/2 rounded-full bg-ice-300" />}
                 {n.label}
               </Link>
             );
           })}
         </nav>
-        <div className="mt-auto border-t border-ice-700/10 px-3 pt-4">
-          <p className="truncate text-[12px] text-ink/45">{email}</p>
-          <LogoutButton className="mt-1" />
+        <div className="mt-auto border-t border-ice-50/10 px-3 pt-4">
+          <p className="truncate text-[12px] text-ice-50/40">{email}</p>
+          <LogoutButton className="mt-1.5" />
         </div>
       </aside>
 
-      {/* 폰 위 막대 */}
-      <header className="sticky top-0 z-40 border-b border-ice-700/10 bg-white/90 backdrop-blur lg:hidden">
+      {/* 폰 위 막대(밤색) */}
+      <header className="sticky top-0 z-40 bg-night lg:hidden">
         <div className="flex h-14 items-center justify-between px-4">
-          <Link href="/admin" className="text-[16px] font-bold">
-            운영 콘솔
-          </Link>
+          <Brand small />
           <LogoutButton />
         </div>
-        <nav ref={mobileNav} className="-mb-px flex gap-1 overflow-x-auto px-3 pb-2 [scrollbar-width:none]">
+        <nav ref={mobileNav} className="flex gap-1 overflow-x-auto px-3 pb-2.5 [scrollbar-width:none]">
           {ADMIN_NAV.map((n) => {
             const active = isActive(pathname, n.href);
             return (
@@ -98,7 +113,7 @@ export function AdminShell({ email, children }: { email: string; children: React
                 key={n.href}
                 href={n.href}
                 aria-current={active ? 'page' : undefined}
-                className={`shrink-0 rounded-full px-3.5 py-1.5 text-[14px] font-medium ${active ? 'bg-glacier text-white' : 'text-ink/65'}`}
+                className={`shrink-0 rounded-full px-3.5 py-1.5 text-[14px] font-medium transition-colors ${active ? 'bg-ice-50 text-night' : 'text-ice-50/60'}`}
               >
                 {n.label}
               </Link>
@@ -107,7 +122,9 @@ export function AdminShell({ email, children }: { email: string; children: React
         </nav>
       </header>
 
-      <main className="min-w-0 px-4 py-6 md:px-8 md:py-10">{children}</main>
+      <main className="min-w-0 px-4 py-6 md:px-8 md:py-9 xl:px-10">
+        <div className="mx-auto max-w-[1180px]">{children}</div>
+      </main>
     </div>
   );
 }
@@ -117,8 +134,8 @@ export function AdminTitle({ title, sub, aside }: { title: string; sub?: ReactNo
   return (
     <div className="mb-6 flex flex-wrap items-end justify-between gap-3 md:mb-8">
       <div>
-        <h1 className="text-[24px] font-bold tracking-[-0.02em] md:text-[28px]">{title}</h1>
-        {sub && <p className="mt-1 text-[14px] text-ink/55">{sub}</p>}
+        <h1 className="text-[22px] font-semibold tracking-[-0.02em] md:text-[26px]">{title}</h1>
+        {sub && <p className="mt-1.5 text-[14px] text-ink-2">{sub}</p>}
       </div>
       {aside}
     </div>

@@ -50,7 +50,7 @@ export function OnSiteActions({
   }
 
   const active = ['confirmed', 'checked_in', 'checked_out'].includes(status);
-  if (!active) return <p className="text-[14px] text-ink/50">취소·환불된 예약입니다.</p>;
+  if (!active) return <p className="text-[14px] text-ink-2">취소·환불된 예약입니다.</p>;
 
   const options = targets.filter((t) => !t.blackout);
 
@@ -68,16 +68,16 @@ export function OnSiteActions({
           </Button>
         )}
         {(status === 'checked_in' || status === 'checked_out') && (
-          <Button variant="secondary" className="col-span-2" disabled={pending} onClick={() => run(() => undoCheckAction(bookingId))}>
+          <Button variant="tint" className="col-span-2" disabled={pending} onClick={() => run(() => undoCheckAction(bookingId))}>
             {status === 'checked_out' ? '퇴실 되돌리기' : '입실 되돌리기'}
           </Button>
         )}
       </div>
-      {status === 'confirmed' && date > today && <p className="text-[12px] text-ink/50">입실 처리는 이용일 당일부터 할 수 있습니다.</p>}
+      {status === 'confirmed' && date > today && <p className="text-[12px] text-ink-2">입실 처리는 이용일 당일부터 할 수 있습니다.</p>}
 
       {options.length > 0 && (
         <form
-          className="flex gap-2 border-t border-ice-700/10 pt-4"
+          className="flex gap-2 border-t border-line pt-4"
           onSubmit={(e) => {
             e.preventDefault();
             const t = options.find((o) => o.unitId === target);
@@ -89,7 +89,7 @@ export function OnSiteActions({
           }}
         >
           <div className="min-w-0 flex-1">
-            <select value={target} onChange={(e) => setTarget(e.target.value)} aria-label="옮길 유닛" className={fieldClass('light', 'appearance-none', 'sm')}>
+            <select value={target} onChange={(e) => setTarget(e.target.value)} aria-label="옮길 유닛" className={fieldClass('light', 'appearance-none', 'cs')}>
             <option value="">다른 유닛으로 옮기기</option>
             {options.map((o) => (
               <option key={o.unitId} value={o.unitId}>
@@ -98,13 +98,13 @@ export function OnSiteActions({
             ))}
           </select>
           </div>
-          <Button type="submit" size="sm" variant="secondary" disabled={pending || !target}>
+          <Button type="submit" size="cs" variant="tint" disabled={pending || !target}>
             옮기기
           </Button>
         </form>
       )}
 
-      {error && <p role="alert" className="rounded-2xl border border-[#d4351c]/20 bg-[#d4351c]/[.05] px-4 py-3 text-[13px] text-[#b42d18]">{error}</p>}
+      {error && <p role="alert" className="rounded-lg border border-[#d4351c]/20 bg-[#d4351c]/[.05] px-4 py-3 text-[13px] text-[#b42d18]">{error}</p>}
     </div>
   );
 }

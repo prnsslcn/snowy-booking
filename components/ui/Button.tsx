@@ -5,11 +5,12 @@ import type { ButtonHTMLAttributes } from 'react';
  * 색·크기는 className 으로 덮어쓰지 말고 variant/size 를 추가(Tailwind v4 는 같은 속성 클래스 승패가 CSS 생성 순서).
  * 링크 버튼은 <TLink className={buttonClass(...)}> 로.
  */
-type Variant = 'primary' | 'secondary' | 'onDark' | 'onDarkSecondary' | 'danger' | 'dangerOnDark';
-type Size = 'sm' | 'md' | 'block';
+type Variant = 'primary' | 'secondary' | 'onDark' | 'onDarkSecondary' | 'danger' | 'dangerOnDark' | 'tint' | 'dangerTint';
+/** cs = 관리자 콘솔(폰 44px 터치, PC 40px) */
+type Size = 'sm' | 'md' | 'block' | 'cs';
 
 const base =
-  'inline-flex items-center justify-center gap-2 rounded-full font-semibold whitespace-nowrap select-none transition-[transform,background-color,border-color,color,opacity] duration-300 ease-[cubic-bezier(0.16,1,0.3,1)] active:scale-[0.97] disabled:pointer-events-none disabled:opacity-40 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-current';
+  'inline-flex items-center justify-center gap-2 rounded-full whitespace-nowrap select-none transition-[transform,background-color,border-color,color,opacity] duration-300 ease-[cubic-bezier(0.16,1,0.3,1)] active:scale-[0.97] disabled:pointer-events-none disabled:opacity-40 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-current';
 
 const variants: Record<Variant, string> = {
   primary: 'bg-glacier text-white hover:bg-glacier-deep',
@@ -18,12 +19,16 @@ const variants: Record<Variant, string> = {
   onDarkSecondary: 'border border-white/20 bg-transparent text-white hover:border-white/50',
   danger: 'border border-[#d4351c]/40 bg-transparent text-[#d4351c] hover:border-[#d4351c]',
   dangerOnDark: 'border border-[#ff8a75]/40 bg-transparent text-[#ff8a75] hover:border-[#ff8a75]',
+  // 관리자 콘솔: 테두리 없는 옅은 면
+  tint: 'bg-ice-600/[.09] text-ink hover:bg-ice-600/[.15]',
+  dangerTint: 'bg-[#d4351c]/[.07] text-[#b42d18] hover:bg-[#d4351c]/[.12]',
 };
 
 const sizes: Record<Size, string> = {
-  sm: 'h-11 px-5 text-[14px]',
-  md: 'h-12 px-7 text-[16px]',
-  block: 'h-14 w-full px-7 text-[16px]',
+  sm: 'h-11 px-5 text-[14px] font-semibold',
+  md: 'h-12 px-7 text-[16px] font-semibold',
+  block: 'h-14 w-full px-7 text-[16px] font-semibold',
+  cs: 'h-11 px-4 text-[14px] font-medium md:h-10 md:px-[18px]',
 };
 
 export function buttonClass(variant: Variant = 'primary', size: Size = 'md', className = '') {

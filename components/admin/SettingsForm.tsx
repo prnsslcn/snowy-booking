@@ -22,7 +22,7 @@ function Toggle({ on, onChange, label }: { on: boolean; onChange: (v: boolean) =
       aria-checked={on}
       aria-label={label}
       onClick={() => onChange(!on)}
-      className={`relative h-7 w-12 flex-none rounded-full transition-colors ${on ? 'bg-glacier' : 'bg-ink/15'}`}
+      className={`relative h-7 w-12 flex-none rounded-full transition-colors ${on ? 'bg-ice-600' : 'bg-ink/15'}`}
     >
       <span className={`absolute top-0.5 h-6 w-6 rounded-full bg-white shadow transition-transform ${on ? 'translate-x-[22px]' : 'translate-x-0.5'}`} />
     </button>
@@ -37,7 +37,7 @@ export function SettingsForm({ initial, year, defaults }: { initial: SettingsInp
   const set = <K extends keyof SettingsInput>(k: K, v: SettingsInput[K]) => setS((p) => ({ ...p, [k]: v }));
   const setN = <K extends keyof SettingsInput['notice']>(k: K, v: SettingsInput['notice'][K]) => setS((p) => ({ ...p, notice: { ...p.notice, [k]: v } }));
   const y = (t: string) => t.replaceAll('{year}', year);
-  const input = fieldClass('light', '', 'sm');
+  const input = fieldClass('light', '', 'cs');
 
   return (
     <form
@@ -53,11 +53,11 @@ export function SettingsForm({ initial, year, defaults }: { initial: SettingsInp
         });
       }}
     >
-      <section className={`rounded-3xl p-5 md:p-6 ${s.businessClosed ? 'border border-[#d4351c]/25 bg-[#d4351c]/[.04]' : 'bg-white'}`}>
+      <section className={`rounded-xl border p-5 md:p-6 ${s.businessClosed ? 'border-[#d4351c]/25 bg-[#d4351c]/[.04]' : 'border-line bg-white'}`}>
         <div className="flex items-start justify-between gap-4">
           <div>
-            <h2 className="text-[17px] font-bold">영업 종료</h2>
-            <p className="mt-1 text-[13px] text-ink/55">켜면 홈·예약 화면이 영업 종료 안내(/off)로 바뀌고 새 예약이 막힙니다. 예약 조회·취소는 그대로 됩니다.</p>
+            <h2 className="panel-title">영업 종료</h2>
+            <p className="mt-1 text-[13px] text-ink-2">켜면 홈·예약 화면이 영업 종료 안내(/off)로 바뀌고 새 예약이 막힙니다. 예약 조회·취소는 그대로 됩니다.</p>
           </div>
           <Toggle on={s.businessClosed} onChange={(v) => set('businessClosed', v)} label="영업 종료" />
         </div>
@@ -77,24 +77,24 @@ export function SettingsForm({ initial, year, defaults }: { initial: SettingsInp
         </div>
       </section>
 
-      <section className="rounded-3xl bg-white p-5 md:p-6">
-        <h2 className="text-[17px] font-bold">시즌 운영 기간</h2>
-        <p className="mt-1 text-[13px] text-ink/55">이 기간 밖 날짜는 손님이 예약할 수 없습니다. 비우면 제한 없음(예약 가능 기간 1개월만 적용).</p>
+      <section className="panel">
+        <h2 className="panel-title">시즌 운영 기간</h2>
+        <p className="mt-1 text-[13px] text-ink-2">이 기간 밖 날짜는 손님이 예약할 수 없습니다. 비우면 제한 없음(예약 가능 기간 1개월만 적용).</p>
         <div className="mt-4 grid grid-cols-2 gap-3">
           <Field label="시작">
-            <input type="date" value={s.seasonFrom} onChange={(e) => set('seasonFrom', e.target.value)} className={fieldClass('light', 'tabular-nums', 'sm')} />
+            <input type="date" value={s.seasonFrom} onChange={(e) => set('seasonFrom', e.target.value)} className={fieldClass('light', 'tabular-nums', 'cs')} />
           </Field>
           <Field label="끝">
-            <input type="date" value={s.seasonTo} min={s.seasonFrom} onChange={(e) => set('seasonTo', e.target.value)} className={fieldClass('light', 'tabular-nums', 'sm')} />
+            <input type="date" value={s.seasonTo} min={s.seasonFrom} onChange={(e) => set('seasonTo', e.target.value)} className={fieldClass('light', 'tabular-nums', 'cs')} />
           </Field>
         </div>
       </section>
 
-      <section className="rounded-3xl bg-white p-5 md:p-6">
+      <section className="panel">
         <div className="flex items-start justify-between gap-4">
           <div>
-            <h2 className="text-[17px] font-bold">공지</h2>
-            <p className="mt-1 text-[13px] text-ink/55">켜면 홈 첫 화면에 제목이 한 줄로 보입니다. 기간을 비우면 계속 보입니다.</p>
+            <h2 className="panel-title">공지</h2>
+            <p className="mt-1 text-[13px] text-ink-2">켜면 홈 첫 화면에 제목이 한 줄로 보입니다. 기간을 비우면 계속 보입니다.</p>
           </div>
           <Toggle on={s.notice.enabled} onChange={(v) => setN('enabled', v)} label="공지" />
         </div>
@@ -104,21 +104,21 @@ export function SettingsForm({ initial, year, defaults }: { initial: SettingsInp
           </Field>
           <div className="grid grid-cols-2 gap-3">
             <Field label="보이기 시작">
-              <input type="date" value={s.notice.from} onChange={(e) => setN('from', e.target.value)} className={fieldClass('light', 'tabular-nums', 'sm')} />
+              <input type="date" value={s.notice.from} onChange={(e) => setN('from', e.target.value)} className={fieldClass('light', 'tabular-nums', 'cs')} />
             </Field>
             <Field label="보이기 끝">
-              <input type="date" value={s.notice.to} min={s.notice.from} onChange={(e) => setN('to', e.target.value)} className={fieldClass('light', 'tabular-nums', 'sm')} />
+              <input type="date" value={s.notice.to} min={s.notice.from} onChange={(e) => setN('to', e.target.value)} className={fieldClass('light', 'tabular-nums', 'cs')} />
             </Field>
           </div>
         </div>
       </section>
 
-      <div className="sticky bottom-0 -mx-4 border-t border-ice-700/10 bg-ice-50/95 px-4 py-3 backdrop-blur md:static md:mx-0 md:border-0 md:bg-transparent md:p-0 md:backdrop-blur-none">
-        <Button type="submit" size="block" disabled={pending}>
+      <div className="sticky bottom-0 -mx-4 border-t border-line bg-canvas/95 px-4 py-3 backdrop-blur md:static md:mx-0 md:flex md:flex-col md:items-end md:border-0 md:bg-transparent md:p-0 md:backdrop-blur-none">
+        <Button type="submit" size="cs" className="w-full md:w-auto md:min-w-40" disabled={pending}>
           {pending ? '저장 중…' : '설정 저장'}
         </Button>
         {msg && (
-          <p role={msg.kind === 'error' ? 'alert' : 'status'} className={`mt-3 rounded-2xl px-4 py-3 text-[13px] ${msg.kind === 'error' ? 'border border-[#d4351c]/20 bg-[#d4351c]/[.05] text-[#b42d18]' : 'bg-ice-100 text-ice-700'}`}>
+          <p role={msg.kind === 'error' ? 'alert' : 'status'} className={`mt-3 rounded-lg px-4 py-3 text-[13px] ${msg.kind === 'error' ? 'border border-[#d4351c]/20 bg-[#d4351c]/[.05] text-[#b42d18]' : 'bg-ice-100 text-ice-700'}`}>
             {msg.text}
           </p>
         )}

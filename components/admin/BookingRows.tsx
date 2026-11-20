@@ -23,24 +23,24 @@ export function BookingRows({ items, compact = false }: { items: BookingListItem
       {/* 데스크톱 표 */}
       <table className="hidden w-full text-[14px] md:table">
         <thead>
-          <tr className="border-b border-ice-700/10 text-left text-[12px] text-ink/50">
-            {!compact && <th className="py-2.5 pr-3 font-medium">이용일</th>}
-            <th className="py-2.5 pr-3 font-medium">유닛</th>
-            <th className="py-2.5 pr-3 font-medium">예약자</th>
-            <th className="py-2.5 pr-3 font-medium">휴대폰</th>
-            <th className="py-2.5 pr-3 font-medium">예약번호</th>
-            <th className="py-2.5 pr-3 text-right font-medium">금액</th>
-            <th className="py-2.5 text-right font-medium">상태</th>
+          <tr className="border-b border-line text-left text-[12px] text-ink-2">
+            {!compact && <th className="pb-2.5 pr-3 font-medium">이용일</th>}
+            <th className="pb-2.5 pr-3 font-medium">유닛</th>
+            <th className="pb-2.5 pr-3 font-medium">예약자</th>
+            <th className="pb-2.5 pr-3 font-medium">휴대폰</th>
+            <th className="pb-2.5 pr-3 font-medium">예약번호</th>
+            <th className="pb-2.5 pr-3 text-right font-medium">금액</th>
+            <th className="pb-2.5 text-right font-medium">상태</th>
           </tr>
         </thead>
         <tbody>
           {items.map((b) => {
             const s = statusBadge({ status: b.status, cancel_error: b.cancelError, refund_method: b.refundMethod });
             return (
-              <tr key={b.id} className="group relative border-b border-ice-700/[.07] last:border-0 hover:bg-ice-50">
+              <tr key={b.id} className="group relative border-b border-line last:border-0 hover:bg-canvas">
                 {!compact && <td className="py-3 pr-3 tabular-nums">{shortDate(b.date)}</td>}
                 <td className="py-3 pr-3">
-                  <Link href={`/admin/bookings/${b.id}`} className="font-semibold after:absolute after:inset-0">
+                  <Link href={`/admin/bookings/${b.id}`} className="font-medium after:absolute after:inset-0">
                     {unitOrType(b)}
                   </Link>
                 </td>
@@ -66,19 +66,19 @@ export function BookingRows({ items, compact = false }: { items: BookingListItem
           const s = statusBadge({ status: b.status, cancel_error: b.cancelError, refund_method: b.refundMethod });
           return (
             <li key={b.id}>
-              <Link href={`/admin/bookings/${b.id}`} className="block rounded-2xl border border-ice-700/10 bg-white p-4 active:bg-ice-50">
+              <Link href={`/admin/bookings/${b.id}`} className="block rounded-lg border border-line bg-white p-4 active:bg-canvas">
                 <div className="flex items-center justify-between gap-2">
-                  <span className="text-[15px] font-semibold">
+                  <span className="text-[15px] font-medium">
                     {b.guestName}
                     {b.source !== 'online' && <span className="ml-1.5 text-[12px] font-medium text-ice-600">{SOURCE_LABEL[b.source]}</span>}
                   </span>
                   <Badge tone={s.tone}>{s.label}</Badge>
                 </div>
-                <p className="mt-1.5 text-[13px] text-ink/60">
+                <p className="mt-1.5 text-[13px] text-ink-2">
                   {!compact && <span className="tabular-nums">{shortDate(b.date)} · </span>}
                   {unitOrType(b)}
                 </p>
-                <p className="mt-1 flex justify-between text-[13px] tabular-nums text-ink/60">
+                <p className="mt-1 flex justify-between text-[13px] tabular-nums text-ink-2">
                   <span>
                     {b.guestPhone ? formatPhone(b.guestPhone) : '—'}
                     {b.lookupCode && <span className="ml-2 font-mono">#{b.lookupCode}</span>}

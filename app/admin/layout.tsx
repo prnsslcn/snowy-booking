@@ -10,14 +10,14 @@ export const metadata: Metadata = {
   robots: { index: false, follow: false },
 };
 
-export const viewport: Viewport = { width: 'device-width', initialScale: 1, themeColor: '#f0f5fa' };
+export const viewport: Viewport = { width: 'device-width', initialScale: 1, themeColor: '#0f1d2e' };
 
 /** 관리자 최상위 레이아웃 — 손님 화면(app/(site))과 별도. */
 export default function AdminRootLayout({ children }: { children: React.ReactNode }) {
   return (
     <html lang="ko" className={`${outfit.variable} antialiased`}>
       <head>
-        <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.min.css" />
+        <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/variable/pretendardvariable.min.css" />
       </head>
       <body className="min-h-[100dvh]">{children}</body>
     </html>

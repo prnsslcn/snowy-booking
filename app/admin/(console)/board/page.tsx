@@ -26,7 +26,7 @@ export default async function BoardPage({ searchParams }: { searchParams: Promis
         aside={
           <div className="flex flex-wrap items-center gap-2">
             <DateNav date={date} today={today} basePath="/admin/board" />
-            <Link href={`/admin/bookings/new?date=${date}`} className={buttonClass('primary', 'sm')}>
+            <Link href={`/admin/bookings/new?date=${date}`} className={buttonClass('primary', 'cs')}>
               + 유선·무상 예약
             </Link>
           </div>
