@@ -142,7 +142,13 @@ export function Closing({ z }: { z: number }) {
           style={WILL}
           {...blockIn(8, '14%', 0.78, 0.45, inView)}
         >
-          <p>© 2026 주식회사 에이비씨웍스글로벌</p>
+          <div className="flex items-baseline justify-between gap-4">
+            <p>© 2026 주식회사 에이비씨웍스글로벌</p>
+            {/* 관리자 진입(별도 레이아웃이라 종이 전환 없이 일반 이동) */}
+            <a href="/admin" className="flex-none font-medium text-ink/45 underline-offset-4 transition-colors hover:text-ink hover:underline">
+              관리자
+            </a>
+          </div>
           <p className="mt-1">
             대표 황혜진 · 사업자등록번호 442-87-01602 · 통신판매업신고 제2021-서울강서-1055호 · 서울특별시 강서구 마곡중앙로 171, 5층 513호 씨(마곡동) · campingclub2020@naver.com
           </p>
