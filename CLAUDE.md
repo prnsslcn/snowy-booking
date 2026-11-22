@@ -391,15 +391,16 @@ pending_payment ──(결제 승인)──▶ confirmed ──(취소 요청)�
   - **`HOLIDAY_API_KEY`는 로컬 `.env.local`에 값이 비어 있음** — 공공데이터 불러오기는 키 넣은 뒤 확인 필요(Vercel에도 설정)
   - 4단계: 매출(`/admin/sales`: 이용일 기준, 프리셋·직접 기간(새로고침 시 이번 달), 매출·예약 수·점유율·취소율·상품별·일별) + 월말보고 xlsx(`/api/admin/report?from&to`: 요약·예약 내역(토스) 시트). 집계 `lib/admin/sales.ts`
 - **관리자 1차 범위 완료(2026-11-20).** 남은 것: `HOLIDAY_API_KEY` (약관 3종 · 이용 안내 `/guide`(+`/faq`→`#faq`) 은 2026-11-20 게시. 오시는 길 `/location` 은 만들어 두었으나 **`LOCATION_ENABLED=false`로 비활성**(메뉴 숨김·404). 2026-11-21 운영자: 당분간 필요 없음, 필요해지면 요청. 약관은 운영자 검토 대기, 주소는 소노 공식 오시는 길 기준 `ADDRESS`)
-- **운영 DB 관리자 계정 발급됨(2026-11-20, 공유 계정 1개 — 비밀번호는 문서에 적지 않음).** 이후 관리자 화면 작업은 `pnpm dev`(3000, 운영 DB)에서 진행. `.env.local`은 fake 결제가 켜져 있어 3000에서 예약하면 운영 DB에 실제 확정 예약이 생기므로 테스트 예약은 최소화·사후 정리. 로컬 문자 발송은 `NOTIFICATIONS_DISABLED=1`
+- **운영 DB 관리자 계정 발급됨(2026-11-20, 공유 계정 1개 — 비밀번호는 문서에 적지 않음).** 운영 데이터 확인은 배포 사이트(`snowy-booking.vercel.app/admin`)에서
 - 관리자 DB 함수는 이미 있음(0010) — 화면만 만들면 된다. 환불 재시도 경로(토스 취소 실패 → cancel_requested → 재시도)는 관리자 화면에서 e2e 검증 예정. fake 토스는 cancelReason에 `[FAIL:CODE]`를 넣으면 실패를 시뮬레이션한다
 
 ### 운영·개발 메모
 
 - **권한:** public 스키마 함수는 anon·authenticated 실행 불가가 원칙(0001에서 기본 권한 회수). 새 함수는 `service_role`에만 명시적 GRANT. grill-booking도 같은 문제를 0038로 수정함
 - **로컬 Supabase:** grill-booking과 동시 실행을 위해 포트 **553xx**(API 55321, DB 55322, Studio 55323). Colima 메모리 2GiB라 realtime·storage·edge·analytics 비활성
-- **두 dev 서버 동시 실행:** 3000(운영 DB)이 떠 있을 때 로컬 DB용은 `NEXT_DIST_DIR=.next-local … next dev --port 3100`(빌드 폴더 분리, `.next-local`은 gitignore·eslint 제외). 실행 중 Next가 tsconfig `include`에 `.next-local/…`를 추가하니 커밋 전 되돌릴 것. 로컬 관리자 계정: `admin@local.test` / `localadmin123`(로컬 DB에만)
-- **로컬 개발 서버는 로컬 DB로:** `.env.local`은 운영 DB를 가리키므로, 개발·테스트 시 `supabase status -o env` 값으로 `NEXT_PUBLIC_SUPABASE_*`/`SUPABASE_SERVICE_ROLE_KEY`를 덮어쓰고 `NEXT_PUBLIC_PAYMENTS_FAKE=1 TOSS_FAKE=1`로 실행
+- **개발 환경(2026-11-22, grill-booking과 같은 방식):** `pnpm dev`(3000) 하나만, **항상 로컬 DB**. `.env.local` = 로컬 Supabase(`supabase status -o env` 값) + 가짜 결제(`NEXT_PUBLIC_PAYMENTS_FAKE=1`, `TOSS_FAKE=1`) + `NOTIFICATIONS_DISABLED=1`. 로컬 Supabase가 꺼져 있으면 `colima start` → `pnpm exec supabase start`. 로컬 관리자 계정: `admin@local.test` / `localadmin123`(로컬 DB에만)
+- **운영 값은 `.env.prod.local`에 보관**(Next가 자동으로 읽지 않는 이름, `.env*` gitignore). 운영 DB를 스크립트로 읽을 일이 있으면 `node --env-file=.env.prod.local …`. **운영 데이터 확인은 배포 사이트(`snowy-booking.vercel.app`)에서** — 로컬 개발 서버를 운영 DB에 붙이지 않는다
+- 두 번째 개발 서버(3100, `NEXT_DIST_DIR=.next-local`)는 더 이상 쓰지 않음. `next.config.ts`의 `NEXT_DIST_DIR` 분기와 gitignore·eslint의 `.next-local` 제외는 남아 있으나 무해
 - **검증 스크립트:** `scripts/db/run-tests.sh`(DB 스모크 + 동시성), `scripts/e2e-api.sh`(고객 API 38개, 로컬 dev 서버 필요)
 - **Vercel:** Production 변수는 기본 Secret. `NEXT_PUBLIC_*`는 **Config** 타입으로 추가해야 함(Secret이면 거부). `next.config.ts`가 `SUPABASE_URL`/`SUPABASE_ANON_KEY`도 `NEXT_PUBLIC_`으로 매핑(우회용). **`NEXT_PUBLIC_PAYMENTS_FAKE`·`TOSS_FAKE`는 Vercel에 절대 넣지 않음**
 - git 원격은 SSH(`git@github.com:prnsslcn/snowy-booking.git`)
