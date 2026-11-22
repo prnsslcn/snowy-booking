@@ -15,7 +15,7 @@ import { Badge } from '@/components/ui/Badge';
 import { Button } from '@/components/ui/Button';
 import { Field, Input } from '@/components/ui/Field';
 import { errorMessage } from '@/lib/booking/error-messages';
-import { PAYMENTS_FAKE, PayError, payAndConfirmFake, reserveClient } from '@/lib/client/pay';
+import { PAYMENTS_FAKE, PayError, payAndConfirmFake, releaseClient, reserveClient } from '@/lib/client/pay';
 import { requestTossPayment } from '@/lib/client/toss-payment';
 import { thumbOf } from '@/lib/content/facilities';
 import { formatDateKorean, formatPhone, formatWon } from '@/lib/format';
@@ -140,6 +140,13 @@ export default function BookingPageClient({ preferredType }: { preferredType: st
       guestPhone: phone,
       agreed: agreeRefund && agreeRules,
     };
+    // 토스 키가 아직 없으면(가맹점 계약 전) 자리를 잡지 않고 안내만 — 키를 넣으면 자동으로 결제 진행
+    if (!PAYMENTS_FAKE && !process.env.NEXT_PUBLIC_TOSS_CLIENT_KEY) {
+      setPayError('온라인 결제를 준비하고 있습니다. 결제가 열리면 바로 예약하실 수 있습니다.');
+      setSubmitting(false);
+      return;
+    }
+    let heldOrderId: string | null = null;
     try {
       if (PAYMENTS_FAKE) {
         const { orderId } = await payAndConfirmFake(req);
@@ -147,6 +154,7 @@ export default function BookingPageClient({ preferredType }: { preferredType: st
         return;
       }
       const r = await reserveClient(req);
+      heldOrderId = r.orderId;
       await requestTossPayment({
         amount: r.amount,
         orderId: r.orderId,
@@ -155,6 +163,8 @@ export default function BookingPageClient({ preferredType }: { preferredType: st
         customerMobilePhone: parseMobilePhone(phone) ?? undefined,
       });
     } catch (err) {
+      // 결제창이 안 떴거나 손님이 닫음 → 잡아 둔 자리를 바로 돌려준다(10분 기다리지 않게)
+      if (heldOrderId) void releaseClient(heldOrderId).catch(() => {});
       if (err instanceof PayError) {
         setPayError(errorMessage(err.code));
         if (['SOLD_OUT', 'DATE_LOCKED', 'DATE_CLOSED', 'OUT_OF_WINDOW'].includes(err.code)) await load();
