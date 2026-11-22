@@ -106,7 +106,6 @@ async function rpcAction(
   await log(admin.email, action, bookingId, detail);
   if (bookingId) refresh(bookingId);
   revalidatePath('/admin/board');
-  revalidatePath('/admin/map');
   return { ok: true, data };
 }
 
@@ -146,14 +145,14 @@ export async function registerSpecialAction(input: { unitId: string; date: strin
       }),
     { unitId: input.unitId, date: input.date },
   );
-  revalidatePath('/admin/map');
+  revalidatePath('/admin/board');
   return res;
 }
 
 /** 특수 등록 취소(토스 없음). */
 export async function cancelSpecialAction(bookingId: string) {
   const res = await rpcAction('cancel_special', bookingId, () => createAdminClient().rpc('admin_cancel_offline_booking', { p_booking_id: bookingId }));
-  revalidatePath('/admin/map');
+  revalidatePath('/admin/board');
   return res;
 }
 

@@ -23,7 +23,18 @@ export function statusBadge(b: { status: string; cancel_error?: unknown; refund_
 
 export const PAYMENT_STATUS_LABEL: Record<string, string> = { ready: '결제 대기', paid: '결제 완료', cancelled: '결제 취소', partial_cancelled: '부분 취소' };
 
-/** 유닛 이름(카바나 1호 등 — 상품명 포함)이 있으면 그것, 없으면 상품명 */
+/**
+ * 화면에 보여 줄 자리 — 입실(퇴실)한 뒤에만. 특수(S1·S2)는 등록한 자리가 곧 자리.
+ * 그 전의 bookings.unit_id 는 재고 계산용 가배정이라 보여 주지 않는다(2026-11-23 선착순 현장 배정).
+ */
+export function seatLabel(b: { status: string; type: string; label: string | null | undefined }): string | null {
+  if (!b.label) return null;
+  if (b.status === 'checked_in' || b.status === 'checked_out') return b.label;
+  if (b.type === 'special' && b.status === 'confirmed') return b.label;
+  return null;
+}
+
+/** 자리(입실 후)가 있으면 그것, 없으면 상품명 */
 export function unitOrType(b: { unitLabel: string | null; typeName: string }): string {
   return b.unitLabel ?? b.typeName;
 }

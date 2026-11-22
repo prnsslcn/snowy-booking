@@ -82,15 +82,3 @@ export async function getBoard(date: string): Promise<BoardGroup[]> {
     };
   });
 }
-
-/** 예약 상세의 '유닛 옮기기' 선택지 — 같은 상품·같은 날짜의 다른 유닛과 그 상태 */
-export async function moveTargets(bookingId: string): Promise<{ unitId: string; label: string; bookingId: string | null; guestName: string | null; blackout: boolean }[]> {
-  const supabase = createAdminClient();
-  const { data: b } = await supabase.from('bookings').select('type, date, unit_id').eq('id', bookingId).maybeSingle();
-  if (!b) return [];
-  const groups = await getBoard(b.date);
-  const g = groups.find((x) => x.type === b.type);
-  return (g?.cells ?? [])
-    .filter((c) => c.unitId !== b.unit_id)
-    .map((c) => ({ unitId: c.unitId, label: c.label, bookingId: c.booking?.id ?? null, guestName: c.booking?.guestName ?? null, blackout: !c.booking && !!c.blackout }));
-}

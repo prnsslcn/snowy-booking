@@ -1,6 +1,6 @@
 import 'server-only';
 
-import { REVENUE_STATUSES } from '@/lib/admin/labels';
+import { REVENUE_STATUSES, seatLabel } from '@/lib/admin/labels';
 import { kstToday } from '@/lib/policy/booking-window';
 import { createAdminClient } from '@/lib/supabase/admin';
 
@@ -60,7 +60,7 @@ export async function getSales(from: string, to: string): Promise<SalesData> {
   const [main, online, types, units, blackouts, closed] = await Promise.all([
     supabase
       .from('bookings')
-      .select('id, date, type, order_id, lookup_code, guest_name, guest_phone, guest_count, amount, units(label), product_types(name), payments(status, method, approved_at)')
+      .select('id, date, type, status, order_id, lookup_code, guest_name, guest_phone, guest_count, amount, units(label), product_types(name), payments(status, method, approved_at)')
       .eq('source', 'online')
       .in('status', [...REVENUE_STATUSES])
       .gte('date', from)
@@ -78,6 +78,7 @@ export async function getSales(from: string, to: string): Promise<SalesData> {
     id: string;
     date: string;
     type: string;
+    status: string;
     order_id: string;
     lookup_code: string | null;
     guest_name: string;
@@ -97,7 +98,7 @@ export async function getSales(from: string, to: string): Promise<SalesData> {
         date: r.date,
         type: r.type,
         typeName: r.product_types?.name ?? r.type,
-        unitLabel: r.units?.label ?? '',
+        unitLabel: seatLabel({ status: r.status, type: r.type, label: r.units?.label }) ?? '',
         orderId: r.order_id,
         lookupCode: r.lookup_code,
         guestName: r.guest_name,

@@ -4,7 +4,6 @@ import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { useMemo, useState, useTransition } from 'react';
 
-import { shortLabel } from '@/components/admin/Board';
 import { Badge } from '@/components/ui/Badge';
 import { Button, buttonClass } from '@/components/ui/Button';
 import { confirmDialog } from '@/components/ui/Dialog';
@@ -12,11 +11,11 @@ import { fieldClass } from '@/components/ui/Field';
 import { cancelSpecialAction, checkInAction, checkOutAction, registerSpecialAction, seatAction, undoCheckAction } from '@/lib/admin/actions';
 import type { BoardBooking, BoardCell, BoardGroup } from '@/lib/admin/board';
 import { statusBadge } from '@/lib/admin/labels';
-import { MAP_BASE, MAP_BLOCKS, MAP_COLS, SLOT_ORDER, SLOT_ORDER_TENTATIVE, SPECIAL_NUDGE_PX, type MapRow, type MapSlot, type SlotType } from '@/lib/admin/site-map';
+import { MAP_BASE, MAP_BLOCKS, MAP_COLS, SLOT_ORDER, SPECIAL_NUDGE_PX, type MapRow, type MapSlot, type SlotType } from '@/lib/admin/site-map';
 import { formatPhone } from '@/lib/format';
 
 /*
-  현장 배치도(Beta) — 선착순 현장 배정.
+  현장 배정 — 배치도로 선착순 현장 배정(2026-11-23 배치도 Beta 를 정식으로, 예전 유닛 칸 보드는 삭제).
   - 예약의 유닛은 도착 전까지 가배정(재고 계산용)일 뿐이라 배치도에 그리지 않는다.
     배치도의 '찬 자리' = 입실·퇴실한 손님(+ 특수 S1·S2 는 등록한 자리).
   - 손님 도착 → 찾기(이름·전화 뒤 4자리·예약번호) → 고르면 앉을 수 있는 빈자리가 밝아짐 → 원하는 자리를 누르면 배정 + 입실.
@@ -28,6 +27,20 @@ import { formatPhone } from '@/lib/format';
 type Item = { booking: BoardBooking; cell: BoardCell; type: SlotType; typeName: string };
 type Tile = { slot: MapSlot; cell: BoardCell; typeName: string };
 type Run = (fn: () => Promise<{ ok: boolean; error?: string }>, after?: () => void) => void;
+
+/** "카바나 12호" → "12호" (칸 안에서는 상품명 생략) */
+function shortLabel(label: string) {
+  const m = label.match(/(\d+\s*호)$/);
+  return m ? m[1] : label;
+}
+
+/** 폰 자리 목록의 묶음 순서 */
+const PHONE_GROUPS: { type: SlotType; label: string }[] = [
+  { type: 'cabana', label: '카바나' },
+  { type: 'caravan', label: '카라반' },
+  { type: 'caravan_group', label: '단체카라반' },
+  { type: 'special', label: '특수' },
+];
 
 const SEATED = new Set(['checked_in', 'checked_out']);
 const ROW_LINE: Record<MapRow, { tile: number; tag: number }> = { top: { tile: 2, tag: 1 }, bottom: { tile: 4, tag: 5 } };
@@ -190,8 +203,8 @@ export function SiteMap({ groups, date, today }: { groups: BoardGroup[]; date: s
         </p>
       </div>
 
-      {/* 배치도 */}
-      <section className="overflow-x-auto rounded-2xl border border-line bg-white p-4 md:p-5">
+      {/* 배치도 — 태블릿·PC. 폰에서는 아래 '자리 목록'으로 */}
+      <section className="hidden overflow-x-auto rounded-2xl border border-line bg-white p-4 md:block md:p-5">
         <div
           className="grid min-w-[600px] gap-x-[3px]"
           style={{ gridTemplateColumns: `repeat(${MAP_COLS}, minmax(0, 1fr))`, gridTemplateRows: 'auto 72px 128px 72px auto' }}
@@ -276,7 +289,6 @@ export function SiteMap({ groups, date, today }: { groups: BoardGroup[]; date: s
               {l}
             </li>
           ))}
-          {SLOT_ORDER_TENTATIVE && <li className="ml-auto text-ink-3">칸 번호는 임시 순서입니다(1번 위치 확정 전)</li>}
         </ul>
       </section>
 
@@ -306,6 +318,59 @@ export function SiteMap({ groups, date, today }: { groups: BoardGroup[]; date: s
           {searching && hits.length === 0 ? '찾는 예약이 없습니다.' : '도착한 손님을 찾아 고른 뒤 원하는 빈자리를 누르면 배정·입실됩니다. 빈 S1·S2 를 누르면 특수 등록.'}
         </p>
       )}
+
+      {/* 폰: 배치도 칸을 상품별 목록으로(같은 동작). 자리를 고르는 중이면 앉을 수 있는 자리만 */}
+      <section className="space-y-4 md:hidden">
+        {PHONE_GROUPS.map((g) => {
+          const rows = tiles
+            .filter((t) => t.slot.type === g.type)
+            .sort((a, b) => a.cell.label.localeCompare(b.cell.label, 'ko', { numeric: true }))
+            .filter((t) => !seating || canTake(t));
+          if (rows.length === 0) return null;
+          return (
+            <div key={g.type} className="overflow-hidden rounded-2xl border border-line bg-white">
+              <p className="flex items-baseline justify-between px-4 pt-3.5 pb-2 text-[13px] font-semibold">
+                {g.label}
+                <span className="text-[12px] font-normal text-ink-3">빈자리 {freeBy(g.type)}</span>
+              </p>
+              <ul className="divide-y divide-line">
+                {rows.map((t) => {
+                  const occ = occupantOf(t.cell, t.slot.type);
+                  const take = canTake(t);
+                  const isSel = !!occ && occ.id === selectedId;
+                  const clickable = take || !!occ || (!seating && t.slot.type === 'special' && !t.cell.blackout && date >= today);
+                  return (
+                    <li key={t.cell.unitId}>
+                      <button
+                        type="button"
+                        disabled={pending || !clickable}
+                        onClick={() => onTile(t)}
+                        className={`flex min-h-[52px] w-full items-center gap-3 px-4 py-2 text-left ${isSel ? 'bg-ice-50' : ''} ${take ? 'bg-ice-50/60' : ''}`}
+                      >
+                        <span
+                          className={`flex h-9 w-11 flex-none items-center justify-center rounded-md border text-[13px] font-semibold tabular-nums ${
+                            take ? 'border-ice-600 bg-ice-100 text-ice-700' : isSel ? 'border-ice-600 bg-ice-600 text-white' : tileTone(occ, t.cell)
+                          }`}
+                        >
+                          {tileText(t.cell, t.slot.type)}
+                        </span>
+                        <span className={`min-w-0 flex-1 truncate text-[15px] ${occ ? 'font-semibold' : 'text-ink-3'}`}>
+                          {occ ? occ.guestName : t.cell.blackout ? '점검' : take ? '이 자리에 배정' : '빈자리'}
+                        </span>
+                        {occ && (
+                          <span className="flex-none text-[12px] text-ink-2">
+                            {occ.status === 'checked_in' ? '입실' : occ.status === 'checked_out' ? '퇴실' : '특수 등록'}
+                          </span>
+                        )}
+                      </button>
+                    </li>
+                  );
+                })}
+              </ul>
+            </div>
+          );
+        })}
+      </section>
 
       {/* 목록 */}
       <section className="rounded-2xl border border-line bg-white">
@@ -398,10 +463,10 @@ function Selected({
       date > today
         ? '이용일 당일부터 자리 배정·입실을 할 수 있습니다.'
         : free > 0
-          ? `배치도에서 밝게 표시된 빈자리(${free})를 누르면 배정과 함께 입실됩니다.`
+          ? `밝게 표시된 빈자리(${free}) 중 원하는 자리를 누르면 배정과 함께 입실됩니다.`
           : '빈자리가 없습니다.';
   } else if (b.status === 'checked_in' && !special && moving) {
-    hint = free > 0 ? '옮길 빈자리를 배치도에서 누르세요.' : '옮길 빈자리가 없습니다.';
+    hint = free > 0 ? '옮길 빈자리를 누르세요.' : '옮길 빈자리가 없습니다.';
   } else if (b.status === 'pending_payment') {
     hint = '결제 대기 중인 예약입니다.';
   } else if (b.status === 'cancel_requested') {
@@ -415,7 +480,7 @@ function Selected({
           <p className="text-[13px] font-medium text-ice-100/70">{item.typeName}</p>
           <p className="stat mt-0.5 text-[34px] leading-none">{hasSeat ? seatName(item.cell, item.type) : '—'}</p>
         </div>
-        <div className="min-w-0 flex-1">
+        <div className="min-w-0 flex-1 basis-[200px]">
           <div className="flex items-center gap-2">
             <p className="truncate text-[20px] font-semibold tracking-[-0.02em]">{b.guestName}</p>
             <Badge tone={s.tone} surface="dark">
@@ -428,7 +493,7 @@ function Selected({
             {b.note ? ` · ${b.note}` : ''}
           </p>
         </div>
-        <div className="flex flex-wrap gap-2">
+        <div className="flex w-full flex-wrap gap-2 md:w-auto">
           {special && b.status === 'confirmed' && date <= today && (
             <Button size="cs" variant="onDark" disabled={pending} onClick={() => run(() => checkInAction(b.id), onCheckedIn)}>
               입실 처리

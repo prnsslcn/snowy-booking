@@ -15,7 +15,6 @@ import { Snowflake } from '@/components/ui/Snowflake';
 export const ADMIN_NAV = [
   { href: '/admin', label: '대시보드', en: 'Dashboard' },
   { href: '/admin/board', label: '현장 배정', en: 'On-site' },
-  { href: '/admin/map', label: '배치도', en: 'Map · Beta', beta: true },
   { href: '/admin/bookings', label: '예약 관리', en: 'Bookings' },
   { href: '/admin/sales', label: '매출', en: 'Sales' },
   { href: '/admin/calendar', label: '운영 달력', en: 'Calendar' },
@@ -89,7 +88,6 @@ export function AdminShell({ email, children }: { email: string; children: React
                 }`}
               >
                 {n.label}
-                {'beta' in n && <BetaTag />}
               </Link>
             );
           })}
@@ -117,7 +115,6 @@ export function AdminShell({ email, children }: { email: string; children: React
                 className={`shrink-0 rounded-full px-3.5 py-1.5 text-[14px] font-medium transition-colors ${active ? 'bg-glacier text-white' : 'text-ink-2'}`}
               >
                 {n.label}
-                {'beta' in n && <BetaTag onDark={active} />}
               </Link>
             );
           })}
@@ -129,17 +126,6 @@ export function AdminShell({ email, children }: { email: string; children: React
       </main>
       <DialogHost />
     </div>
-  );
-}
-
-/** 시험 중인 메뉴 표시 */
-function BetaTag({ onDark = false }: { onDark?: boolean }) {
-  return (
-    <span
-      className={`ml-1.5 rounded-full px-1.5 py-0.5 align-[1px] font-display text-[10px] font-semibold tracking-[0.02em] ${onDark ? 'bg-white/15 text-white' : 'bg-ice-600/10 text-ice-600'}`}
-    >
-      Beta
-    </span>
   );
 }
 

@@ -1,45 +1,33 @@
 'use client';
 
+import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { useState, useTransition } from 'react';
 
-import { Button } from '@/components/ui/Button';
-import { confirmDialog } from '@/components/ui/Dialog';
-import { fieldClass } from '@/components/ui/Field';
-import { checkInAction, checkOutAction, moveUnitAction, undoCheckAction } from '@/lib/admin/actions';
+import { Button, buttonClass } from '@/components/ui/Button';
+import { checkOutAction, undoCheckAction } from '@/lib/admin/actions';
 
 /*
-  예약 상세 — 현장 처리: 입실 · 퇴실 · 되돌리기 · 다른 유닛으로 옮기기(빈 유닛 이동 / 예약 있는 유닛과 맞바꾸기).
-  현장 배정 화면의 처리 창과 같은 동작.
+  예약 상세 — 현장 처리.
+  자리는 손님이 도착했을 때 현장 배정 화면(배치도)에서 고르며 입실과 함께 정해진다(2026-11-23 선착순).
+  그래서 여기서는 자리 배정·이동을 하지 않고, 입실 후의 퇴실·되돌리기만 둔다.
 */
-
-export interface MoveTarget {
-  unitId: string;
-  label: string;
-  bookingId: string | null;
-  guestName: string | null;
-  blackout: boolean;
-}
 
 export function OnSiteActions({
   bookingId,
   status,
   date,
-  today,
-  unitLabel,
-  targets,
+  seat,
 }: {
   bookingId: string;
   status: string;
   date: string;
-  today: string;
-  unitLabel: string | null;
-  targets: MoveTarget[];
+  /** 입실(특수는 등록) 뒤의 자리. 그 전이면 null */
+  seat: string | null;
 }) {
   const router = useRouter();
   const [pending, start] = useTransition();
   const [error, setError] = useState('');
-  const [target, setTarget] = useState('');
 
   function run(fn: () => Promise<{ ok: boolean; error?: string }>) {
     setError('');
@@ -50,67 +38,44 @@ export function OnSiteActions({
     });
   }
 
-  const active = ['confirmed', 'checked_in', 'checked_out'].includes(status);
-  if (!active)
-    return (
-      <p className="text-[14px] text-ink-2">
-        {status === 'cancel_requested' ? '환불 처리 중인 예약입니다. 현장 처리는 할 수 없습니다.' : status === 'pending_payment' ? '결제 대기 중인 예약입니다.' : '취소·환불된 예약입니다.'}
-      </p>
-    );
-
-  const options = targets.filter((t) => !t.blackout);
+  if (status === 'cancel_requested') return <p className="text-[14px] text-ink-2">환불 처리 중인 예약입니다. 현장 처리는 할 수 없습니다.</p>;
+  if (status === 'pending_payment') return <p className="text-[14px] text-ink-2">결제 대기 중인 예약입니다.</p>;
+  if (!['confirmed', 'checked_in', 'checked_out'].includes(status)) return <p className="text-[14px] text-ink-2">취소·환불된 예약입니다.</p>;
 
   return (
     <div className="space-y-3">
-      <div className="grid grid-cols-2 gap-2">
-        {status === 'confirmed' && (
-          <Button size="cs" className="col-span-2" disabled={pending || date > today} onClick={() => run(() => checkInAction(bookingId))}>
-            입실 처리
-          </Button>
-        )}
-        {status === 'checked_in' && (
-          <Button size="cs" className="col-span-2" disabled={pending} onClick={() => run(() => checkOutAction(bookingId))}>
+      <p className="text-[14px]">
+        <span className="text-ink-2">자리 </span>
+        <b className="font-semibold">{seat ?? '현장 배정 전'}</b>
+      </p>
+      {status === 'confirmed' && (
+        <>
+          <p className="text-[13px] text-ink-2">손님이 도착하면 현장 배정 화면에서 원하는 빈자리를 골라 배정·입실합니다.</p>
+          <Link href={`/admin/board?date=${date}`} className={buttonClass('tint', 'cs', 'w-full')}>
+            현장 배정 열기
+          </Link>
+        </>
+      )}
+      {status === 'checked_in' && (
+        <div className="grid grid-cols-2 gap-2">
+          <Button size="cs" disabled={pending} onClick={() => run(() => checkOutAction(bookingId))}>
             퇴실 처리
           </Button>
-        )}
-        {(status === 'checked_in' || status === 'checked_out') && (
-          <Button size="cs" variant="tint" className="col-span-2" disabled={pending} onClick={() => run(() => undoCheckAction(bookingId))}>
-            {status === 'checked_out' ? '퇴실 되돌리기' : '입실 되돌리기'}
+          <Button size="cs" variant="tint" disabled={pending} onClick={() => run(() => undoCheckAction(bookingId))}>
+            입실 되돌리기
           </Button>
-        )}
-      </div>
-      {status === 'confirmed' && date > today && <p className="text-[12px] text-ink-2">입실 처리는 이용일 당일부터 할 수 있습니다.</p>}
-
-      {options.length > 0 && (
-        <form
-          className="flex gap-2 border-t border-line pt-4"
-          onSubmit={async (e) => {
-            e.preventDefault();
-            const t = options.find((o) => o.unitId === target);
-            if (!t) return;
-            const msg = t.bookingId ? `${unitLabel ?? '이 유닛'} ↔ ${t.label}(${t.guestName}) 맞바꿀까요?` : `${t.label}(으)로 옮길까요?`;
-            if (!(await confirmDialog(msg))) return;
-            run(() => moveUnitAction(bookingId, t.unitId, t.bookingId));
-            setTarget('');
-          }}
-        >
-          <div className="min-w-0 flex-1">
-            <select value={target} onChange={(e) => setTarget(e.target.value)} aria-label="옮길 유닛" className={fieldClass('light', 'appearance-none', 'cs')}>
-            <option value="">다른 유닛으로 옮기기</option>
-            {options.map((o) => (
-              <option key={o.unitId} value={o.unitId}>
-                {o.label} {o.bookingId ? `— ${o.guestName} (맞바꾸기)` : '— 빈 칸'}
-              </option>
-            ))}
-          </select>
-          </div>
-          <Button type="submit" size="cs" variant="tint" disabled={pending || !target}>
-            옮기기
-          </Button>
-        </form>
+        </div>
       )}
-
-      {error && <p role="alert" className="rounded-lg border border-[#d4351c]/20 bg-[#d4351c]/[.05] px-4 py-3 text-[13px] text-[#b42d18]">{error}</p>}
+      {status === 'checked_out' && (
+        <Button size="cs" variant="tint" className="w-full" disabled={pending} onClick={() => run(() => undoCheckAction(bookingId))}>
+          퇴실 되돌리기
+        </Button>
+      )}
+      {error && (
+        <p role="alert" className="text-[13px] text-[#b42d18]">
+          {error}
+        </p>
+      )}
     </div>
   );
 }

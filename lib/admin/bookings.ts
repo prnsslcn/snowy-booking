@@ -1,6 +1,6 @@
 import 'server-only';
 
-import { ACTIVE_STATUSES, REVENUE_STATUSES } from '@/lib/admin/labels';
+import { ACTIVE_STATUSES, REVENUE_STATUSES, seatLabel } from '@/lib/admin/labels';
 import { kstToday } from '@/lib/policy/booking-window';
 import { createAdminClient } from '@/lib/supabase/admin';
 import type { Json } from '@/types/database';
@@ -60,7 +60,7 @@ function toItem(r: Row): BookingListItem {
     source: r.source,
     type: r.type,
     typeName: r.product_types?.name ?? r.type,
-    unitLabel: r.units?.label ?? null,
+    unitLabel: seatLabel({ status: r.status, type: r.type, label: r.units?.label }),
     date: r.date,
     guestName: r.guest_name,
     guestPhone: r.guest_phone,

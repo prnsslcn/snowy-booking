@@ -7,11 +7,9 @@ import { AdminTitle } from '@/components/admin/AdminShell';
 import { BookingActions } from '@/components/admin/BookingActions';
 import { OnSiteActions } from '@/components/admin/OnSiteActions';
 import { Badge } from '@/components/ui/Badge';
-import { moveTargets } from '@/lib/admin/board';
 import { getBooking } from '@/lib/admin/bookings';
 import { PAYMENT_STATUS_LABEL, statusBadge, unitOrType } from '@/lib/admin/labels';
 import { formatDateKorean, formatDateTimeKorean, formatPhone, formatWon } from '@/lib/format';
-import { kstToday } from '@/lib/policy/booking-window';
 import { refundAmount, refundRate } from '@/lib/policy/refund';
 
 export const metadata: Metadata = { title: '예약 상세' };
@@ -28,6 +26,9 @@ const ACTION_LABEL: Record<string, string> = {
   undo_check: '입실·퇴실 되돌리기',
   reassign_unit: '유닛 변경',
   swap_units: '유닛 맞바꾸기',
+  seat: '현장 배정·입실(자리 이동)',
+  register_special: '특수 등록',
+  cancel_special: '특수 등록 취소',
 };
 const NOTI_LABEL: Record<string, string> = { confirm: '예약 확정', cancel: '취소·환불', reminder: '리마인더', change: '변경' };
 const NOTI_STATUS: Record<string, string> = { sent: '발송', failed: '실패', skipped: '발송 안 함', pending: '대기' };
@@ -61,8 +62,6 @@ export default async function BookingDetailPage({ params }: { params: Promise<{ 
 
   const s = statusBadge({ status: b.status, cancel_error: b.cancelError, refund_method: b.refundMethod });
   const snap = (b.priceSnapshot ?? {}) as { rate_kind?: string };
-  const today = kstToday();
-  const targets = ['confirmed', 'checked_in', 'checked_out'].includes(b.status) ? await moveTargets(b.id) : [];
   const err = b.cancelError as { code?: string; message?: string; at?: string } | null;
   const now = new Date();
 
@@ -92,7 +91,7 @@ export default async function BookingDetailPage({ params }: { params: Promise<{ 
               rows={[
                 ['이용일', formatDateKorean(b.date)],
                 ['상품', b.typeName],
-                ['유닛', b.unitLabel ?? '—'],
+                ['자리', b.unitLabel ?? (b.status === 'confirmed' ? '현장 배정 전' : '—')],
                 ['예약자', b.guestName],
                 ['휴대폰', b.guestPhone ? formatPhone(b.guestPhone) : '—'],
                 ...(b.guestCount ? ([['인원', `${b.guestCount}명`]] as [string, ReactNode][]) : []),
@@ -140,7 +139,7 @@ export default async function BookingDetailPage({ params }: { params: Promise<{ 
 
         <div className="order-first space-y-4 lg:order-none">
           <Card title="현장">
-            <OnSiteActions bookingId={b.id} status={b.status} date={b.date} today={today} unitLabel={b.unitLabel} targets={targets} />
+            <OnSiteActions bookingId={b.id} status={b.status} date={b.date} seat={b.unitLabel} />
           </Card>
 
           {b.source === 'online' ? (

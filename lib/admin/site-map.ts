@@ -1,5 +1,5 @@
 /*
-  현장 배치도(Beta) — 위에서 본 자리 배치. 운영자 스프레드시트(2026-11-23)를 바탕으로, 화면에 맞게 당겨 그린 칸 좌표.
+  현장 배정 배치도 — 위에서 본 자리 배치. 운영자 스프레드시트(2026-11-23)를 바탕으로, 화면에 맞게 당겨 그린 칸 좌표.
   좌표 = 화면 그리드 열 번호(1부터), 줄 = 'top' / 'bottom'.
 
     위 줄:   카라반 1~9 · S1 · S2 · (빈 칸) · 카바나 14동
@@ -9,9 +9,9 @@
     예약의 유닛은 그 전까지 가배정일 뿐(admin_seat_booking 이 도착 시 맞바꿈).
   - S1·S2 = 특수(예약 오류·지인 방문 등, 관리자 유선 등록 전용, 온라인 판매 안 함).
 
-  ⚠ 칸 번호 ↔ 유닛 대응(어디서부터 1번인지)은 아직 미정 — 운영자가 추후 알려주기로 함.
-  지금은 임시로 상품별 왼쪽 → 오른쪽(카바나는 아래 줄 다음 위 줄) 순서. 확정되면 SLOT_ORDER 만 바꾼다.
-  단체는 운영자 표시대로 G1 = 1호, G2 = 2호.
+  칸 번호(2026-11-23 운영자 확정): 상품별 왼쪽 → 오른쪽, 카바나는 아래 줄 1~16 다음 위 줄 17~30.
+  단체는 G1 = 1호, G2 = 2호(오른쪽이 G1).
+  유닛은 정렬(sort) 순서로 SLOT_ORDER 의 자리에 앉는다.
 */
 
 export type SlotType = 'cabana' | 'caravan' | 'caravan_group' | 'special';
@@ -57,7 +57,7 @@ export const MAP_BLOCKS: { label: string; row: MapRow; from: number; to: number 
 ];
 
 /**
- * 상품별 자리 순서 = 유닛 정렬 순서(앞에서부터 1호, 2호 …).  ⚠ 임시 — 운영자 확정 후 교체.
+ * 상품별 자리 순서 = 유닛 정렬 순서(앞에서부터 1호, 2호 …). 운영자 확정.
  */
 export const SLOT_ORDER: Record<SlotType, MapSlot[]> = {
   cabana: [...CABANA_BOTTOM, ...CABANA_TOP],
@@ -65,6 +65,3 @@ export const SLOT_ORDER: Record<SlotType, MapSlot[]> = {
   caravan_group: [GROUP_G1, GROUP_G2],
   special: SPECIAL,
 };
-
-/** 번호 순서가 아직 임시인지(화면에 안내) */
-export const SLOT_ORDER_TENTATIVE = true;
