@@ -6,6 +6,7 @@ import { getAdminUser } from '@/lib/admin/auth';
 import { logAdminAction } from '@/lib/admin/audit';
 import { adminErrorMessage } from '@/lib/admin/errors';
 import { RefundError, refundBooking } from '@/lib/booking/refund';
+import { getTossClient } from '@/lib/payments/toss';
 import { createAdminClient } from '@/lib/supabase/admin';
 
 /*
@@ -28,6 +29,7 @@ const REFUND_MESSAGES: Record<string, string> = {
   NOT_CANCELLABLE: '지금 상태에서는 취소할 수 없습니다.',
   NOT_ONLINE: '온라인 결제 예약이 아닙니다.',
   NO_PAYMENT: '결제 정보가 없습니다.',
+  CANCEL_IN_PROGRESS: '다른 취소가 처리되고 있습니다. 1~2분 뒤 새로고침해 결과를 확인해 주세요.',
 };
 
 /**
@@ -79,7 +81,21 @@ export async function manualRefundAction(bookingId: string, amount: number, note
   if (!admin) return { ok: false, error: '로그인이 필요합니다.' };
   if (!Number.isInteger(amount) || amount <= 0) return { ok: false, error: '환불 금액을 확인해 주세요.' };
 
-  const { error } = await createAdminClient().rpc('admin_manual_refund_tx', { p_booking_id: bookingId, p_amount: amount, p_note: note });
+  // 토스에서 이미 취소(환불)된 결제면 계좌로 또 돌려주지 않게 먼저 확인(이중 환불 방지)
+  const supa = createAdminClient();
+  const { data: pay } = await supa.from('payments').select('toss_payment_key').eq('booking_id', bookingId).eq('status', 'paid').maybeSingle();
+  if (pay?.toss_payment_key) {
+    try {
+      const t = await getTossClient().get(pay.toss_payment_key);
+      if (t.status === 'CANCELED' || t.status === 'PARTIAL_CANCELED') {
+        return { ok: false, error: '토스에서 이미 취소(환불)된 결제입니다. 계좌 환불 대신 위의 환불 재시도를 눌러 반영해 주세요.' };
+      }
+    } catch {
+      return { ok: false, error: '토스 결제 상태를 확인하지 못했습니다. 잠시 후 다시 시도해 주세요.' };
+    }
+  }
+
+  const { error } = await supa.rpc('admin_manual_refund_tx', { p_booking_id: bookingId, p_amount: amount, p_note: note });
   if (error) {
     const msg = error.message.includes('INVALID_AMOUNT')
       ? '환불 금액은 1원 이상, 결제 금액 이하여야 합니다.'

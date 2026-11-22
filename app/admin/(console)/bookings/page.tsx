@@ -5,6 +5,7 @@ import { AdminTitle } from '@/components/admin/AdminShell';
 import { BookingRows } from '@/components/admin/BookingRows';
 import { buttonClass } from '@/components/ui/Button';
 import { fieldClass } from '@/components/ui/Field';
+import { requireAdmin } from '@/lib/admin/auth';
 import { listBookings, PAGE_SIZE, STATUS_FILTERS, type ListFilters, type StatusFilter } from '@/lib/admin/bookings';
 import { kstToday } from '@/lib/policy/booking-window';
 
@@ -16,6 +17,7 @@ type SP = { q?: string; status?: string; from?: string; to?: string; page?: stri
 const DATE_RE = /^\d{4}-\d{2}-\d{2}$/;
 
 export default async function BookingsPage({ searchParams }: { searchParams: Promise<SP> }) {
+  await requireAdmin(); // 레이아웃 확인은 화면 이동(RSC) 요청에서 건너뛰어질 수 있어 화면마다 다시 확인
   const sp = await searchParams;
   const filters: ListFilters = {
     q: sp.q?.slice(0, 40),

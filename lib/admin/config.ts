@@ -1,5 +1,6 @@
 import 'server-only';
 
+import { requireAdmin } from '@/lib/admin/auth';
 import { REVENUE_STATUSES } from '@/lib/admin/labels';
 import { kstToday } from '@/lib/policy/booking-window';
 import { createAdminClient } from '@/lib/supabase/admin';
@@ -25,6 +26,7 @@ export interface BlackoutRow {
 }
 
 export async function getUnitsData() {
+  await requireAdmin();
   const supabase = createAdminClient();
   const today = kstToday();
   const [types, units, blackouts] = await Promise.all([
@@ -50,6 +52,7 @@ export async function getUnitsData() {
 }
 
 export async function getPricingData(year: number) {
+  await requireAdmin();
   const supabase = createAdminClient();
   const [types, peaks, holidays] = await Promise.all([
     // 요금은 판매 상품만(특수 S1·S2 는 요금 없음)
@@ -74,6 +77,7 @@ export interface CalendarDayInfo {
 
 /** 달력 한 달 — 휴무·잠금(메모)·공휴일·성수기·예약 수(확정·입실·퇴실) */
 export async function getCalendarMonth(ym: string): Promise<Record<string, CalendarDayInfo>> {
+  await requireAdmin();
   const supabase = createAdminClient();
   const [y, m] = ym.split('-').map(Number);
   const from = `${ym}-01`;

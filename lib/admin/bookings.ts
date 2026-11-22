@@ -1,5 +1,6 @@
 import 'server-only';
 
+import { requireAdmin } from '@/lib/admin/auth';
 import { ACTIVE_STATUSES, REVENUE_STATUSES, seatLabel } from '@/lib/admin/labels';
 import { kstToday } from '@/lib/policy/booking-window';
 import { createAdminClient } from '@/lib/supabase/admin';
@@ -97,6 +98,7 @@ export interface ListFilters {
 export const PAGE_SIZE = 50;
 
 export async function listBookings(f: ListFilters): Promise<{ items: BookingListItem[]; total: number }> {
+  await requireAdmin();
   const supabase = createAdminClient();
   const statuses = STATUS_FILTERS[f.status ?? 'valid'].statuses;
   let query = supabase
@@ -149,6 +151,7 @@ export interface BookingDetail extends BookingListItem {
 }
 
 export async function getBooking(id: string): Promise<BookingDetail | null> {
+  await requireAdmin();
   if (!/^[0-9a-f-]{36}$/i.test(id)) return null;
   const supabase = createAdminClient();
   const { data } = await supabase
@@ -219,6 +222,7 @@ export interface DashboardData {
 }
 
 export async function getDashboard(): Promise<DashboardData> {
+  await requireAdmin();
   const supabase = createAdminClient();
   const today = kstToday();
   const monthStart = `${today.slice(0, 7)}-01`;
@@ -238,7 +242,7 @@ export async function getDashboard(): Promise<DashboardData> {
       .order('created_at'),
     supabase.from('bookings').select(LIST_COLUMNS).eq('status', 'cancel_requested').order('date'),
     // 매출 화면(lib/admin/sales.ts)과 같은 기준: 온라인(토스)만
-    supabase.from('bookings').select('amount').eq('source', 'online').gte('date', monthStart).lte('date', monthEnd).in('status', [...REVENUE_STATUSES]),
+    supabase.from('bookings').select('amount, status, refund_amount').eq('source', 'online').gte('date', monthStart).lte('date', monthEnd).in('status', [...REVENUE_STATUSES, 'refunded']),
     supabase
       .from('bookings')
       .select('id', { count: 'exact', head: true })
@@ -257,14 +261,18 @@ export async function getDashboard(): Promise<DashboardData> {
     dayStatus: a.day_status,
   }));
 
-  const monthRows = (month.data ?? []) as { amount: number }[];
+  // 매출 화면과 같은 기준: 확정·입실·퇴실 금액 + 취소 건의 남은 금액(건수는 확정·입실·퇴실만)
+  const monthAll = (month.data ?? []) as { amount: number; status: string; refund_amount: number | null }[];
+  const monthRows = monthAll
+    .map((r) => ({ amount: r.status === 'refunded' ? r.amount - (r.refund_amount ?? r.amount) : r.amount, kept: r.status === 'refunded' }))
+    .filter((r) => !r.kept || r.amount > 0);
   return {
     today,
     occupancy,
     todayBookings: ((todays.data ?? []) as unknown as Row[]).map(toItem),
     stuckRefunds: ((stuck.data ?? []) as unknown as Row[]).map(toItem),
     monthRevenue: monthRows.reduce((s, r) => s + r.amount, 0),
-    monthCount: monthRows.length,
+    monthCount: monthRows.filter((r) => !r.kept).length,
     upcoming7: upcoming.count ?? 0,
   };
 }

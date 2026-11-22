@@ -23,10 +23,11 @@ export type RefundErrorCode =
   | 'NOT_CANCELLABLE'
   | 'NOT_ONLINE'
   | 'NO_PAYMENT'
+  | 'CANCEL_IN_PROGRESS'
   | 'TOSS_CANCEL_FAILED'
   | 'UNKNOWN';
 
-const KNOWN: RefundErrorCode[] = ['BOOKING_NOT_FOUND', 'NOT_CANCELLABLE', 'NOT_ONLINE', 'NO_PAYMENT'];
+const KNOWN: RefundErrorCode[] = ['BOOKING_NOT_FOUND', 'NOT_CANCELLABLE', 'NOT_ONLINE', 'NO_PAYMENT', 'CANCEL_IN_PROGRESS'];
 
 export class RefundError extends Error {
   readonly code: RefundErrorCode;
@@ -54,6 +55,7 @@ export function refundHttpStatus(code: RefundErrorCode): number {
     case 'NOT_CANCELLABLE':
     case 'NOT_ONLINE':
     case 'NO_PAYMENT':
+    case 'CANCEL_IN_PROGRESS':
       return 409;
     case 'TOSS_CANCEL_FAILED':
       return 502;
@@ -94,9 +96,10 @@ export async function refundBooking(
     return { bookingId: req.booking_id, refundedAmount: 0, outcome: 'ALREADY_REFUNDED' };
   }
 
-  // 2) 환불액
+  // 2) 환불액 — 처음 취소를 요청한 시각 기준(실패 후 다음 날 재시도해도 환불율이 바뀌지 않게, 0014)
   const paid = req.paid_amount ?? 0;
-  let refund = input.fullRefund ? paid : refundAmount(paid, req.usage_date, now);
+  const basis = req.requested_at ? new Date(req.requested_at) : now;
+  let refund = input.fullRefund ? paid : refundAmount(paid, req.usage_date, basis);
   let isPartial = refund > 0 && refund < paid;
   let method: 'toss' | 'none' = refund > 0 ? 'toss' : 'none';
   let raw: Json = { refunded: 0 } as Json;

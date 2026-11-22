@@ -27,8 +27,20 @@ export async function updateSession(request: NextRequest): Promise<NextResponse>
     },
   });
 
-  // getUser()가 토큰 갱신을 트리거한다. 호출 자체가 목적.
-  await supabase.auth.getUser();
+  // getUser()가 토큰 갱신을 트리거한다.
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+
+  // 관리자 화면은 입구에서 한 번 더 막는다(로그인 안 됐으면 로그인으로).
+  // 화면 이동(RSC) 요청은 레이아웃의 확인을 건너뛸 수 있어서 — 관리자 여부(admins)는 화면·데이터 함수가 다시 확인.
+  const path = request.nextUrl.pathname;
+  if (!user && path.startsWith('/admin') && !path.startsWith('/admin/login')) {
+    const url = request.nextUrl.clone();
+    url.pathname = '/admin/login';
+    url.search = '';
+    return NextResponse.redirect(url);
+  }
 
   return response;
 }

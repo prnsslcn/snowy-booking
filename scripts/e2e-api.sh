@@ -9,7 +9,8 @@ PASS=0; FAIL=0; CODE=''
 
 sql() { docker exec -i "$DB" psql -U postgres -qtA -c "$1"; }
 # post <path> <json> → CODE 에 HTTP 상태, $OUT 에 본문
-post() { CODE=$(curl -s -o "$OUT" -w '%{http_code}' -X POST "$BASE$1" -H 'Content-Type: application/json' -H "x-forwarded-for: ${IP:-10.0.0.1}" -d "$2"); }
+# IP 를 안 주면 요청마다 다른 IP(선점 시도 제한 10분 10회에 걸리지 않게)
+post() { CODE=$(curl -s -o "$OUT" -w '%{http_code}' -X POST "$BASE$1" -H 'Content-Type: application/json' -H "x-forwarded-for: ${IP:-10.0.$((RANDOM % 250)).$((RANDOM % 250))}" -d "$2"); }
 j() { node -e 'let s="";process.stdin.on("data",d=>s+=d).on("end",()=>{const o=JSON.parse(s||"{}");console.log(eval(process.argv[1]))})' "$1" < "$OUT"; }
 check() { if [[ "$2" == "$3" ]]; then PASS=$((PASS+1)); echo "ok - $1"; else FAIL=$((FAIL+1)); echo "FAIL - $1 (expected '$3' got '$2') $(head -c 300 "$OUT")"; fi; }
 reserve_body() { printf '{"type":"%s","date":"%s","guestName":"테스트","guestPhone":"%s","guestCount":%s,"agreed":%s}' "$1" "$2" "$3" "$4" "${5:-true}"; }

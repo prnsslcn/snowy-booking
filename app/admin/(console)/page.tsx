@@ -4,6 +4,7 @@ import Link from 'next/link';
 import { AdminTitle } from '@/components/admin/AdminShell';
 import { BookingRows } from '@/components/admin/BookingRows';
 import { StatStrip } from '@/components/admin/StatStrip';
+import { requireAdmin } from '@/lib/admin/auth';
 import { getDashboard } from '@/lib/admin/bookings';
 import { formatDateKorean } from '@/lib/format';
 
@@ -13,6 +14,7 @@ export const dynamic = 'force-dynamic';
 const DAY_STATUS: Record<string, string> = { closed: '휴장', locked: '예약 잠금', out_of_season: '시즌 외', business_closed: '영업 종료' };
 
 export default async function DashboardPage() {
+  await requireAdmin(); // 레이아웃 확인은 화면 이동(RSC) 요청에서 건너뛰어질 수 있어 화면마다 다시 확인
   const d = await getDashboard();
   const totalUnits = d.occupancy.reduce((s, o) => s + o.total, 0);
   const totalSold = d.occupancy.reduce((s, o) => s + o.sold, 0);

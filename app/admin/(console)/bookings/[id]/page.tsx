@@ -7,6 +7,7 @@ import { AdminTitle } from '@/components/admin/AdminShell';
 import { BookingActions } from '@/components/admin/BookingActions';
 import { OnSiteActions } from '@/components/admin/OnSiteActions';
 import { Badge } from '@/components/ui/Badge';
+import { requireAdmin } from '@/lib/admin/auth';
 import { getBooking } from '@/lib/admin/bookings';
 import { PAYMENT_STATUS_LABEL, statusBadge, unitOrType } from '@/lib/admin/labels';
 import { formatDateKorean, formatDateTimeKorean, formatPhone, formatWon } from '@/lib/format';
@@ -56,6 +57,7 @@ function Rows({ rows }: { rows: [string, ReactNode][] }) {
 }
 
 export default async function BookingDetailPage({ params }: { params: Promise<{ id: string }> }) {
+  await requireAdmin(); // 레이아웃 확인은 화면 이동(RSC) 요청에서 건너뛰어질 수 있어 화면마다 다시 확인
   const { id } = await params;
   const b = await getBooking(id);
   if (!b) notFound();

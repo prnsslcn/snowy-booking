@@ -6,6 +6,7 @@ import { EphemeralRange } from '@/components/admin/EphemeralRange';
 import { StatStrip } from '@/components/admin/StatStrip';
 import { buttonClass } from '@/components/ui/Button';
 import { fieldClass } from '@/components/ui/Field';
+import { requireAdmin } from '@/lib/admin/auth';
 import { getSales, salesRanges } from '@/lib/admin/sales';
 import { formatDateKorean, formatWon } from '@/lib/format';
 
@@ -16,6 +17,7 @@ const DATE = /^\d{4}-\d{2}-\d{2}$/;
 const pct = (a: number, b: number) => (b ? `${Math.round((a / b) * 1000) / 10}%` : '—');
 
 export default async function SalesPage({ searchParams }: { searchParams: Promise<{ from?: string; to?: string }> }) {
+  await requireAdmin(); // 레이아웃 확인은 화면 이동(RSC) 요청에서 건너뛰어질 수 있어 화면마다 다시 확인
   const r = salesRanges();
   const sp = await searchParams;
   let from = sp.from && DATE.test(sp.from) ? sp.from : r.thisMonth.from;
@@ -82,7 +84,12 @@ export default async function SalesPage({ searchParams }: { searchParams: Promis
       {/* 합계 */}
       <StatStrip
         items={[
-          { label: '매출', value: s.total.amount.toLocaleString('ko-KR'), unit: '원', note: '토스 결제 기준' },
+          {
+            label: '매출',
+            value: s.total.amount.toLocaleString('ko-KR'),
+            unit: '원',
+            note: s.kept.amount ? `토스 결제 기준 · 취소 후 남은 금액 ${s.kept.amount.toLocaleString('ko-KR')}원 포함` : '토스 결제 기준',
+          },
           { label: '예약', value: `${s.total.count}`, unit: '건', note: '확정·입실·퇴실' },
           {
             label: '점유율',

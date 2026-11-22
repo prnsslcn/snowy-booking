@@ -44,6 +44,8 @@ function parseResult(body: Record<string, unknown>): TossPaymentResult {
 async function call(path: string, init: RequestInit): Promise<TossPaymentResult> {
   const res = await fetch(`${TOSS_API_BASE}${path}`, {
     ...init,
+    // 응답이 오지 않으면 끊는다(서버 함수 시간 초과로 결제만 되고 예약이 안 되는 일 방지 — 승인은 호출 쪽에서 원천 재조회로 복구)
+    signal: AbortSignal.timeout(15_000),
     headers: { Authorization: authHeader(), 'Content-Type': 'application/json', ...init.headers },
   });
   const body = (await res.json().catch(() => ({}))) as Record<string, unknown>;

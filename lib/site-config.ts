@@ -2,8 +2,9 @@
  * 사이트 표시용 고정 정보. [미정] 항목은 null — 운영자 확인 후 채운다(CLAUDE.md §14).
  */
 
-export const SITE_NAME = '스노위랜드 카바나·카라반';
-export const SMS_BRAND = '스노위랜드';
+// '스노위랜드'는 리조트 시설 이름이라 우리 브랜드로 쓰지 않는다(CLAUDE.md §16)
+export const SITE_NAME = '스노위 카바나·카라반';
+export const SMS_BRAND = '스노위 카바나·카라반';
 
 /** 이용 시간(당일 이용, 부 구분 없음). */
 export const USAGE_START = '10:00';

@@ -1,5 +1,8 @@
 import 'server-only';
 
+import { isIP } from 'node:net';
+
+import { kstToday } from '@/lib/policy/booking-window';
 import { refundAmount, refundRate } from '@/lib/policy/refund';
 import { parseMobilePhone } from '@/lib/policy/phone';
 import { createAdminClient } from '@/lib/supabase/admin';
@@ -44,27 +47,17 @@ export async function lookupBooking(
   if (!phone || code.length !== 4) return { ok: false, error: 'VALIDATION_FAILED' };
 
   const supabase = createAdminClient();
-  const since = new Date(now.getTime() - LOOKUP_WINDOW_MINUTES * 60_000).toISOString();
 
-  // 시도 제한(실패 횟수 기준)
-  const [byPhone, byIp] = await Promise.all([
-    supabase
-      .from('lookup_attempts')
-      .select('id', { count: 'exact', head: true })
-      .eq('phone', phone)
-      .eq('success', false)
-      .gte('attempted_at', since),
-    params.ip
-      ? supabase
-          .from('lookup_attempts')
-          .select('id', { count: 'exact', head: true })
-          .eq('ip', params.ip)
-          .eq('success', false)
-          .gte('attempted_at', since)
-      : Promise.resolve({ count: 0 }),
-  ]);
-  if ((byPhone.count ?? 0) >= LOOKUP_MAX_FAILS_PER_PHONE || (byIp.count ?? 0) >= LOOKUP_MAX_FAILS_PER_IP) {
-    return { ok: false, error: 'TOO_MANY_ATTEMPTS' };
+  // 시도 제한: 세기 + 실패로 먼저 기록을 DB 한 번에(번호·IP 잠금) — 동시 요청으로 제한을 넘지 못하게(0014)
+  const { data: attemptId, error: limitError } = await supabase.rpc('lookup_attempt_begin', {
+    p_phone: phone,
+    p_ip: (params.ip ?? null) as string,
+    p_window_minutes: LOOKUP_WINDOW_MINUTES,
+    p_max_phone: LOOKUP_MAX_FAILS_PER_PHONE,
+    p_max_ip: LOOKUP_MAX_FAILS_PER_IP,
+  });
+  if (limitError) {
+    return { ok: false, error: limitError.message.includes('TOO_MANY_ATTEMPTS') ? 'TOO_MANY_ATTEMPTS' : 'NOT_FOUND' };
   }
 
   const { data } = await supabase
@@ -80,10 +73,11 @@ export async function lookupBooking(
     .limit(1)
     .maybeSingle();
 
-  await supabase.from('lookup_attempts').insert({ phone, ip: params.ip, success: !!data });
+  if (data) await supabase.from('lookup_attempts').update({ success: true }).eq('id', attemptId as number);
   if (!data) return { ok: false, error: 'NOT_FOUND' };
 
-  const cancellable = data.status === 'confirmed' || data.status === 'cancel_requested';
+  // 지난 이용일은 취소 불가(DB request_cancel_tx 도 거절, 0014)
+  const cancellable = (data.status === 'confirmed' && data.date >= kstToday(now)) || data.status === 'cancel_requested';
   const snapshot = (data.price_snapshot ?? {}) as { type_name?: string };
 
   return {
@@ -112,5 +106,6 @@ export async function lookupBooking(
 export function clientIp(headers: Headers): string | null {
   const fwd = headers.get('x-forwarded-for')?.split(',')[0]?.trim();
   const ip = fwd || headers.get('x-real-ip')?.trim() || null;
-  return ip && /^[0-9a-fA-F:.]+$/.test(ip) ? ip : null;
+  // DB inet 으로 넘기므로 올바른 IP 만(아니면 IP 제한 없이 번호 제한만)
+  return ip && isIP(ip) ? ip : null;
 }

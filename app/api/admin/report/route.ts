@@ -43,6 +43,7 @@ function detailSheet(ws: ExcelJS.Worksheet, rows: SalesRow[]) {
     { header: '결제수단', key: 'method', width: 10 },
     { header: '결제일시', key: 'paid', width: 18 },
     { header: '주문번호', key: 'order', width: 28 },
+    { header: '비고', key: 'note', width: 22 },
   ];
   for (const r of rows) {
     ws.addRow({
@@ -56,9 +57,10 @@ function detailSheet(ws: ExcelJS.Worksheet, rows: SalesRow[]) {
       method: r.method ?? '',
       paid: kstDateTime(r.paidAt),
       order: r.orderId,
+      note: r.kind === 'kept' ? '취소 후 남은 금액(규정)' : '',
     });
   }
-  const total = ws.addRow({ name: `${rows.length}건`, amount: rows.reduce((s, r) => s + r.amount, 0), method: '합계' });
+  const total = ws.addRow({ name: `${rows.filter((r) => r.kind !== 'kept').length}건`, amount: rows.reduce((s, r) => s + r.amount, 0), method: '합계' });
   total.font = { bold: true };
   ws.getColumn('amount').numFmt = '#,##0';
   style(ws);
@@ -88,11 +90,12 @@ export async function GET(req: Request): Promise<Response> {
   ];
   sum.addRow({ k: `기간 ${from} ~ ${to} (이용일 기준)` });
   sum.addRow({ k: '매출(토스 결제)', c: s.total.count, a: s.total.amount }).font = { bold: true };
+  if (s.kept.count) sum.addRow({ k: '  └ 그중 취소 후 남은 금액', c: s.kept.count, a: s.kept.amount });
   sum.addRow({});
   for (const t of s.byType) sum.addRow({ k: `${t.name}${t.capacity ? ` (점유율 ${Math.round((t.sold / t.capacity) * 1000) / 10}%)` : ''}`, c: t.count, a: t.amount });
   sum.addRow({});
   sum.addRow({ k: `취소율 ${s.cancel.base ? Math.round((s.cancel.cancelled / s.cancel.base) * 1000) / 10 : 0}% (${s.cancel.cancelled} / ${s.cancel.base}건)` });
-  sum.addRow({ k: '※ 확정·입실·퇴실만 합산. 취소·환불 제외.' });
+  sum.addRow({ k: '※ 확정·입실·퇴실 + 취소 건의 남은 금액(1일 전 50%·당일 취소). 건수는 확정·입실·퇴실만.' });
   sum.getColumn('a').numFmt = '#,##0';
   style(sum);
 

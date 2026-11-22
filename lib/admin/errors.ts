@@ -16,6 +16,7 @@ const MESSAGES: Record<string, string> = {
   NOT_CHECKED_IN: '입실한 예약만 퇴실 처리할 수 있습니다.',
   NOTHING_TO_UNDO: '되돌릴 입실·퇴실 처리가 없습니다.',
   NOT_SEATABLE: '예약 확정·입실 상태에서만 자리를 배정할 수 있습니다.',
+  CANCEL_IN_PROGRESS: '다른 취소가 처리되고 있습니다. 1~2분 뒤 새로고침해 결과를 확인해 주세요.',
   UNIT_OCCUPIED: '이미 다른 손님이 입실한 자리입니다.',
   INVALID_SOURCE: '예약 경로를 확인해 주세요.',
   PRODUCT_NOT_FOUND: '상품을 찾을 수 없습니다.',

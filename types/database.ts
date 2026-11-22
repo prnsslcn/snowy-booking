@@ -59,14 +59,14 @@ isOneToOne: false
                   ]
                 },"bookings": {
                   Row: {
-                    "amount": number,"cancel_error": Json | null,"checked_in_at": string | null,"checked_out_at": string | null,"created_at": string,"date": string,"expires_at": string | null,"guest_count": number | null,"guest_name": string,"guest_phone": string | null,"id": string,"lookup_code": string | null,"manual_refund_note": string | null,"note": string | null,"offline_payment_method": string | null,"order_id": string,"price_snapshot": NonNullable<Json>,"refund_amount": number | null,"refund_method": string | null,"refunded_at": string | null,"source": string,"status": string,"type": string,"unit_id": string,"updated_at": string
+                    "amount": number,"cancel_error": Json | null,"cancel_lock_until": string | null,"cancel_requested_at": string | null,"checked_in_at": string | null,"checked_out_at": string | null,"created_at": string,"date": string,"expires_at": string | null,"guest_count": number | null,"guest_name": string,"guest_phone": string | null,"id": string,"lookup_code": string | null,"manual_refund_note": string | null,"note": string | null,"offline_payment_method": string | null,"order_id": string,"price_snapshot": NonNullable<Json>,"refund_amount": number | null,"refund_method": string | null,"refunded_at": string | null,"source": string,"status": string,"type": string,"unit_id": string,"updated_at": string
                   }
                   ComputedFields: never
                   Insert: {
-                    "amount": number,"cancel_error"?: Json | null,"checked_in_at"?: string | null,"checked_out_at"?: string | null,"created_at"?: string,"date": string,"expires_at"?: string | null,"guest_count"?: number | null,"guest_name": string,"guest_phone"?: string | null,"id"?: string,"lookup_code"?: string | null,"manual_refund_note"?: string | null,"note"?: string | null,"offline_payment_method"?: string | null,"order_id": string,"price_snapshot": NonNullable<Json>,"refund_amount"?: number | null,"refund_method"?: string | null,"refunded_at"?: string | null,"source": string,"status": string,"type": string,"unit_id": string,"updated_at"?: string
+                    "amount": number,"cancel_error"?: Json | null,"cancel_lock_until"?: string | null,"cancel_requested_at"?: string | null,"checked_in_at"?: string | null,"checked_out_at"?: string | null,"created_at"?: string,"date": string,"expires_at"?: string | null,"guest_count"?: number | null,"guest_name": string,"guest_phone"?: string | null,"id"?: string,"lookup_code"?: string | null,"manual_refund_note"?: string | null,"note"?: string | null,"offline_payment_method"?: string | null,"order_id": string,"price_snapshot": NonNullable<Json>,"refund_amount"?: number | null,"refund_method"?: string | null,"refunded_at"?: string | null,"source": string,"status": string,"type": string,"unit_id": string,"updated_at"?: string
                   }
                   Update: {
-                    "amount"?: number,"cancel_error"?: Json | null,"checked_in_at"?: string | null,"checked_out_at"?: string | null,"created_at"?: string,"date"?: string,"expires_at"?: string | null,"guest_count"?: number | null,"guest_name"?: string,"guest_phone"?: string | null,"id"?: string,"lookup_code"?: string | null,"manual_refund_note"?: string | null,"note"?: string | null,"offline_payment_method"?: string | null,"order_id"?: string,"price_snapshot"?: NonNullable<Json>,"refund_amount"?: number | null,"refund_method"?: string | null,"refunded_at"?: string | null,"source"?: string,"status"?: string,"type"?: string,"unit_id"?: string,"updated_at"?: string
+                    "amount"?: number,"cancel_error"?: Json | null,"cancel_lock_until"?: string | null,"cancel_requested_at"?: string | null,"checked_in_at"?: string | null,"checked_out_at"?: string | null,"created_at"?: string,"date"?: string,"expires_at"?: string | null,"guest_count"?: number | null,"guest_name"?: string,"guest_phone"?: string | null,"id"?: string,"lookup_code"?: string | null,"manual_refund_note"?: string | null,"note"?: string | null,"offline_payment_method"?: string | null,"order_id"?: string,"price_snapshot"?: NonNullable<Json>,"refund_amount"?: number | null,"refund_method"?: string | null,"refunded_at"?: string | null,"source"?: string,"status"?: string,"type"?: string,"unit_id"?: string,"updated_at"?: string
                   }
                   Relationships: [
                     {
@@ -203,6 +203,20 @@ isOneToOne: false
                   }
                   Update: {
                     "is_active"?: boolean,"max_capacity"?: number,"name"?: string,"price_weekday"?: number,"price_weekend"?: number,"slug"?: string,"sort"?: number,"type"?: string,"updated_at"?: string
+                  }
+                  Relationships: [
+                    
+                  ]
+                },"rate_events": {
+                  Row: {
+                    "at": string,"id": number,"key": string,"kind": string
+                  }
+                  ComputedFields: never
+                  Insert: {
+                    "at"?: string,"id"?: never,"key": string,"kind": string
+                  }
+                  Update: {
+                    "at"?: string,"id"?: never,"key"?: string,"kind"?: string
                   }
                   Relationships: [
                     
@@ -362,6 +376,9 @@ isOneToOne: false
 "lock_type_date":
 { Args: { "p_date": string,"p_type": string }; Returns: undefined
                            },
+"lookup_attempt_begin":
+{ Args: { "p_ip": unknown,"p_max_ip": number,"p_max_phone": number,"p_phone": string,"p_window_minutes": number }; Returns: number
+                           },
 "pending_payment_timeout":
 { Args: Record<PropertyKey, never>; Returns: string
                            },
@@ -373,6 +390,9 @@ isOneToOne: false
               "rate_kind": string,"unit_price": number
             }[]
                            },
+"rate_hit":
+{ Args: { "p_key": string,"p_kind": string,"p_max": number,"p_window_seconds": number }; Returns: boolean
+                           },
 "record_cancel_error":
 { Args: { "p_booking_id": string,"p_code": string,"p_message": string }; Returns: undefined
                            },
@@ -381,7 +401,7 @@ isOneToOne: false
                            },
 "request_cancel_tx":
 { Args: { "p_admin_override"?: boolean,"p_order_id": string }; Returns: {
-              "booking_id": string,"outcome": string,"paid_amount": number,"payment_key": string,"usage_date": string
+              "booking_id": string,"outcome": string,"paid_amount": number,"payment_key": string,"requested_at": string,"usage_date": string
             }[]
                            },
 "reserve_booking":

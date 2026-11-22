@@ -148,6 +148,9 @@ select pg_temp.expect_error($q$select count(*) from public.bookings$q$, 'permiss
 select pg_temp.ok((select count(*) from public.product_types where is_active) = 3, 'anon 상품 공개 읽기');
 select pg_temp.expect_error($q$select public.admin_seat_booking(gen_random_uuid(), gen_random_uuid())$q$, 'permission denied for function admin_seat_booking');
 select pg_temp.expect_error($q$select public.admin_register_special(gen_random_uuid(), current_date, 'x')$q$, 'permission denied for function admin_register_special');
+select pg_temp.expect_error($q$select public.lookup_attempt_begin('01000000000', null, 15, 5, 20)$q$, 'permission denied for function lookup_attempt_begin');
+select pg_temp.expect_error($q$select public.rate_hit('reserve', 'x', 600, 10)$q$, 'permission denied for function rate_hit');
+select pg_temp.expect_error($q$select count(*) from public.rate_events$q$, 'permission denied for table rate_events');
 reset role;
 set local role authenticated;
 select pg_temp.expect_error(format($q$select public.admin_create_booking('cabana', %L, 'comp', 'x', null, 1)$q$, :'dlit'), 'permission denied for function admin_create_booking');

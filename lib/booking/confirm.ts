@@ -43,31 +43,86 @@ export async function confirmBooking(
   if (pre.status !== 'pending_payment') throw new PaymentError('BOOKING_NOT_PENDING');
   if (input.amount !== pre.amount) throw new PaymentError('AMOUNT_MISMATCH'); // 위변조 — 캡처 전 차단
 
-  const tossResult = await toss.confirm({ ...input, amount: pre.amount });
+  // 토스 승인(캡처). 응답 유실·시간 초과·'이미 승인됨'이면 토스 원천 조회로 실제 상태를 확인해 이어 간다.
+  let tossResult: TossPaymentResult;
+  try {
+    tossResult = await toss.confirm({ ...input, amount: pre.amount });
+  } catch (e) {
+    let current: TossPaymentResult | null = null;
+    try {
+      current = await toss.get(input.paymentKey);
+    } catch {
+      // 조회도 실패 — 원래 오류를 돌려준다(웹훅이 나중에 맞춘다)
+    }
+    if (!current || current.status !== 'DONE' || current.orderId !== input.orderId) {
+      throw e instanceof PaymentError ? e : toPaymentError(e);
+    }
+    tossResult = current;
+  }
 
-  const { data, error } = await supabase.rpc('confirm_booking_tx', {
-    p_order_id: input.orderId,
-    p_payment_key: tossResult.paymentKey,
-    p_amount: tossResult.totalAmount,
-    p_method: (tossResult.method ?? null) as string,
-    p_approved_at: (tossResult.approvedAt ?? null) as string,
-    p_raw: tossResult.raw as Json,
-  });
+  return settlePayment(supabase, toss, input.orderId, tossResult);
+}
+
+/**
+ * 토스에서 결제가 된 뒤 우리 쪽 확정 — 결제 승인 화면과 웹훅(DONE) 둘 다 쓴다.
+ *  - 결제 완료(DONE)·주문번호 일치만 확정. 가상계좌 입금 대기 등은 확정하지 않고 취소(보상).
+ *  - confirm_booking_tx 가 확정 불가(만료·금액 불일치)면 보상 취소.
+ *  - 알 수 없는 DB 오류면 예약 상태를 다시 보고: 이미 확정이면 그대로, 아직 대기면 한 번 더, 아니면 보상.
+ */
+export async function settlePayment(
+  supabase: AdminClient,
+  toss: TossClient,
+  orderId: string,
+  tossResult: TossPaymentResult,
+): Promise<ConfirmResult> {
+  if (tossResult.status !== 'DONE' || tossResult.orderId !== orderId) {
+    await compensate(supabase, toss, tossResult, 'PAYMENT_NOT_COMPLETED');
+    throw new PaymentError('PAYMENT_NOT_COMPLETED');
+  }
+
+  const runTx = () =>
+    supabase.rpc('confirm_booking_tx', {
+      p_order_id: orderId,
+      p_payment_key: tossResult.paymentKey,
+      p_amount: tossResult.totalAmount,
+      p_method: (tossResult.method ?? null) as string,
+      p_approved_at: (tossResult.approvedAt ?? null) as string,
+      p_raw: tossResult.raw as Json,
+    });
+
+  let { data, error } = await runTx();
 
   if (error) {
-    const perr = toPaymentError(error);
+    let perr = toPaymentError(error);
+    if (perr.code === 'UNKNOWN') {
+      const { data: now } = await supabase.from('bookings').select('status, lookup_code').eq('order_id', orderId).maybeSingle();
+      if (now && ['confirmed', 'checked_in', 'checked_out'].includes(now.status)) {
+        return { orderId, lookupCode: now.lookup_code, outcome: 'ALREADY_CONFIRMED' };
+      }
+      if (now?.status === 'pending_payment') {
+        ({ data, error } = await runTx());
+        if (!error) return finish(supabase, orderId, data);
+        perr = toPaymentError(error);
+      }
+      // 확정할 수 없는 상태(만료·취소) — 결제된 돈은 돌려준다
+      if (perr.code === 'UNKNOWN' && now && now.status !== 'pending_payment') perr = new PaymentError('BOOKING_NOT_PENDING', perr.message);
+    }
     if (needsCompensation(perr.code)) await compensate(supabase, toss, tossResult, perr.code);
     throw perr;
   }
 
-  const row = Array.isArray(data) ? data[0] : data;
+  return finish(supabase, orderId, data);
+}
+
+async function finish(supabase: AdminClient, orderId: string, data: unknown): Promise<ConfirmResult> {
+  const row = (Array.isArray(data) ? data[0] : data) as { booking_id: string; lookup_code: string | null; outcome: string } | null;
   if (!row) throw new PaymentError('UNKNOWN', 'confirm 결과가 비어 있습니다.');
 
   if (row.outcome === 'CONFIRMED') {
     await dispatchBookingNotification(supabase, row.booking_id, 'confirm');
   }
   return {
-    orderId: input.orderId,
+    orderId,
     lookupCode: row.lookup_code,
     outcome: row.outcome === 'CONFIRMED' ? 'CONFIRMED' : 'ALREADY_CONFIRMED',
   };

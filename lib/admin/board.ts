@@ -1,5 +1,6 @@
 import 'server-only';
 
+import { requireAdmin } from '@/lib/admin/auth';
 import { ACTIVE_STATUSES } from '@/lib/admin/labels';
 import { createAdminClient } from '@/lib/supabase/admin';
 
@@ -34,6 +35,7 @@ export interface BoardGroup {
 }
 
 export async function getBoard(date: string): Promise<BoardGroup[]> {
+  await requireAdmin();
   const supabase = createAdminClient();
   const [types, units, bookings, blackouts] = await Promise.all([
     // 특수(S1·S2)는 온라인 판매 안 함(is_active=false)이지만 현장에서는 보여야 한다

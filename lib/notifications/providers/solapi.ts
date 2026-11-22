@@ -42,6 +42,8 @@ export const solapiSender: NotificationSender = {
     try {
       const res = await fetch(`${SOLAPI_API_BASE}/messages/v4/send`, {
         method: 'POST',
+        // 문자 업체가 늦어도 결제 확정·환불 응답을 붙잡지 않게(실패는 이력에 '실패'로 남음)
+        signal: AbortSignal.timeout(5_000),
         headers: {
           Authorization: authHeader(),
           'Content-Type': 'application/json',

@@ -1,5 +1,6 @@
 import 'server-only';
 
+import { requireAdmin } from '@/lib/admin/auth';
 import { REVENUE_STATUSES, seatLabel } from '@/lib/admin/labels';
 import { kstToday } from '@/lib/policy/booking-window';
 import { createAdminClient } from '@/lib/supabase/admin';
@@ -43,6 +44,8 @@ export interface SalesRow {
   /** 결제수단(카드 등) */
   method: string | null;
   paidAt: string | null;
+  /** 'kept' = 취소됐지만 규정상 돌려주지 않은 금액(1일 전 50%·당일 취소). amount 가 그 남은 금액 */
+  kind?: 'kept';
 }
 
 export interface SalesData {
@@ -50,14 +53,17 @@ export interface SalesData {
   to: string;
   rows: SalesRow[];
   total: { count: number; amount: number };
+  /** 취소 후 남은 금액(위약금) — total.amount 에 포함, 건수에는 미포함 */
+  kept: { count: number; amount: number };
   cancel: { cancelled: number; base: number };
   byType: { type: string; name: string; count: number; amount: number; sold: number; capacity: number }[];
   byDate: { date: string; count: number; amount: number }[];
 }
 
 export async function getSales(from: string, to: string): Promise<SalesData> {
+  await requireAdmin();
   const supabase = createAdminClient();
-  const [main, online, types, units, blackouts, closed] = await Promise.all([
+  const [main, online, types, units, blackouts, closed, keptQ] = await Promise.all([
     supabase
       .from('bookings')
       .select('id, date, type, status, order_id, lookup_code, guest_name, guest_phone, guest_count, amount, units(label), product_types(name), payments(status, method, approved_at)')
@@ -72,6 +78,14 @@ export async function getSales(from: string, to: string): Promise<SalesData> {
     supabase.from('units').select('id, type').eq('is_active', true),
     supabase.from('unit_blackouts').select('unit_id, from_date, to_date').lte('from_date', to).gte('to_date', from),
     supabase.from('closed_dates').select('date').gte('date', from).lte('date', to),
+    // 취소됐지만 다 돌려주지 않은 금액(1일 전 50%·당일 0%) — 실제로 받은 돈이라 매출에 넣는다
+    supabase
+      .from('bookings')
+      .select('id, date, type, order_id, lookup_code, guest_name, guest_phone, guest_count, amount, refund_amount, product_types(name), payments(status, method, approved_at)')
+      .eq('source', 'online')
+      .eq('status', 'refunded')
+      .gte('date', from)
+      .lte('date', to),
   ]);
 
   type R = {
@@ -111,7 +125,31 @@ export async function getSales(from: string, to: string): Promise<SalesData> {
     })
     .sort((a, b) => a.date.localeCompare(b.date) || a.typeName.localeCompare(b.typeName) || a.unitLabel.localeCompare(b.unitLabel, 'ko', { numeric: true }));
 
+  type K = Omit<R, 'status' | 'units'> & { refund_amount: number | null };
+  const keptRows: SalesRow[] = ((keptQ.data ?? []) as unknown as K[])
+    .map((r) => {
+      const paid = (r.payments ?? []).find((p) => p.status === 'paid' || p.status === 'partial_cancelled' || p.status === 'cancelled') ?? null;
+      return {
+        id: r.id,
+        date: r.date,
+        type: r.type,
+        typeName: r.product_types?.name ?? r.type,
+        unitLabel: '',
+        orderId: r.order_id,
+        lookupCode: r.lookup_code,
+        guestName: r.guest_name,
+        guestPhone: r.guest_phone,
+        guestCount: r.guest_count,
+        amount: r.amount - (r.refund_amount ?? r.amount),
+        method: paid?.method ?? null,
+        paidAt: paid?.approved_at ?? null,
+        kind: 'kept' as const,
+      };
+    })
+    .filter((r) => r.amount > 0);
+
   const total = { count: 0, amount: 0 };
+  const kept = { count: keptRows.length, amount: keptRows.reduce((sum, r) => sum + r.amount, 0) };
   const dateMap = new Map<string, SalesData['byDate'][number]>();
   const typeSum = new Map<string, { count: number; amount: number }>();
   for (const r of rows) {
@@ -123,6 +161,16 @@ export async function getSales(from: string, to: string): Promise<SalesData> {
     dateMap.set(r.date, e);
     const t = typeSum.get(r.type) ?? { count: 0, amount: 0 };
     t.count += 1;
+    t.amount += r.amount;
+    typeSum.set(r.type, t);
+  }
+
+  for (const r of keptRows) {
+    total.amount += r.amount;
+    const e = dateMap.get(r.date) ?? { date: r.date, count: 0, amount: 0 };
+    e.amount += r.amount;
+    dateMap.set(r.date, e);
+    const t = typeSum.get(r.type) ?? { count: 0, amount: 0 };
     t.amount += r.amount;
     typeSum.set(r.type, t);
   }
@@ -149,7 +197,7 @@ export async function getSales(from: string, to: string): Promise<SalesData> {
       name: t.name,
       count: s.count,
       amount: s.amount,
-      sold: s.count,
+      sold: s.count, // 남은 금액 건은 유닛을 비웠으므로 판매에 넣지 않는다
       capacity: Math.max(0, unitCount * days.length - blackedDays),
     };
   });
@@ -158,8 +206,9 @@ export async function getSales(from: string, to: string): Promise<SalesData> {
   return {
     from,
     to,
-    rows,
+    rows: [...rows, ...keptRows].sort((a, b) => a.date.localeCompare(b.date) || a.typeName.localeCompare(b.typeName)),
     total,
+    kept,
     cancel: { cancelled: onlineRows.filter((r) => r.status === 'refunded' || r.status === 'cancel_requested').length, base: onlineRows.length },
     byType,
     byDate: [...dateMap.values()].sort((a, b) => b.date.localeCompare(a.date)),

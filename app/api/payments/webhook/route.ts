@@ -8,9 +8,9 @@ import { syncPaymentFromWebhook } from '@/lib/booking/webhook';
  */
 export async function POST(request: Request) {
   try {
-    const body = (await request.json()) as { eventType?: string; data?: { paymentKey?: string } };
+    const body = (await request.json()) as { eventType?: string; data?: { paymentKey?: string; orderId?: string } };
     if (body.eventType === 'PAYMENT_STATUS_CHANGED' && typeof body.data?.paymentKey === 'string') {
-      await syncPaymentFromWebhook(body.data.paymentKey);
+      await syncPaymentFromWebhook(body.data.paymentKey, typeof body.data.orderId === 'string' ? body.data.orderId : null);
     }
   } catch {
     // 삼킴(200 유지)

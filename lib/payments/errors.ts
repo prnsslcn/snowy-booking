@@ -7,6 +7,7 @@ export type PaymentErrorCode =
   | 'BOOKING_NOT_PENDING' // 만료 회수·재시도 대체된 예약(보상 환불 대상)
   | 'AMOUNT_MISMATCH' // 토스 승인액 ≠ 예약 금액(보상 환불 대상)
   | 'TOSS_API_FAILED' // 토스 API 자체 실패
+  | 'PAYMENT_NOT_COMPLETED' // 승인됐지만 결제 완료(DONE)가 아님(가상계좌 입금 대기 등) → 취소
   | 'UNKNOWN';
 
 const KNOWN_CODES: PaymentErrorCode[] = [
@@ -49,6 +50,7 @@ export function paymentHttpStatus(code: PaymentErrorCode): number {
     case 'BOOKING_NOT_PENDING':
       return 409;
     case 'AMOUNT_MISMATCH':
+    case 'PAYMENT_NOT_COMPLETED':
       return 422;
     case 'TOSS_API_FAILED':
       return 502;
