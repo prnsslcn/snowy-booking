@@ -4,6 +4,7 @@ import { motion, useInView } from 'framer-motion';
 import Image from 'next/image';
 import { useRef } from 'react';
 
+import { BusinessInfo } from '@/components/site/BusinessInfo';
 import { blockIn, WILL } from '@/components/site/motion';
 import { usePageTransition } from '@/components/site/PageTransition';
 import { useStickyCover } from '@/components/site/useStickyCover';
@@ -142,16 +143,14 @@ export function Closing({ z }: { z: number }) {
           style={WILL}
           {...blockIn(8, '14%', 0.78, 0.45, inView)}
         >
-          <div className="flex items-baseline justify-between gap-4">
-            <p>© 2026 주식회사 에이비씨웍스글로벌</p>
+          <div className="flex items-start justify-between gap-4">
+            {/* 누르면 사업자 정보가 펼쳐짐(전자상거래법 필수 표시) */}
+            <BusinessInfo className="min-w-0" />
             {/* 관리자 진입(별도 레이아웃이라 종이 전환 없이 일반 이동) */}
             <a href="/admin" className="flex-none font-medium text-ink/45 underline-offset-4 transition-colors hover:text-ink hover:underline">
               Admin
             </a>
           </div>
-          <p className="mt-1">
-            대표 황혜진 · 사업자등록번호 442-87-01602 · 통신판매업신고 제2021-서울강서-1055호 · 서울특별시 강서구 마곡중앙로 171, 5층 513호 씨(마곡동) · campingclub2020@naver.com
-          </p>
         </motion.div>
       </div>
 
