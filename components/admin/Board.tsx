@@ -19,12 +19,12 @@ import { formatPhone } from '@/lib/format';
 */
 
 /** "카바나 12호" → "12호" (칸 안에서는 상품명 생략) */
-function shortLabel(label: string) {
+export function shortLabel(label: string) {
   const m = label.match(/(\d+\s*호)$/);
   return m ? m[1] : label;
 }
 
-function cellTone(c: BoardCell) {
+export function cellTone(c: BoardCell) {
   const s = c.booking?.status;
   if (!c.booking) return c.blackout ? 'border-dashed border-ink/15 bg-[repeating-linear-gradient(135deg,transparent_0_6px,rgba(14,26,43,.04)_6px_12px)] text-ink-3' : 'border-dashed border-ice-300 bg-transparent text-ink-3';
   if (s === 'checked_in') return 'border-glacier bg-glacier text-white';
