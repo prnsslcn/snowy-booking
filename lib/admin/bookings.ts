@@ -237,7 +237,8 @@ export async function getDashboard(): Promise<DashboardData> {
       .order('type')
       .order('created_at'),
     supabase.from('bookings').select(LIST_COLUMNS).eq('status', 'cancel_requested').order('date'),
-    supabase.from('bookings').select('amount').gte('date', monthStart).lte('date', monthEnd).in('status', [...REVENUE_STATUSES]),
+    // 매출 화면(lib/admin/sales.ts)과 같은 기준: 온라인(토스)만
+    supabase.from('bookings').select('amount').eq('source', 'online').gte('date', monthStart).lte('date', monthEnd).in('status', [...REVENUE_STATUSES]),
     supabase
       .from('bookings')
       .select('id', { count: 'exact', head: true })

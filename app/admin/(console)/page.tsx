@@ -52,7 +52,7 @@ export default async function DashboardPage() {
           </div>
         }
         items={[
-          { label: '오늘 점유', value: `${totalSold}`, unit: `/ ${totalUnits}`, note: '확정·입실·퇴실 / 운영 유닛' },
+          { label: '오늘 점유', value: `${totalSold}`, unit: `/ ${totalUnits}`, note: '결제 대기 포함 / 운영 유닛' },
           { label: '오늘 입실', value: `${checkedIn}`, unit: `/ ${d.todayBookings.length}`, note: '입실·퇴실 처리 / 오늘 예약' },
           { label: '7일 내 예약', value: `${d.upcoming7}`, unit: '건', note: '오늘 포함, 확정·입실' },
           { label: '이번 달 매출', value: d.monthRevenue.toLocaleString('ko-KR'), unit: '원', note: `이용일 기준 ${d.monthCount}건` },

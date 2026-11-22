@@ -168,17 +168,17 @@ function Sheet({ group, cell, date, today, onClose }: { group: BoardGroup; cell:
 
         <div className="mt-5 grid grid-cols-2 gap-2">
           {canIn && (
-            <Button className="col-span-2" disabled={pending} onClick={() => run(() => checkInAction(b.id))}>
+            <Button size="cs" className="col-span-2" disabled={pending} onClick={() => run(() => checkInAction(b.id))}>
               입실 처리
             </Button>
           )}
           {canOut && (
-            <Button className="col-span-2" disabled={pending} onClick={() => run(() => checkOutAction(b.id))}>
+            <Button size="cs" className="col-span-2" disabled={pending} onClick={() => run(() => checkOutAction(b.id))}>
               퇴실 처리
             </Button>
           )}
           {canUndo && (
-            <Button variant="tint" className="col-span-2" disabled={pending} onClick={() => run(() => undoCheckAction(b.id))}>
+            <Button size="cs" variant="tint" className="col-span-2" disabled={pending} onClick={() => run(() => undoCheckAction(b.id))}>
               {b.status === 'checked_out' ? '퇴실 되돌리기' : '입실 되돌리기'}
             </Button>
           )}

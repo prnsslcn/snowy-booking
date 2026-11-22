@@ -51,7 +51,12 @@ export function OnSiteActions({
   }
 
   const active = ['confirmed', 'checked_in', 'checked_out'].includes(status);
-  if (!active) return <p className="text-[14px] text-ink-2">취소·환불된 예약입니다.</p>;
+  if (!active)
+    return (
+      <p className="text-[14px] text-ink-2">
+        {status === 'cancel_requested' ? '환불 처리 중인 예약입니다. 현장 처리는 할 수 없습니다.' : status === 'pending_payment' ? '결제 대기 중인 예약입니다.' : '취소·환불된 예약입니다.'}
+      </p>
+    );
 
   const options = targets.filter((t) => !t.blackout);
 
@@ -59,17 +64,17 @@ export function OnSiteActions({
     <div className="space-y-3">
       <div className="grid grid-cols-2 gap-2">
         {status === 'confirmed' && (
-          <Button className="col-span-2" disabled={pending || date > today} onClick={() => run(() => checkInAction(bookingId))}>
+          <Button size="cs" className="col-span-2" disabled={pending || date > today} onClick={() => run(() => checkInAction(bookingId))}>
             입실 처리
           </Button>
         )}
         {status === 'checked_in' && (
-          <Button className="col-span-2" disabled={pending} onClick={() => run(() => checkOutAction(bookingId))}>
+          <Button size="cs" className="col-span-2" disabled={pending} onClick={() => run(() => checkOutAction(bookingId))}>
             퇴실 처리
           </Button>
         )}
         {(status === 'checked_in' || status === 'checked_out') && (
-          <Button variant="tint" className="col-span-2" disabled={pending} onClick={() => run(() => undoCheckAction(bookingId))}>
+          <Button size="cs" variant="tint" className="col-span-2" disabled={pending} onClick={() => run(() => undoCheckAction(bookingId))}>
             {status === 'checked_out' ? '퇴실 되돌리기' : '입실 되돌리기'}
           </Button>
         )}

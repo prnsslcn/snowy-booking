@@ -30,6 +30,7 @@ const ACTION_LABEL: Record<string, string> = {
   swap_units: '유닛 맞바꾸기',
 };
 const NOTI_LABEL: Record<string, string> = { confirm: '예약 확정', cancel: '취소·환불', reminder: '리마인더', change: '변경' };
+const NOTI_STATUS: Record<string, string> = { sent: '발송', failed: '실패', skipped: '발송 안 함', pending: '대기' };
 
 function Card({ title, children }: { title: string; children: ReactNode }) {
   return (
@@ -137,7 +138,7 @@ export default async function BookingDetailPage({ params }: { params: Promise<{ 
           )}
         </div>
 
-        <div className="space-y-4">
+        <div className="order-first space-y-4 lg:order-none">
           <Card title="현장">
             <OnSiteActions bookingId={b.id} status={b.status} date={b.date} today={today} unitLabel={b.unitLabel} targets={targets} />
           </Card>
@@ -166,7 +167,7 @@ export default async function BookingDetailPage({ params }: { params: Promise<{ 
                 {b.notifications.map((n, i) => (
                   <li key={`n${i}`} className="flex justify-between gap-3 text-ink/70">
                     <span>
-                      문자 · {NOTI_LABEL[n.type] ?? n.type} ({n.recipient === 'admin' ? '관리자' : '고객'}) · {n.status}
+                      문자 · {NOTI_LABEL[n.type] ?? n.type} ({n.recipient === 'admin' ? '관리자' : '고객'}) · {NOTI_STATUS[n.status] ?? n.status}
                     </span>
                     <span className="flex-none tabular-nums text-ink-3">{formatDateTimeKorean(n.sentAt ?? n.createdAt)}</span>
                   </li>
