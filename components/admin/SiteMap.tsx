@@ -12,7 +12,7 @@ import { fieldClass } from '@/components/ui/Field';
 import { cancelSpecialAction, checkInAction, checkOutAction, registerSpecialAction, seatAction, undoCheckAction } from '@/lib/admin/actions';
 import type { BoardBooking, BoardCell, BoardGroup } from '@/lib/admin/board';
 import { statusBadge } from '@/lib/admin/labels';
-import { MAP_BASE, MAP_BLOCKS, MAP_COLS, SLOT_ORDER, SLOT_ORDER_TENTATIVE, type MapRow, type MapSlot, type SlotType } from '@/lib/admin/site-map';
+import { MAP_BASE, MAP_BLOCKS, MAP_COLS, SLOT_ORDER, SLOT_ORDER_TENTATIVE, SPECIAL_NUDGE_PX, type MapRow, type MapSlot, type SlotType } from '@/lib/admin/site-map';
 import { formatPhone } from '@/lib/format';
 
 /*
@@ -204,7 +204,7 @@ export function SiteMap({ groups, date, today }: { groups: BoardGroup[]; date: s
             <p
               key={`${b.row}-${b.from}`}
               className={`flex items-center gap-1.5 whitespace-nowrap text-[12px] font-medium text-ink-2 ${b.row === 'top' ? 'pb-2' : 'pt-2'}`}
-              style={{ gridColumn: `${b.from} / ${b.to + 1}`, gridRow: ROW_LINE[b.row].tag }}
+              style={{ gridColumn: `${b.from} / ${b.to + 1}`, gridRow: ROW_LINE[b.row].tag, translate: b.label === '특수' ? `${SPECIAL_NUDGE_PX}px 0` : undefined }}
             >
               <span className="h-px flex-1 bg-line" />
               {b.label}
@@ -244,7 +244,7 @@ export function SiteMap({ groups, date, today }: { groups: BoardGroup[]; date: s
                       ? 'z-10 scale-110 border-ice-600 bg-ice-600 text-white shadow-[0_0_0_3px_#f0f5fa,0_0_0_5px_#33689f]'
                       : tileTone(occ, t.cell)
                 } ${dim ? 'opacity-25' : ''}`}
-                style={{ gridColumn: t.slot.col, gridRow: ROW_LINE[t.slot.row].tile }}
+                style={{ gridColumn: t.slot.col, gridRow: ROW_LINE[t.slot.row].tile, translate: t.slot.type === 'special' ? `${SPECIAL_NUDGE_PX}px 0` : undefined }}
               >
                 <span>{tileText(t.cell, t.slot.type)}</span>
                 {occ && <span className="max-w-full truncate text-[10px] font-medium leading-none opacity-80">{occ.guestName.slice(0, 3)}</span>}
@@ -313,7 +313,17 @@ export function SiteMap({ groups, date, today }: { groups: BoardGroup[]; date: s
         {list.length === 0 ? (
           <p className="px-5 pt-3 pb-6 text-[14px] text-ink-2 md:px-6">예약이 없습니다.</p>
         ) : (
-          <ul className="mt-2 divide-y divide-line">
+          <>
+          {/* 열 이름 — 칸 배치는 아래 줄과 같은 그리드(폰에서는 줄이 두 칸이라 숨김) */}
+          <div className="mt-3 hidden grid-cols-[minmax(0,1.2fr)_minmax(0,1fr)_90px_90px_96px] gap-x-4 border-b border-line px-6 pb-2.5 text-[12px] font-medium text-ink-3 md:grid"
+          >
+            <span>성명</span>
+            <span>예약 상품</span>
+            <span>휴대폰 뒷번호</span>
+            <span>예약 번호</span>
+            <span />
+          </div>
+          <ul className="mt-2 divide-y divide-line md:mt-0">
             {list.map((x) => {
               const b = x.booking;
               const s = statusBadge({ status: b.status });
@@ -347,6 +357,7 @@ export function SiteMap({ groups, date, today }: { groups: BoardGroup[]; date: s
               );
             })}
           </ul>
+          </>
         )}
       </section>
     </div>

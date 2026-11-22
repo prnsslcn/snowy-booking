@@ -28,6 +28,9 @@ export interface MapSlot {
 const run = (type: SlotType, row: MapRow, from: number, count: number): MapSlot[] =>
   Array.from({ length: count }, (_, i) => ({ id: `${row}-${from + i}`, type, col: from + i, row }));
 
+/** 특수(S1·S2)를 카라반 9 에서 살짝 띄우는 거리(px). 오른쪽 빈 칸 안에서 밀어 카바나와는 여전히 떨어져 있다 */
+export const SPECIAL_NUDGE_PX = 6;
+
 /** 가로 칸 수 */
 export const MAP_COLS = 26;
 
