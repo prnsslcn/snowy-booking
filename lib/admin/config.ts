@@ -52,7 +52,8 @@ export async function getUnitsData() {
 export async function getPricingData(year: number) {
   const supabase = createAdminClient();
   const [types, peaks, holidays] = await Promise.all([
-    supabase.from('product_types').select('type, name, price_weekday, price_weekend, sort').order('sort'),
+    // 요금은 판매 상품만(특수 S1·S2 는 요금 없음)
+    supabase.from('product_types').select('type, name, price_weekday, price_weekend, sort').eq('is_active', true).order('sort'),
     supabase.from('peak_periods').select('id, name, from_date, to_date').order('from_date', { ascending: false }),
     supabase.from('holidays').select('date, name, source').gte('date', `${year}-01-01`).lte('date', `${year}-12-31`).order('date'),
   ]);

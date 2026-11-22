@@ -143,15 +143,21 @@ export default async function BookingDetailPage({ params }: { params: Promise<{ 
             <OnSiteActions bookingId={b.id} status={b.status} date={b.date} today={today} unitLabel={b.unitLabel} targets={targets} />
           </Card>
 
-          <Card title="취소·환불">
-            <BookingActions
-              bookingId={b.id}
-              status={b.status}
-              amount={b.amount}
-              policyRefund={refundAmount(b.amount, b.date, now)}
-              policyRate={refundRate(b.date, now)}
-            />
-          </Card>
+          {b.source === 'online' ? (
+            <Card title="취소·환불">
+              <BookingActions
+                bookingId={b.id}
+                status={b.status}
+                amount={b.amount}
+                policyRefund={refundAmount(b.amount, b.date, now)}
+                policyRate={refundRate(b.date, now)}
+              />
+            </Card>
+          ) : (
+            <Card title="특수 등록">
+              <p className="text-[14px] text-ink-2">관리자가 등록한 무상 자리(S1·S2)입니다. 등록 취소는 배치도에서 합니다.</p>
+            </Card>
+          )}
 
           <Card title="기록">
             {b.actions.length === 0 && b.notifications.length === 0 ? (

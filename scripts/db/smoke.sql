@@ -144,7 +144,10 @@ select pg_temp.expect_error(format($q$select public.reserve_booking('cabana', %L
 select pg_temp.expect_error($q$select public.kst_today()$q$, 'permission denied for function kst_today');
 select pg_temp.expect_error($q$select public.confirm_booking_tx('x', 'x', 1, 'x', now(), '{}')$q$, 'permission denied for function confirm_booking_tx');
 select pg_temp.expect_error($q$select count(*) from public.bookings$q$, 'permission denied for table bookings');
-select pg_temp.ok((select count(*) from public.product_types) = 3, 'anon 상품 공개 읽기');
+-- 판매 상품 3종(특수 S1·S2 는 is_active=false, 0013)
+select pg_temp.ok((select count(*) from public.product_types where is_active) = 3, 'anon 상품 공개 읽기');
+select pg_temp.expect_error($q$select public.admin_seat_booking(gen_random_uuid(), gen_random_uuid())$q$, 'permission denied for function admin_seat_booking');
+select pg_temp.expect_error($q$select public.admin_register_special(gen_random_uuid(), current_date, 'x')$q$, 'permission denied for function admin_register_special');
 reset role;
 set local role authenticated;
 select pg_temp.expect_error(format($q$select public.admin_create_booking('cabana', %L, 'comp', 'x', null, 1)$q$, :'dlit'), 'permission denied for function admin_create_booking');

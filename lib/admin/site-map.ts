@@ -1,85 +1,66 @@
 /*
-  현장 배치도(Beta) — 위에서 본 유닛 위치. 운영자 스프레드시트(2026-11-23) 그대로 옮김.
-  - 열 = 시트의 열 문자(D … AU), 줄 = 'top'(위 줄) / 'bottom'(아래 줄)
-  - 위 줄:   카라반 9대(X~AF) · 빈 열(AG) · 카바나 14동(AH~AU)
-  - 아래 줄: 단체카라반 G2(D)·G1(E) · 빈 열(F) · 카바나 16동(G~V) · 푸드트레일러(AC)
-  - 화면에서는 위 줄(MAP_TOP_SHIFT)·푸드트레일러(MAP_BASE_SHIFT)를 왼쪽으로 당겨 그린다(2026-11-23 운영자: 좌우 빈 곳 줄이고 칸 넓히기).
-    시트 좌표(col)는 그대로 두고 그릴 때만 옮긴다.
+  현장 배치도(Beta) — 위에서 본 자리 배치. 운영자 스프레드시트(2026-11-23)를 바탕으로, 화면에 맞게 당겨 그린 칸 좌표.
+  좌표 = 화면 그리드 열 번호(1부터), 줄 = 'top' / 'bottom'.
 
-  ⚠ 유닛 번호 ↔ 자리 대응은 아직 미정(운영자가 '어디서부터 1번인지' 추후 알려주기로 함).
-  지금은 임시로 상품별 왼쪽 → 오른쪽(카바나는 아래 줄 다음 위 줄) 순서로 유닛 1호부터 앉힌다.
-  확정되면 SLOT_ORDER 의 순서만 바꾸면 된다(배치·화면 코드는 그대로).
-  단체카라반만 운영자 표시대로 G1 = 1호, G2 = 2호.
+    위 줄:   카라반 1~9 · S1 · S2 · (빈 칸) · 카바나 14동
+    아래 줄: 단체 G2 · G1 · (빈 칸) · 카바나 16동 · (빈 칸) · 푸드트레일러(2칸 폭)
+
+  - 자리는 예약 순서와 무관하다(운영자 2026-11-23): 손님이 도착하면 원하는 빈자리를 주고 그 자리로 입실 처리.
+    예약의 유닛은 그 전까지 가배정일 뿐(admin_seat_booking 이 도착 시 맞바꿈).
+  - S1·S2 = 특수(예약 오류·지인 방문 등, 관리자 유선 등록 전용, 온라인 판매 안 함).
+
+  ⚠ 칸 번호 ↔ 유닛 대응(어디서부터 1번인지)은 아직 미정 — 운영자가 추후 알려주기로 함.
+  지금은 임시로 상품별 왼쪽 → 오른쪽(카바나는 아래 줄 다음 위 줄) 순서. 확정되면 SLOT_ORDER 만 바꾼다.
+  단체는 운영자 표시대로 G1 = 1호, G2 = 2호.
 */
 
-export type SlotType = 'cabana' | 'caravan' | 'caravan_group';
+export type SlotType = 'cabana' | 'caravan' | 'caravan_group' | 'special';
 export type MapRow = 'top' | 'bottom';
 
 export interface MapSlot {
-  /** 자리 이름(시트 열 + 줄). 유닛 번호와 무관 */
   id: string;
   type: SlotType;
-  col: string;
+  /** 화면 그리드 열(1부터) */
+  col: number;
   row: MapRow;
 }
 
-/** 시트 열 문자 → 번호(A=1) */
-export function colIndex(col: string): number {
-  return [...col].reduce((n, ch) => n * 26 + (ch.charCodeAt(0) - 64), 0);
-}
+const run = (type: SlotType, row: MapRow, from: number, count: number): MapSlot[] =>
+  Array.from({ length: count }, (_, i) => ({ id: `${row}-${from + i}`, type, col: from + i, row }));
 
-function colsBetween(from: string, to: string): string[] {
-  const out: string[] = [];
-  for (let i = colIndex(from); i <= colIndex(to); i++) {
-    let n = i;
-    let s = '';
-    while (n > 0) {
-      const r = (n - 1) % 26;
-      s = String.fromCharCode(65 + r) + s;
-      n = Math.floor((n - 1) / 26);
-    }
-    out.push(s);
-  }
-  return out;
-}
+/** 가로 칸 수 */
+export const MAP_COLS = 26;
 
-const slots = (type: SlotType, row: MapRow, from: string, to: string): MapSlot[] =>
-  colsBetween(from, to).map((col) => ({ id: `${row}-${col}`, type, col, row }));
+// 위 줄
+const CARAVAN = run('caravan', 'top', 1, 9); //     1~9
+const SPECIAL = run('special', 'top', 10, 2); //    10~11 (S1, S2)
+const CABANA_TOP = run('cabana', 'top', 13, 14); // 13~26
 
-/** 배치도 가로 범위(시트 열) */
-export const MAP_FIRST_COL = 'D';
-export const MAP_LAST_COL = 'AU';
+// 아래 줄
+const GROUP_G2: MapSlot = { id: 'bottom-1', type: 'caravan_group', col: 1, row: 'bottom' };
+const GROUP_G1: MapSlot = { id: 'bottom-2', type: 'caravan_group', col: 2, row: 'bottom' };
+const CABANA_BOTTOM = run('cabana', 'bottom', 4, 16); // 4~19
 
-/** 푸드트레일러 위치(시트 AC, 아래 줄) — 그릴 때 2열 폭 */
-export const MAP_BASE = { col: 'AC', row: 'bottom' as MapRow, label: 'Food Trailer' };
+/** 푸드트레일러(2칸 폭) */
+export const MAP_BASE = { col: 21, span: 2, row: 'bottom' as MapRow, label: 'Food Trailer' };
 
-/**
- * 화면에서만 당기는 열 수(칸 폭을 넓히려고 가로 칸 수를 줄인다, 2026-11-23 운영자).
- * - 위 줄 20열 왼쪽으로: 카라반 첫 칸(X)이 맨 왼쪽(D)에서 시작
- * - 푸드트레일러 5열 왼쪽으로(AC → X): 오른쪽 끝에서 2칸 안쪽(운영자 요청). 전체 폭은 위 줄 기준 24열
- */
-export const MAP_TOP_SHIFT = 20;
-export const MAP_BASE_SHIFT = 5;
-
-/** 같은 상품이 이어진 묶음 — 배치도 위 이름표 */
-export const MAP_BLOCKS: { type: SlotType; row: MapRow; from: string; to: string }[] = [
-  { type: 'caravan', row: 'top', from: 'X', to: 'AF' },
-  { type: 'cabana', row: 'top', from: 'AH', to: 'AU' },
-  { type: 'caravan_group', row: 'bottom', from: 'D', to: 'E' },
-  { type: 'cabana', row: 'bottom', from: 'G', to: 'V' },
+/** 같은 상품이 이어진 묶음 — 이름표 */
+export const MAP_BLOCKS: { label: string; row: MapRow; from: number; to: number }[] = [
+  { label: '카라반', row: 'top', from: 1, to: 9 },
+  { label: '특수', row: 'top', from: 10, to: 11 },
+  { label: '카바나', row: 'top', from: 13, to: 26 },
+  { label: '단체', row: 'bottom', from: 1, to: 2 },
+  { label: '카바나', row: 'bottom', from: 4, to: 19 },
 ];
 
 /**
- * 상품별 자리 순서 = 유닛 번호 순서(앞에서부터 1호, 2호 …).  ⚠ 임시 — 운영자 확정 후 교체.
+ * 상품별 자리 순서 = 유닛 정렬 순서(앞에서부터 1호, 2호 …).  ⚠ 임시 — 운영자 확정 후 교체.
  */
 export const SLOT_ORDER: Record<SlotType, MapSlot[]> = {
-  cabana: [...slots('cabana', 'bottom', 'G', 'V'), ...slots('cabana', 'top', 'AH', 'AU')],
-  caravan: slots('caravan', 'top', 'X', 'AF'),
-  // 운영자 표시: E = G1, D = G2
-  caravan_group: [
-    { id: 'bottom-E', type: 'caravan_group', col: 'E', row: 'bottom' },
-    { id: 'bottom-D', type: 'caravan_group', col: 'D', row: 'bottom' },
-  ],
+  cabana: [...CABANA_BOTTOM, ...CABANA_TOP],
+  caravan: CARAVAN,
+  caravan_group: [GROUP_G1, GROUP_G2],
+  special: SPECIAL,
 };
 
 /** 번호 순서가 아직 임시인지(화면에 안내) */

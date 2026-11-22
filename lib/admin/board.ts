@@ -36,7 +36,8 @@ export interface BoardGroup {
 export async function getBoard(date: string): Promise<BoardGroup[]> {
   const supabase = createAdminClient();
   const [types, units, bookings, blackouts] = await Promise.all([
-    supabase.from('product_types').select('type, name, sort').eq('is_active', true).order('sort'),
+    // 특수(S1·S2)는 온라인 판매 안 함(is_active=false)이지만 현장에서는 보여야 한다
+    supabase.from('product_types').select('type, name, sort').or('is_active.eq.true,type.eq.special').order('sort'),
     supabase.from('units').select('id, type, label, sort').eq('is_active', true).order('sort'),
     supabase
       .from('bookings')

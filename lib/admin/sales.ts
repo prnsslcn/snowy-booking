@@ -67,7 +67,8 @@ export async function getSales(from: string, to: string): Promise<SalesData> {
       .lte('date', to),
     // 취소율: 결제까지 끝난 예약 중 취소·환불된 비율
     supabase.from('bookings').select('status').eq('source', 'online').in('status', [...REVENUE_STATUSES, 'cancel_requested', 'refunded']).gte('date', from).lte('date', to),
-    supabase.from('product_types').select('type, name, sort').order('sort'),
+    // 판매 상품만(특수 S1·S2 제외)
+    supabase.from('product_types').select('type, name, sort').eq('is_active', true).order('sort'),
     supabase.from('units').select('id, type').eq('is_active', true),
     supabase.from('unit_blackouts').select('unit_id, from_date, to_date').lte('from_date', to).gte('to_date', from),
     supabase.from('closed_dates').select('date').gte('date', from).lte('date', to),

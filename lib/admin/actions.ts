@@ -106,6 +106,7 @@ async function rpcAction(
   await log(admin.email, action, bookingId, detail);
   if (bookingId) refresh(bookingId);
   revalidatePath('/admin/board');
+  revalidatePath('/admin/map');
   return { ok: true, data };
 }
 
@@ -122,6 +123,40 @@ export async function undoCheckAction(bookingId: string) {
 }
 
 /** 같은 상품·같은 날짜의 다른 유닛으로 — 비어 있으면 옮기고, 예약이 있으면 서로 맞바꾼다 */
+/**
+ * 현장 선착순 배정 — 도착한 손님(확정)을 고른 자리에 앉히고 입실. 입실한 손님이면 자리만 옮긴다.
+ * 그 자리를 아직 안 온 예약이 가배정으로 잡고 있으면 DB 가 맞바꾼다(admin_seat_booking, 0013).
+ */
+export async function seatAction(bookingId: string, unitId: string) {
+  return rpcAction('seat', bookingId, () => createAdminClient().rpc('admin_seat_booking', { p_booking_id: bookingId, p_unit_id: unitId }), { unitId });
+}
+
+/** 특수 자리(S1·S2) 등록 — 예약 오류·지인 방문 등. 무상 0원. */
+export async function registerSpecialAction(input: { unitId: string; date: string; name: string; phone: string; note: string }) {
+  const res = await rpcAction(
+    'register_special',
+    null,
+    () =>
+      createAdminClient().rpc('admin_register_special', {
+        p_unit_id: input.unitId,
+        p_date: input.date,
+        p_guest_name: input.name,
+        p_guest_phone: input.phone || undefined,
+        p_note: input.note || undefined,
+      }),
+    { unitId: input.unitId, date: input.date },
+  );
+  revalidatePath('/admin/map');
+  return res;
+}
+
+/** 특수 등록 취소(토스 없음). */
+export async function cancelSpecialAction(bookingId: string) {
+  const res = await rpcAction('cancel_special', bookingId, () => createAdminClient().rpc('admin_cancel_offline_booking', { p_booking_id: bookingId }));
+  revalidatePath('/admin/map');
+  return res;
+}
+
 export async function moveUnitAction(bookingId: string, unitId: string, swapWithBookingId: string | null) {
   if (swapWithBookingId) {
     return rpcAction('swap_units', bookingId, async () => {

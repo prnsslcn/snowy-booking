@@ -298,6 +298,12 @@ isOneToOne: false
               "from_label": string,"to_label": string
             }[]
                            },
+"admin_register_special":
+{ Args: { "p_date": string,"p_guest_name": string,"p_guest_phone"?: string,"p_note"?: string,"p_unit_id": string }; Returns: string
+                           },
+"admin_seat_booking":
+{ Args: { "p_booking_id": string,"p_unit_id": string }; Returns: string
+                           },
 "admin_set_unit_active":
 { Args: { "p_active": boolean,"p_unit_id": string }; Returns: undefined
                            },
