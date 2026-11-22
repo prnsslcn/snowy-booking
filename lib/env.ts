@@ -36,13 +36,6 @@ export const serverEnv = {
   get solapiSender(): string {
     return required('SOLAPI_SENDER');
   },
-  /** 관리자 알림 수신 번호 목록(쉼표 구분, 선택). 비면 관리자 발송을 건너뛴다. */
-  get adminNotifyPhones(): string[] {
-    return (process.env.ADMIN_NOTIFY_PHONES ?? '')
-      .split(',')
-      .map((p) => p.replace(/\D/g, ''))
-      .filter(Boolean);
-  },
   /** 공공데이터포털 특일 정보 API 서비스 키(공휴일 불러오기). */
   get holidayApiKey(): string {
     return required('HOLIDAY_API_KEY');

@@ -232,7 +232,7 @@ offline/comp: (생성 즉시) confirmed ──admin_cancel_offline──▶ canc
 
 grill-booking과 동일: `booking_id, type(confirm/cancel), channel(sms), recipient(customer/admin), status(pending/sent/failed), sent_at, payload`.
 - 리마인더는 없다(확정). 발송은 Solapi SMS(`lib/notifications/providers/solapi.ts`를 이식).
-- 관리자 수신 번호는 환경변수 `ADMIN_NOTIFY_PHONES`(쉼표 구분)로 둔다. 코드·DB에 하드코딩하지 않는다.
+- 고객에게만 보낸다. 관리자 문자는 없다(2026-11-23 운영자 결정 — 관리자 화면에서 확인). `recipient='admin'` 값은 예전 이력용으로만 남는다.
 
 ### `admins`
 
