@@ -13,9 +13,11 @@ import type { BoardCell, BoardGroup } from '@/lib/admin/board';
 import { statusBadge } from '@/lib/admin/labels';
 import {
   MAP_BASE,
+  MAP_BASE_SHIFT,
   MAP_BLOCKS,
   MAP_FIRST_COL,
   MAP_LAST_COL,
+  MAP_TOP_SHIFT,
   SLOT_ORDER,
   SLOT_ORDER_TENTATIVE,
   colIndex,
@@ -35,10 +37,12 @@ import { formatPhone } from '@/lib/format';
 
 const TYPE_NAME: Record<SlotType, string> = { cabana: '카바나', caravan: '카라반', caravan_group: '단체카라반' };
 const FIRST = colIndex(MAP_FIRST_COL);
-const COLS = colIndex(MAP_LAST_COL) - FIRST + 1;
+// 위 줄은 MAP_TOP_SHIFT 만큼 왼쪽으로 당겨 그린다(시트 좌표는 그대로)
+const gridCol = (col: string, row: MapRow) => colIndex(col) - FIRST + 1 - (row === 'top' ? MAP_TOP_SHIFT : 0);
+const baseCol = gridCol(MAP_BASE.col, MAP_BASE.row) - MAP_BASE_SHIFT;
+const COLS = Math.max(gridCol(MAP_LAST_COL, 'top'), baseCol + 1);
 // 그리드 줄: 1 위 이름표 · 2 위 칸 · 3 가운데 길 · 4 아래 칸 · 5 아래 이름표
 const ROW_LINE: Record<MapRow, { tile: number; tag: number }> = { top: { tile: 2, tag: 1 }, bottom: { tile: 4, tag: 5 } };
-const gridCol = (col: string) => colIndex(col) - FIRST + 1;
 
 type Placed = { slot: MapSlot; cell: BoardCell; typeName: string };
 
@@ -118,20 +122,20 @@ export function SiteMap({ groups, date, today }: { groups: BoardGroup[]; date: s
       </div>
 
       {/* 배치도 */}
-      <section className="overflow-x-auto rounded-2xl border border-line bg-white p-4 md:p-6">
+      <section className="overflow-x-auto rounded-2xl border border-line bg-white p-4 md:p-5">
         <div
-          className="grid min-w-[700px] gap-x-[2px] md:gap-x-[3px]"
-          style={{ gridTemplateColumns: `repeat(${COLS}, minmax(0, 1fr))`, gridTemplateRows: 'auto 64px 72px 64px auto' }}
+          className="grid min-w-[560px] gap-x-[3px]"
+          style={{ gridTemplateColumns: `repeat(${COLS}, minmax(0, 1fr))`, gridTemplateRows: 'auto 72px 128px 72px auto' }}
         >
           {/* 가운데 길 */}
-          <div className="rounded-full bg-ice-50" style={{ gridColumn: `1 / span ${COLS}`, gridRow: 3, margin: '22px 0' }} aria-hidden />
+          <div className="rounded-full bg-ice-50" style={{ gridColumn: `1 / span ${COLS}`, gridRow: 3, margin: '50px 0' }} aria-hidden />
 
           {/* 묶음 이름표 */}
           {MAP_BLOCKS.map((b) => (
             <p
               key={`${b.row}-${b.from}`}
               className={`flex items-center gap-1.5 whitespace-nowrap text-[12px] font-medium text-ink-2 ${b.row === 'top' ? 'pb-2' : 'pt-2'}`}
-              style={{ gridColumn: `${gridCol(b.from)} / ${gridCol(b.to) + 1}`, gridRow: ROW_LINE[b.row].tag }}
+              style={{ gridColumn: `${gridCol(b.from, b.row)} / ${gridCol(b.to, b.row) + 1}`, gridRow: ROW_LINE[b.row].tag }}
             >
               <span className="h-px flex-1 bg-line" />
               {b.type === 'caravan_group' ? '단체' : TYPE_NAME[b.type]}
@@ -139,10 +143,10 @@ export function SiteMap({ groups, date, today }: { groups: BoardGroup[]; date: s
             </p>
           ))}
 
-          {/* Base */}
+          {/* 푸드트레일러 */}
           <div
-            className="flex items-center justify-center rounded-md bg-glacier font-display text-[12px] font-semibold text-ice-50"
-            style={{ gridColumn: `${gridCol(MAP_BASE.col)} / span 2`, gridRow: ROW_LINE[MAP_BASE.row].tile }}
+            className="flex items-center justify-center rounded-md bg-glacier px-1 text-center font-display text-[11px] font-semibold leading-tight text-ice-50 xl:text-[12px]"
+            style={{ gridColumn: `${baseCol} / span 2`, gridRow: ROW_LINE[MAP_BASE.row].tile }}
           >
             {MAP_BASE.label}
           </div>
@@ -164,7 +168,7 @@ export function SiteMap({ groups, date, today }: { groups: BoardGroup[]; date: s
                 className={`relative flex items-center justify-center rounded-md border text-[11px] font-semibold tabular-nums tracking-[-0.03em] transition-[opacity,scale,box-shadow] xl:text-[12px] duration-200 enabled:active:scale-95 ${
                   isSel ? 'z-10 scale-110 border-ice-600 bg-ice-600 text-white shadow-[0_0_0_3px_#f0f5fa,0_0_0_5px_#33689f]' : cellTone(cell)
                 } ${dim ? 'opacity-25' : ''}`}
-                style={{ gridColumn: gridCol(slot.col), gridRow: ROW_LINE[slot.row].tile }}
+                style={{ gridColumn: gridCol(slot.col, slot.row), gridRow: ROW_LINE[slot.row].tile }}
               >
                 {slot.type === 'caravan_group' ? `G${digits(cell.label)}` : digits(cell.label)}
                 {/* 고른 칸 이름표 — 가운데 길 쪽으로 */}

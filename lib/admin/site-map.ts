@@ -2,7 +2,9 @@
   현장 배치도(Beta) — 위에서 본 유닛 위치. 운영자 스프레드시트(2026-11-23) 그대로 옮김.
   - 열 = 시트의 열 문자(D … AU), 줄 = 'top'(위 줄) / 'bottom'(아래 줄)
   - 위 줄:   카라반 9대(X~AF) · 빈 열(AG) · 카바나 14동(AH~AU)
-  - 아래 줄: 단체카라반 G2(D)·G1(E) · 빈 열(F) · 카바나 16동(G~V) · Base(AC)
+  - 아래 줄: 단체카라반 G2(D)·G1(E) · 빈 열(F) · 카바나 16동(G~V) · 푸드트레일러(AC)
+  - 화면에서는 위 줄(MAP_TOP_SHIFT)·푸드트레일러(MAP_BASE_SHIFT)를 왼쪽으로 당겨 그린다(2026-11-23 운영자: 좌우 빈 곳 줄이고 칸 넓히기).
+    시트 좌표(col)는 그대로 두고 그릴 때만 옮긴다.
 
   ⚠ 유닛 번호 ↔ 자리 대응은 아직 미정(운영자가 '어디서부터 1번인지' 추후 알려주기로 함).
   지금은 임시로 상품별 왼쪽 → 오른쪽(카바나는 아래 줄 다음 위 줄) 순서로 유닛 1호부터 앉힌다.
@@ -48,8 +50,16 @@ const slots = (type: SlotType, row: MapRow, from: string, to: string): MapSlot[]
 export const MAP_FIRST_COL = 'D';
 export const MAP_LAST_COL = 'AU';
 
-/** Base(관리 거점) 위치 */
-export const MAP_BASE = { col: 'AC', row: 'bottom' as MapRow, label: 'Base' };
+/** 푸드트레일러 위치(시트 AC, 아래 줄) — 그릴 때 2열 폭 */
+export const MAP_BASE = { col: 'AC', row: 'bottom' as MapRow, label: 'Food Trailer' };
+
+/**
+ * 화면에서만 당기는 열 수(칸 폭을 넓히려고 가로 칸 수를 줄인다, 2026-11-23 운영자).
+ * - 위 줄 20열 왼쪽으로: 카라반 첫 칸(X)이 맨 왼쪽(D)에서 시작
+ * - 푸드트레일러 5열 왼쪽으로(AC → X): 오른쪽 끝에서 2칸 안쪽(운영자 요청). 전체 폭은 위 줄 기준 24열
+ */
+export const MAP_TOP_SHIFT = 20;
+export const MAP_BASE_SHIFT = 5;
 
 /** 같은 상품이 이어진 묶음 — 배치도 위 이름표 */
 export const MAP_BLOCKS: { type: SlotType; row: MapRow; from: string; to: string }[] = [
