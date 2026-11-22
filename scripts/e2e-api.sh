@@ -1,8 +1,8 @@
 #!/usr/bin/env bash
 # 고객 API e2e (fake 결제, 로컬 Supabase). 개발 서버가 로컬 DB + TOSS_FAKE=1 로 떠 있어야 한다.
-#   BASE=http://localhost:3100 scripts/e2e-api.sh
+#   scripts/e2e-api.sh   (BASE 기본 http://localhost:3000)
 set -uo pipefail
-BASE=${BASE:-http://localhost:3100}
+BASE=${BASE:-http://localhost:3000}
 DB=${DB:-supabase_db_snowy-booking}
 OUT=$(mktemp)
 PASS=0; FAIL=0; CODE=''
@@ -54,7 +54,7 @@ check "확정" "$CODE $(j o.outcome)" "200 CONFIRMED"
 C1=$(j o.lookupCode)
 post /api/payments/confirm "$(confirm_body "fakepay_$O1" "$O1" "$A1")"
 check "확정 멱등" "$CODE $(j o.outcome)" "200 ALREADY_CONFIRMED"
-check "알림 이력(고객+관리자)" "$(sql "select count(*) from public.notifications n join public.bookings b on b.id=n.booking_id where b.order_id='$O1' and n.type='confirm'")" "2"
+check "알림 이력(고객만 — 관리자 문자 없음)" "$(sql "select count(*) from public.notifications n join public.bookings b on b.id=n.booking_id where b.order_id='$O1' and n.type='confirm'")" "1"
 CODE=$(curl -s -o "$OUT" -w '%{http_code}' "$BASE/api/availability")
 check "잔여 1 감소" "$(j "o.days.find(d=>d.date==='$D3').types.find(t=>t.type==='caravan').remaining")" "$((BEFORE-1))"
 post /api/bookings/reserve "$(reserve_body cabana "$D3" "$P1" 2)"
@@ -74,7 +74,7 @@ check "환불 미리보기 100%" "$(j o.refundPreview.amount)" "$A1"
 post /api/bookings/cancel "$(code_body "$P1" "$C1")"
 check "취소(100%)" "$CODE $(j o.refundedAmount)" "200 $A1"
 check "payments cancelled" "$(sql "select status from public.payments where toss_order_id='$O1'")" "cancelled"
-check "취소 알림 이력" "$(sql "select count(*) from public.notifications n join public.bookings b on b.id=n.booking_id where b.order_id='$O1' and n.type='cancel'")" "2"
+check "취소 알림 이력(고객만)" "$(sql "select count(*) from public.notifications n join public.bookings b on b.id=n.booking_id where b.order_id='$O1' and n.type='cancel'")" "1"
 post /api/bookings/cancel "$(code_body "$P1" "$C1")"
 check "환불 완료 건 재취소 불가" "$CODE $(j o.error)" "409 NOT_CANCELLABLE"
 post /api/bookings/reserve "$(reserve_body caravan "$D3" "$P1" 2)"
