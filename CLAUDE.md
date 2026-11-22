@@ -135,7 +135,7 @@ snowy-booking은 **`상품 type × 날짜`** 재고형이다. 고객은 유형�
 - **전액 선결제.** 결제 완료되어야 예약 확정
 - 결제 승인은 반드시 **서버에서 토스 API로 재검증** (`/v1/payments/confirm`)
 - 결제 성공 ↔ 예약 확정은 **DB 함수(트랜잭션) 하나**로 묶는다
-- `pending_payment` 선점 타임아웃 (기본 10분) — 만료 시 재고 반환 (pg_cron 등)
+- `pending_payment` 선점 타임아웃 **5분**(2026-11-23, 10분→5분. 0012 + `PENDING_PAYMENT_MINUTES`) — 만료 시 재고 반환 (pg_cron 등)
 - 웹훅으로 상태 변경 수신 시에도 토스 원천 조회로 재확인
 
 ---
@@ -376,7 +376,7 @@ pending_payment ──(결제 승인)──▶ confirmed ──(취소 요청)�
 
 ## 16. 진행 현황 (2026-11-22 기준)
 
-- **완료:** 설계 문서(`docs/schema.md`, `docs/booking-flow.md`) · 마이그레이션 0001~0011(운영 DB 반영됨, 2026-11-22 `migration list`로 확인) · 고객 예약·결제(fake)·조회·취소·환불 흐름 · Vercel 프로덕션 배포(`snowy-booking.vercel.app`)
+- **완료:** 설계 문서(`docs/schema.md`, `docs/booking-flow.md`) · 마이그레이션 0001~0011(운영 DB 반영됨, 2026-11-22 `migration list`로 확인) + 0012(결제 대기 5분, 2026-11-23 운영 반영) · 고객 예약·결제(fake)·조회·취소·환불 흐름 · Vercel 프로덕션 배포(`snowy-booking.vercel.app`)
 - **고객 UI 4차(2026-11-20) — 사용자 프로젝트 aftc(`~/Desktop/dev/aftc`) 홈 구조 이식** (taste-skill 키트·DESIGN.md 방식은 폐기, 파일 삭제):
   - **라우트 그룹 하나** `app/(site)`(홈·예약·조회·결과·/off) — 최상위 레이아웃 1개, `site.css`(Tailwind), Outfit(영문 디스플레이, next/font) + Pretendard(CDN), 바탕 얼음빛 `#f0f5fa`(ice-50, 사이트 전체·전환 종이) + 글자 `ink` #0e1a2b(푸른 기운 진한 남색, 순수 검정 대신) + 얼음 팔레트(`site.css` `glacier` #1f4469 = 상품 장 바탕·주요 버튼, `ice-50~700` = 포인트·옅은 면). 검정 바탕은 쓰지 않음
   - `components/site/`: `Navbar`(fixed, 3겹 progressive blur, 섹션 `data-nav-theme` 감지로 글자색 반전, 모바일 풀스크린 clip-path 메뉴) · `PageTransition`(첫 진입은 블라인드 enter. 사이트 안 이동은 **종이 전환**: 지금 화면을 DOM 복제본으로 얼려 두고(body 맨 앞, 스크롤 상자로 sticky 유지) 새 화면이 위 모서리 48px 종이로 아래에서 올라와 덮음 → 복제본 제거. `#앵커`는 그 뒤 스크롤) · `SmoothScroll`(Lenis) · `TLink`(사이트 안 링크는 이걸로 — 종이 전환) · `Hero` · `Spaces`(상품 장: sticky + 다음 장이 위 모서리 48px 로 덮음, 밝음/어두움 반전, FAQ식 '자세히 보기') · `Closing`(마지막 장) · `PageTitle`/`SubPage`/`SiteFooter`(하위 화면) · `useStickyCover` · `motion.ts`(blockIn)

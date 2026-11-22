@@ -201,7 +201,7 @@ grill-booking과 동일하다.
 ```
 pending_payment ──confirm_booking_tx──▶ confirmed ──request_cancel_tx──▶ cancel_requested ──finalize_refund_tx──▶ refunded
       │                                    │                                     │
-      │ 만료(10분)/결제 실패                │ admin_check_in                      └─admin_manual_refund_tx─▶ refunded
+      │ 만료(5분)/결제 실패                │ admin_check_in                      └─admin_manual_refund_tx─▶ refunded
       ▼                                    ▼
   cancelled                           checked_in ──admin_check_out──▶ checked_out
 
@@ -226,7 +226,7 @@ offline/comp: (생성 즉시) confirmed ──admin_cancel_offline──▶ canc
 | notice_popup (jsonb) | `{enabled, title, body, from, to}` |
 | updated_at | |
 
-예약 가능 기간(1개월), 당일 마감(16시), 결제 대기 시간(10분)은 DB가 아니라 **`lib/policy/booking-window.ts` 상수**로 둔다(grill-booking과 동일). 바꿀 때는 코드 한 줄을 고친다.
+예약 가능 기간(1개월), 당일 마감(16시), 결제 대기 시간(5분, DB `pending_payment_timeout()`과 짝)은 DB가 아니라 **`lib/policy/booking-window.ts` 상수**로 둔다(grill-booking과 동일). 바꿀 때는 코드 한 줄을 고친다.
 
 ### `notifications`
 

@@ -17,7 +17,7 @@ export const BOOKING_WINDOW_MONTHS = 1;
 export const SAME_DAY_CUTOFF_HOUR = 16;
 
 /** 결제 대기(pending_payment) 선점 유지 시간(분). DB pending_payment_timeout()과 일치시킨다. */
-export const PENDING_PAYMENT_MINUTES = 10;
+export const PENDING_PAYMENT_MINUTES = 5;
 
 export interface SeasonRange {
   from: string | null;

@@ -10,7 +10,7 @@
 | 시즌 | 성수기보다 넓음, **날짜 미정** → `site_settings.season_from/to`(null이면 제한 없음) | DB |
 | 예약 가능 기간 | 오늘(KST) ~ 오늘 + 1개월 − 1일 | `lib/policy/booking-window.ts` `BOOKING_WINDOW_MONTHS = 1` |
 | 당일 마감 | 당일 16:00(KST) 이후 당일 예약 불가 | `SAME_DAY_CUTOFF_HOUR = 16` |
-| 결제 대기 | 10분 | `PENDING_PAYMENT_MINUTES = 10` |
+| 결제 대기 | 5분 | `PENDING_PAYMENT_MINUTES = 5` (+ DB 0012) |
 | 1인 1동 | 같은 휴대폰번호로 같은 날 온라인 활성 예약 1건 | DB partial unique |
 | 인원 | 1 ≤ n ≤ 최대(6/8/14), 영유아 포함, 추가 요금 없음 | DB 함수 |
 | 유닛 | 시스템이 내부적으로 가배정한다. **고객에게는 번호를 알리지 않고**, 현장에서 관리자가 배정한다 | — |
@@ -66,12 +66,12 @@
 2. 날짜 검증: 시즌 범위(설정된 경우), `closed_dates` 아님, `locked_dates` 아님, `business_closed` 아님
 3. **`pg_advisory_xact_lock('reserve', type, date)`**: 같은 유형·같은 날짜의 선점을 직렬화한다
 4. 지연 회수: 이 (type, date)와 이 휴대폰·날짜의 만료된 pending을 `cancelled`로 바꾼다
-5. **같은 휴대폰의 같은 날짜 미만료 pending 처리**: 고객이 결제창을 닫고 다시 시도한 경우다. 이전 pending을 `cancelled`로 바꾸고 새로 선점한다(아니면 최대 10분간 재시도가 막힌다)
+5. **같은 휴대폰의 같은 날짜 미만료 pending 처리**: 고객이 결제창을 닫고 다시 시도한 경우다. 이전 pending을 `cancelled`로 바꾸고 새로 선점한다(아니면 최대 5분간 재시도가 막힌다)
    - 이전 건이 뒤늦게 결제 승인되면 [6]의 보상 취소가 처리한다
 6. 빈 유닛 선택: 유형 일치, `is_active`, 그 날짜 점검 아님, 그 날짜 활성 예약 없음 → `order by sort limit 1`. 없으면 **`SOLD_OUT`**
 7. `price_for(type, date)`로 금액을 정하고 `price_snapshot`을 만든다
 8. `lookup_code` 발급: 0000~9999 무작위. `(guest_phone, lookup_code)` 활성 unique에 걸리면 재추첨한다
-9. insert(`pending_payment`, `expires_at = now() + 10분`)
+9. insert(`pending_payment`, `expires_at = now() + 5분`)
    - `(guest_phone, date)` 위반 → **`DUPLICATE_PHONE_DATE`**
    - `(unit_id, date)` 위반 → 정상 경로에서는 발생하지 않는다(advisory lock). 발생하면 `SOLD_OUT`으로 처리하고 로그를 남긴다
 10. `{order_id, amount, order_name, expires_at}` 반환
@@ -181,7 +181,7 @@ grill-booking `lib/booking/confirm.ts`의 흐름을 그대로 쓴다.
 ```
 
 - 빈 유닛이 없는 날짜는 경고창에 "옮길 자리 없음"으로 표시한다. 그 날짜는 점검 기간에서 빼거나 고객과 협의해야 한다
-- `pending_payment` 충돌은 "결제 진행 중, 최대 10분 후 다시 확인"으로 표시한다(옮기기도 가능)
+- `pending_payment` 충돌은 "결제 진행 중, 최대 5분 후 다시 확인"으로 표시한다(옮기기도 가능)
 - 점검이 등록되면 해당 기간에 그 유닛은 자동 배정 후보에서 빠지고, 재고에서도 제외된다
 
 ## 8. 관리자 — 요금·달력·설정

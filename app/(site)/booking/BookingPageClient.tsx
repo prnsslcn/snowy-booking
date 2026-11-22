@@ -424,7 +424,7 @@ export default function BookingPageClient({ preferredType }: { preferredType: st
                 </div>
                 <ul className="space-y-1 text-[13px] text-ink/55">
                   <li>취소·환불: {REFUND_SUMMARY}</li>
-                  <li>결제창에서 10분 안에 결제를 마쳐 주세요. 시간이 지나면 선점한 자리가 풀립니다.</li>
+                  <li>결제창에서 5분 안에 결제를 마쳐 주세요. 시간이 지나면 선점한 자리가 풀립니다.</li>
                 </ul>
 
                 {PAYMENTS_FAKE && (
