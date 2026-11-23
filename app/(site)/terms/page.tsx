@@ -2,6 +2,7 @@ import type { Metadata } from 'next';
 
 import { LegalPage } from '@/components/site/LegalPage';
 import { getLocale } from '@/lib/i18n/server';
+import { BOOKING_WINDOW_EN, BOOKING_WINDOW_KO } from '@/lib/policy/booking-window';
 
 export async function generateMetadata(): Promise<Metadata> {
   return (await getLocale()) === 'en'
@@ -72,7 +73,7 @@ function TermsKo() {
         </li>
         <li>결제는 회사가 지정한 결제대행사(토스페이먼츠)를 통해 처리됩니다.</li>
         <li>
-          예약 가능 기간은 <strong>예약일로부터 1개월 이내</strong>이며, 이용 당일 예약은 <strong>16:00까지</strong>{' '}
+          예약 가능 기간은 <strong>예약일로부터 {BOOKING_WINDOW_KO} 이내</strong>이며, 이용 당일 예약은 <strong>16:00까지</strong>{' '}
           받습니다.
         </li>
         <li>
@@ -178,7 +179,7 @@ function TermsEn() {
         </li>
         <li>Payments are processed through the payment service provider designated by the Company (Toss Payments).</li>
         <li>
-          Bookings can be made for dates <strong>up to one month ahead</strong>. Same-day bookings are accepted{' '}
+          Bookings can be made for dates <strong>up to {BOOKING_WINDOW_EN} ahead</strong>. Same-day bookings are accepted{' '}
           <strong>until 16:00</strong>.
         </li>
         <li>

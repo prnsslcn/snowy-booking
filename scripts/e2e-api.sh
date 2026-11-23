@@ -21,7 +21,7 @@ cleanup() { sql "delete from public.lookup_attempts; delete from public.notifica
 TODAY=$(sql "select public.kst_today()")
 D3=$(sql "select public.kst_today() + 3")
 D1=$(sql "select public.kst_today() + 1")
-FAR=$(sql "select public.kst_today() + 40")
+FAR=$(sql "select public.kst_today() + 130")
 P1=01090000001; P2=01090000002; P3=01090000003; P4=01090000004
 cleanup
 
@@ -37,7 +37,7 @@ BEFORE=$(j "o.days.find(d=>d.date==='$D3').types.find(t=>t.type==='caravan').rem
 post /api/bookings/reserve "$(reserve_body caravan "$D3" "$P1" 2 false)"
 check "동의 없으면 거부" "$CODE $(j o.error)" "400 AGREEMENT_REQUIRED"
 post /api/bookings/reserve "$(reserve_body caravan "$FAR" "$P1" 2)"
-check "1개월 밖 거부" "$CODE $(j o.error)" "400 OUT_OF_WINDOW"
+check "4개월 밖 거부" "$CODE $(j o.error)" "400 OUT_OF_WINDOW"
 post /api/bookings/reserve "$(reserve_body cabana "$D3" "$P1" 7)"
 check "최대 인원 초과 거부" "$CODE $(j o.error)" "400 OVER_CAPACITY"
 post /api/bookings/reserve "$(reserve_body cabana "$D3" "02-123-4567" 2)"

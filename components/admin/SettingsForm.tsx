@@ -7,6 +7,7 @@ import { Button } from '@/components/ui/Button';
 import { confirmDialog } from '@/components/ui/Dialog';
 import { Field, fieldClass } from '@/components/ui/Field';
 import { saveSettingsAction, type SettingsInput } from '@/lib/admin/config-actions';
+import { BOOKING_WINDOW_KO } from '@/lib/policy/booking-window';
 
 /*
   운영 설정(grill-booking 일반설정 이식).
@@ -87,7 +88,7 @@ export function SettingsForm({ initial, year, defaults }: { initial: SettingsInp
 
       <section className="panel">
         <h2 className="panel-title">시즌 운영 기간</h2>
-        <p className="mt-1 text-[13px] text-ink-2">이 기간 밖 날짜는 손님이 예약할 수 없습니다. 비우면 제한 없음(예약 가능 기간 1개월만 적용).</p>
+        <p className="mt-1 text-[13px] text-ink-2">이 기간 밖 날짜는 손님이 예약할 수 없습니다. 비우면 제한 없음(예약 가능 기간 {BOOKING_WINDOW_KO}만 적용).</p>
         <div className="mt-4 grid grid-cols-2 gap-3">
           <Field label="시작">
             <input type="date" value={s.seasonFrom} onChange={(e) => set('seasonFrom', e.target.value)} className={fieldClass('light', 'tabular-nums', 'cs')} />

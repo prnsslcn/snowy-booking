@@ -1,7 +1,8 @@
 /**
  * 예약 가능 기간 — 단일 출처 (docs/booking-flow.md §0).
  *
- * - 오늘(KST)부터 1개월 이내 날짜까지 예약 가능 (예: 11/16 → 12/15까지 = 오늘 + 1개월 − 1일)
+ * - 오늘(KST)부터 4개월 이내 날짜까지 예약 가능 (예: 11/16 → 3/15까지 = 오늘 + 4개월 − 1일)
+ *   (2026-11-23 1개월 → 4개월: 토스페이먼츠 서비스 제공 기간 '4개월 이내' 승인)
  * - 당일 예약은 KST 16시 전까지
  * - 시즌 범위(site_settings.season_from/to)는 DB 설정이라 여기서는 인자로 받는다(null = 제한 없음)
  *
@@ -11,7 +12,11 @@
 const KST_OFFSET_MS = 9 * 60 * 60 * 1000;
 
 /** 예약 가능 기간(개월). 정책 변경 시 이 값만 수정. */
-export const BOOKING_WINDOW_MONTHS = 1;
+export const BOOKING_WINDOW_MONTHS: number = 4;
+
+/** 고객 안내 문구용 기간 표기 — 문구는 숫자를 직접 쓰지 말고 이것을 쓴다. */
+export const BOOKING_WINDOW_KO = `${BOOKING_WINDOW_MONTHS}개월`;
+export const BOOKING_WINDOW_EN = BOOKING_WINDOW_MONTHS === 1 ? 'one month' : `${BOOKING_WINDOW_MONTHS} months`;
 
 /** 당일 예약 마감 시각(KST, 시). 이 시각 이후 당일 예약 불가. */
 export const SAME_DAY_CUTOFF_HOUR = 16;
@@ -42,7 +47,7 @@ export function bookingMaxDate(now: Date = new Date()): string {
   const day = d.getUTCDate();
   d.setUTCDate(1);
   d.setUTCMonth(d.getUTCMonth() + BOOKING_WINDOW_MONTHS);
-  // 월말 넘침 방지: 1/31 + 1개월 → 2/28(29)로 맞춘 뒤 −1일
+  // 월말 넘침 방지: 예) 10/31 + 4개월 → 2/28(29)로 맞춘 뒤 −1일
   const lastDay = new Date(Date.UTC(d.getUTCFullYear(), d.getUTCMonth() + 1, 0)).getUTCDate();
   d.setUTCDate(Math.min(day, lastDay));
   d.setUTCDate(d.getUTCDate() - 1);

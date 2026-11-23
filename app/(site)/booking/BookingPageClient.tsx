@@ -20,7 +20,7 @@ import { requestTossPayment } from '@/lib/client/toss-payment';
 import { thumbOf } from '@/lib/content/facilities';
 import { formatPhone } from '@/lib/format';
 import { formatDate, money, productName, tr } from '@/lib/i18n';
-import { SAME_DAY_CUTOFF_HOUR } from '@/lib/policy/booking-window';
+import { BOOKING_WINDOW_EN, BOOKING_WINDOW_KO, SAME_DAY_CUTOFF_HOUR } from '@/lib/policy/booking-window';
 import { parseMobilePhone } from '@/lib/policy/phone';
 import { notices, USAGE_TIME, usageTime } from '@/lib/site-config';
 import { useLocale } from '@/components/site/LocaleProvider';
@@ -303,7 +303,7 @@ export default function BookingPageClient({ preferredType }: { preferredType: st
             {/* 1. 날짜 */}
             {step === 1 && (
               <div className="mt-6">
-                <p className="mb-5 text-[15px] text-ink/60">{L(`오늘부터 1개월 이내 · 당일 예약 ${CUTOFF}까지`, `Up to one month ahead · same-day bookings until ${CUTOFF}`)}</p>
+                <p className="mb-5 text-[15px] text-ink/60">{L(`오늘부터 ${BOOKING_WINDOW_KO} 이내 · 당일 예약 ${CUTOFF}까지`, `Up to ${BOOKING_WINDOW_EN} ahead · same-day bookings until ${CUTOFF}`)}</p>
                 {avail ? (
                   <Calendar value={date} onSelect={pickDate} days={dayMap} today={avail.today} minDate={avail.minDate} maxDate={avail.maxDate} />
                 ) : (

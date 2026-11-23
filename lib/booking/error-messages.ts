@@ -3,7 +3,7 @@
  */
 
 import { ONE_PER_DAY_NOTICE } from '@/lib/site-config';
-import { SAME_DAY_CUTOFF_HOUR } from '@/lib/policy/booking-window';
+import { BOOKING_WINDOW_EN, BOOKING_WINDOW_KO, SAME_DAY_CUTOFF_HOUR } from '@/lib/policy/booking-window';
 
 const CUTOFF = `${String(SAME_DAY_CUTOFF_HOUR).padStart(2, '0')}:00`;
 
@@ -12,7 +12,7 @@ const MESSAGES: Record<string, string> = {
   DUPLICATE_PHONE_DATE: `${ONE_PER_DAY_NOTICE} 기존 예약은 예약 조회에서 확인해 주세요.`,
   DATE_CLOSED: '휴장일입니다.',
   DATE_LOCKED: '예약이 마감된 날짜입니다.',
-  OUT_OF_WINDOW: `예약은 오늘부터 1개월 이내 날짜만 가능합니다(당일 예약은 ${CUTOFF}까지).`,
+  OUT_OF_WINDOW: `예약은 오늘부터 ${BOOKING_WINDOW_KO} 이내 날짜만 가능합니다(당일 예약은 ${CUTOFF}까지).`,
   OUT_OF_SEASON: '운영 기간이 아닌 날짜입니다.',
   OVER_CAPACITY: '선택하신 상품의 최대 인원을 초과했습니다.',
   INVALID_GUEST_COUNT: '인원을 확인해 주세요.',
@@ -37,7 +37,7 @@ const MESSAGES_EN: Record<string, string> = {
   DUPLICATE_PHONE_DATE: 'Each mobile number can book one unit per day. You can check your existing booking under Find or Cancel a Booking.',
   DATE_CLOSED: 'We are closed on this date.',
   DATE_LOCKED: 'Booking is closed for this date.',
-  OUT_OF_WINDOW: `You can book up to one month ahead (same-day bookings close at ${CUTOFF}).`,
+  OUT_OF_WINDOW: `You can book up to ${BOOKING_WINDOW_EN} ahead (same-day bookings close at ${CUTOFF}).`,
   OUT_OF_SEASON: 'This date is outside our operating season.',
   OVER_CAPACITY: 'This exceeds the maximum number of guests for the selected type.',
   INVALID_GUEST_COUNT: 'Please check the number of guests.',

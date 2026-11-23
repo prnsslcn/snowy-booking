@@ -9,7 +9,7 @@ import { createAdminClient } from '@/lib/supabase/admin';
 /**
  * 온라인 선점(pending_payment). 정합성은 DB reserve_booking(0008)이 단일 트랜잭션으로 보장:
  * 휴대폰·날짜 → 유형·날짜 advisory lock → 지연 회수 → 1인1일 확인 → 빈 유닛 가배정 → 금액(DB) → 삽입.
- * 여기서는 DB가 모르는 정책(1개월·당일 16시 마감)만 먼저 거른다.
+ * 여기서는 DB가 모르는 정책(예약 가능 기간·당일 16시 마감)만 먼저 거른다.
  */
 
 export interface ReserveInput {

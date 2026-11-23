@@ -9,6 +9,7 @@ import { formatKrw } from '@/lib/format';
 import { getProducts } from '@/lib/products';
 import { productName, tr, type Locale } from '@/lib/i18n';
 import { getLocale } from '@/lib/i18n/server';
+import { BOOKING_WINDOW_EN, BOOKING_WINDOW_KO } from '@/lib/policy/booking-window';
 import { notices, usageTime } from '@/lib/site-config';
 
 export async function generateMetadata(): Promise<Metadata> {
@@ -104,7 +105,7 @@ export default async function GuidePage() {
           <Notes items={[t('당일 이용, 하루 1회입니다.', 'Day use, once a day.'), t('조기 입실·연장 이용은 없습니다.', 'Early check-in and extensions are not available.')]} />
         </Card>
 
-        <Card label={t('예약', 'Booking')} title={t('오늘부터 1개월 이내', 'Up to one month ahead')}>
+        <Card label={t('예약', 'Booking')} title={t(`오늘부터 ${BOOKING_WINDOW_KO} 이내`, `Up to ${BOOKING_WINDOW_EN} ahead`)}>
           <Notes
             items={[
               t('당일 예약은 16:00까지 받습니다.', 'Same-day bookings close at 16:00.'),
