@@ -12,7 +12,8 @@
   숨김·등장은 data-swap 속성 + site.css 규칙으로(등장 애니메이션이 남긴 인라인 스타일보다 우선).
 */
 
-const TEXT = 'h1, h2, h3, h4, p, li, dt, dd, th, td, label, legend, a, button, small, strong, b, input, textarea, select';
+// span 도 포함(홈 'Snowy'·배지·달력 월 표시 등). 다른 조각 안의 span 은 바깥 조각 하나로 합쳐진다
+const TEXT = 'h1, h2, h3, h4, p, li, dt, dd, th, td, label, legend, a, button, small, strong, b, span, input, textarea, select';
 
 function hasBox(el: Element): boolean {
   const s = getComputedStyle(el);

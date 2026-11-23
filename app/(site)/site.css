@@ -74,7 +74,7 @@
     translate 0.7s cubic-bezier(0.22, 1, 0.36, 1) var(--swap-delay, 0ms) !important;
 }
 /* 바뀌는 순간 새로 생기는 글자(한국어에만 있는 줄 등)도 처음부터 숨김 — 조각으로 다시 잡힌 뒤 차례로 등장 */
-html[data-swap-phase='wait'] :is(h1, h2, h3, h4, p, li, dt, dd, th, td, label, legend, a, button, small, strong, b, input, textarea, select) {
+html[data-swap-phase='wait'] :is(h1, h2, h3, h4, p, li, dt, dd, th, td, label, legend, a, button, small, strong, b, span, input, textarea, select) {
   opacity: 0 !important;
   transition: none !important;
 }
