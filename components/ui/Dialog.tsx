@@ -3,6 +3,7 @@
 import { AnimatePresence, motion } from 'framer-motion';
 import { useEffect, useRef, useState, useSyncExternalStore } from 'react';
 
+import { useLocale } from '@/components/site/LocaleProvider';
 import { buttonClass } from '@/components/ui/Button';
 
 /*
@@ -42,8 +43,9 @@ function open(kind: Req['kind'], message: string, opts: DialogOptions & { defaul
       kind,
       title,
       body: rest.join('\n').trim(),
-      confirmLabel: opts.confirmLabel ?? '확인',
-      cancelLabel: opts.cancelLabel ?? '취소',
+      // 비워 두면 화면 언어에 맞는 기본 문구(확인/취소 · OK/Cancel)
+      confirmLabel: opts.confirmLabel ?? '',
+      cancelLabel: opts.cancelLabel ?? '',
       danger: opts.danger ?? false,
       defaultValue: opts.defaultValue ?? '',
       resolve,
@@ -85,6 +87,7 @@ export function DialogHost() {
 
 function DialogView({ req }: { req: Req }) {
   const [value, setValue] = useState(req.defaultValue);
+  const en = useLocale() === 'en';
   const okRef = useRef<HTMLButtonElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
   const cancel = () => close(req.kind === 'confirm' ? false : null);
@@ -151,7 +154,7 @@ function DialogView({ req }: { req: Req }) {
         )}
         <div className="mt-6 flex gap-2 sm:justify-end">
           <button type="button" onClick={cancel} className={buttonClass('tint', 'cs', 'flex-1 sm:flex-none')}>
-            {req.cancelLabel}
+            {req.cancelLabel || (en ? 'Cancel' : '취소')}
           </button>
           <button
             ref={okRef}
@@ -159,7 +162,7 @@ function DialogView({ req }: { req: Req }) {
             disabled={req.kind === 'prompt' && !value.trim()}
             className={buttonClass('primary', 'cs', `flex-1 sm:flex-none ${req.danger ? '!bg-[#d4351c] hover:!bg-[#b42d18]' : ''}`)}
           >
-            {req.confirmLabel}
+            {req.confirmLabel || (en ? 'OK' : '확인')}
           </button>
         </div>
       </motion.form>

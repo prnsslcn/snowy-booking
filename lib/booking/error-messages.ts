@@ -32,6 +32,32 @@ const MESSAGES: Record<string, string> = {
   AMOUNT_MISMATCH: '결제 금액이 올바르지 않아 자동 취소되었습니다. 결제된 금액은 환불됩니다.',
 };
 
-export function errorMessage(code: string | undefined | null): string {
+const MESSAGES_EN: Record<string, string> = {
+  SOLD_OUT: 'This type is fully booked for the selected date. Please choose another date or type.',
+  DUPLICATE_PHONE_DATE: 'Each mobile number can book one unit per day. You can check your existing booking under Find or Cancel a Booking.',
+  DATE_CLOSED: 'We are closed on this date.',
+  DATE_LOCKED: 'Booking is closed for this date.',
+  OUT_OF_WINDOW: `You can book up to one month ahead (same-day bookings close at ${CUTOFF}).`,
+  OUT_OF_SEASON: 'This date is outside our operating season.',
+  OVER_CAPACITY: 'This exceeds the maximum number of guests for the selected type.',
+  INVALID_GUEST_COUNT: 'Please check the number of guests.',
+  INVALID_PHONE: 'Please enter a valid Korean mobile number.',
+  NAME_REQUIRED: 'Please enter the name for the booking.',
+  AGREEMENT_REQUIRED: 'Please agree to the refund policy and house rules.',
+  PRODUCT_NOT_FOUND: 'This type is not currently available.',
+  BUSINESS_CLOSED: 'We are not accepting bookings at the moment.',
+  TOO_MANY_ATTEMPTS: 'Too many attempts. Please try again in 15 minutes.',
+  NOT_FOUND: 'No matching booking was found. Please check your mobile number and 4-digit booking number.',
+  NOT_CANCELLABLE: 'This booking cannot be cancelled.',
+  CANCEL_IN_PROGRESS: 'Your cancellation is being processed. Please check the result under Find or Cancel a Booking shortly.',
+  TOO_MANY_REQUESTS: 'Too many requests. Please try again shortly.',
+  PAYMENT_NOT_COMPLETED: 'The payment was not completed, so your booking was not confirmed. Any amount charged will be cancelled automatically.',
+  TOSS_CANCEL_FAILED: 'Your cancellation was received, but the refund is delayed. We will check and process it.',
+  BOOKING_NOT_PENDING: 'Your payment time ran out and the booking was cancelled automatically. Any amount charged will be refunded.',
+  AMOUNT_MISMATCH: 'The payment amount was incorrect, so it was cancelled automatically. Any amount charged will be refunded.',
+};
+
+export function errorMessage(code: string | undefined | null, locale: 'ko' | 'en' = 'ko'): string {
+  if (locale === 'en') return (code && MESSAGES_EN[code]) || 'Something went wrong. Please try again shortly.';
   return (code && MESSAGES[code]) || '처리 중 문제가 발생했습니다. 잠시 후 다시 시도해 주세요.';
 }

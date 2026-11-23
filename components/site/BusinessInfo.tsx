@@ -2,7 +2,8 @@
 
 import { useId, useState } from 'react';
 
-import { BUSINESS_INFO, COMPANY_NAME } from '@/lib/site-config';
+import { useLocale } from '@/components/site/LocaleProvider';
+import { BUSINESS_INFO, BUSINESS_INFO_EN, COMPANY_NAME } from '@/lib/site-config';
 
 /**
  * '© 2026 회사명' — 누르면 사업자 정보가 아래로 펼쳐진다(평소에는 접힘).
@@ -12,6 +13,7 @@ import { BUSINESS_INFO, COMPANY_NAME } from '@/lib/site-config';
 export function BusinessInfo({ className = '' }: { className?: string }) {
   const [open, setOpen] = useState(false);
   const id = useId();
+  const en = useLocale() === 'en';
   return (
     <div className={className}>
       <button
@@ -29,7 +31,9 @@ export function BusinessInfo({ className = '' }: { className?: string }) {
         >
           <path d="M2.5 4.5 6 8l3.5-3.5" fill="none" stroke="currentColor" strokeWidth="1.4" strokeLinecap="round" strokeLinejoin="round" />
         </svg>
-        <span className="sr-only">{open ? '사업자 정보 접기' : '사업자 정보 펼치기'}</span>
+        <span className="sr-only">
+          {en ? (open ? 'Hide business information' : 'Show business information') : open ? '사업자 정보 접기' : '사업자 정보 펼치기'}
+        </span>
       </button>
       <div
         id={id}
@@ -38,7 +42,7 @@ export function BusinessInfo({ className = '' }: { className?: string }) {
         }`}
       >
         <p className="overflow-hidden" inert={!open}>
-          <span className="block pt-1">{BUSINESS_INFO}</span>
+          <span className="block pt-1">{en ? BUSINESS_INFO_EN : BUSINESS_INFO}</span>
         </p>
       </div>
     </div>

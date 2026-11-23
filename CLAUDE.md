@@ -363,6 +363,7 @@ pending_payment ──(결제 승인)──▶ confirmed ──(취소 요청)�
 - [x] (2026-11-23) **도메인 `www.abc-places.com`**(가비아 구입, 대표 주소 www, `abc-places.com` → www 308). DNS: 가비아 A `@` + CNAME `www`(Vercel 값). Vercel `NEXT_PUBLIC_SITE_URL=https://www.abc-places.com`(문자 조회 링크), Supabase Auth Site URL 같은 값. `snowy-booking.vercel.app`도 계속 열림
 - [x] (2026-11-23) **현장 선착순 배정:** 예약 순서와 자리는 무관. 손님이 도착하면 원하는 빈자리를 주고 그 자리로 입실(예약의 unit_id 는 도착 전까지 가배정). 관리자 **현장 배정(`/admin/board`) = 위에서 본 배치도**(예전 유닛 칸 보드는 삭제, `/admin/map`→board 리다이렉트): 찾기 → 빈자리 누르기 → `admin_seat_booking`(0013, 안 온 예약과 맞바꿈 + 입실 한 트랜잭션). 폰에서는 같은 칸을 상품별 목록으로. 배치·칸 번호(운영자 확정)는 `lib/admin/site-map.ts`. **가배정 유닛은 화면 어디에도 보이지 않음**(목록·상세·매출·xlsx 는 입실 후 자리만, `seatLabel`). 예약 상세에서는 자리 배정·이동 안 함
 - [x] (2026-11-23) **특수 S1·S2:** 예약 오류·지인 방문 등 특수 상황에 관리자가 유선 등록하는 자리(무상 comp, 0원). `product_types.special`(is_active=false → 고객 화면·온라인 예약·가용성·대시보드·매출·요금에서 제외), 배치도에서 빈 S 칸을 눌러 등록·취소(`admin_register_special`). 11-21 '관리자 직접 등록 없음'의 유일한 예외
+- [x] (2026-11-23) **손님 화면 한/영 전환:** nav 맨 오른쪽 번역 아이콘(폰은 메뉴 버튼 왼쪽). 주소는 그대로, 쿠키 `lang`(1년)으로 기억. 서버 `getLocale()`(lib/i18n/server.ts), 클라이언트 `useLocale()`(components/site/LocaleProvider.tsx), 문구는 쓰는 자리에서 `tr(locale)('한국어', 'English')`. **새 손님 화면 문구는 반드시 두 언어로.** 약관 3종은 영문 번역 + "한국어 원문 우선" 안내. 회사·대표 이름·등록번호는 공식 한국어 그대로(영문 상호 미확정). 관리자 화면·문자는 한국어만
 - [x] (2026-11-21) 오시는 길(`/location`)·편의시설·소개 문구는 당분간 필요 없음(필요해지면 운영자가 요청)
 - [x] 공휴일: 공공데이터포털 특일 API 키로 연도별 불러오기(env `HOLIDAY_API_KEY`)
 - [x] UI 방향: **겨울·스노우 테마의 밝은 톤 + 애플식 미니멀 + 토스식 깔끔함** (고객·관리자 모두 리뉴얼 예정, 시설 사진 준비됨)

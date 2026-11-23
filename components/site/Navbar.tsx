@@ -5,10 +5,12 @@ import { AnimatePresence, motion, useAnimationControls } from 'framer-motion';
 import { usePathname } from 'next/navigation';
 import { Fragment, useEffect, useState } from 'react';
 
+import { LangToggle, useLocale } from '@/components/site/LocaleProvider';
 import { usePageTransition } from '@/components/site/PageTransition';
 import { SCROLL_OPTS, useLenis } from '@/components/site/SmoothScroll';
 import { LOCATION_ENABLED } from '@/lib/site-config';
 import { Snowflake } from '@/components/ui/Snowflake';
+import { tr, type Locale } from '@/lib/i18n';
 
 /*
   aftc Navbar 이식.
@@ -20,19 +22,23 @@ import { Snowflake } from '@/components/ui/Snowflake';
 
 type NavTheme = 'light' | 'dark';
 
-/** 상품 링크는 홈의 공간 장으로(#cabana 등 — Spaces 의 0높이 표식) */
-export const NAV_ITEMS = [
-  { label: '카바나', href: '#cabana' },
-  { label: '카라반', href: '#caravan' },
-  { label: '단체카라반', href: '#caravan-group' },
-] as const;
-/** 안내 화면 */
-const INFO_ITEMS = [
-  { label: '이용 안내', href: '/guide' },
-  ...(LOCATION_ENABLED ? [{ label: '오시는 길', href: '/location' }] : []),
-];
-const LOOKUP = { label: '예약 조회', href: '/booking/lookup' };
-const BOOK = { label: '예약하기', href: '/booking' };
+/** 메뉴(언어별) — 상품 링크는 홈의 공간 장으로(#cabana 등 — Spaces 의 0높이 표식) */
+function navItems(locale: Locale) {
+  const t = tr(locale);
+  return {
+    NAV_ITEMS: [
+      { label: t('카바나', 'Cabana'), href: '#cabana' },
+      { label: t('카라반', 'Caravan'), href: '#caravan' },
+      { label: t('단체카라반', 'Group Caravan'), href: '#caravan-group' },
+    ],
+    INFO_ITEMS: [
+      { label: t('이용 안내', 'Guide'), href: '/guide' },
+      ...(LOCATION_ENABLED ? [{ label: t('오시는 길', 'Directions'), href: '/location' }] : []),
+    ],
+    LOOKUP: { label: t('예약 조회', 'My Booking'), href: '/booking/lookup' },
+    BOOK: { label: t('예약하기', 'Book Now'), href: '/booking' },
+  };
+}
 
 const BLUR_EXTEND = 48;
 const BLUR_LAYERS = [
@@ -65,6 +71,9 @@ export function Navbar() {
   const lenis = useLenis();
   const pathname = usePathname();
   const { leaveTo } = usePageTransition();
+  const locale = useLocale();
+  const t = tr(locale);
+  const { NAV_ITEMS, INFO_ITEMS, LOOKUP, BOOK } = navItems(locale);
 
   useEffect(() => {
     const detect = () => {
@@ -148,7 +157,7 @@ export function Navbar() {
           className="relative z-10 flex items-center px-4 py-3 transition-colors duration-300 md:px-6 md:py-4 lg:px-10"
           style={{ color: isDark ? '#ffffff' : '#0e1a2b' }}
         >
-          <a href="/" onClick={(e) => go(e, '/')} className="-my-1 flex flex-none items-center" aria-label="스노위 카바나·카라반 홈">
+          <a href="/" onClick={(e) => go(e, '/')} className="-my-1 flex flex-none items-center" aria-label={t('스노위 카바나·카라반 홈', 'Snowy Cabana & Caravan home')}>
             <span className="transition-colors duration-300" style={{ color: isDark ? '#ffffff' : '#33689f' }}>
               <Logo />
             </span>
@@ -178,11 +187,13 @@ export function Navbar() {
             <a href={BOOK.href} onClick={(e) => go(e, BOOK.href)} className={`${link} hidden md:inline`}>
               <span className={underline(pathname === BOOK.href)}>{BOOK.label}</span>
             </a>
+            {/* 한/영 전환 — 맨 오른쪽(폰에서는 메뉴 버튼 왼쪽) */}
+            <LangToggle className={`-mx-1 p-1.5 transition-colors ${isDark ? 'text-white/80 hover:text-white' : 'text-ink/70 hover:text-ink'} lg:order-last`} />
             <button
               type="button"
               onClick={() => setOpen(true)}
               className={`-mr-1 p-1.5 transition-colors lg:hidden ${isDark ? 'text-white/80 hover:text-white' : 'text-ink/70 hover:text-ink'}`}
-              aria-label="메뉴 열기"
+              aria-label={t('메뉴 열기', 'Open menu')}
               aria-expanded={open}
             >
               <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={1.5} strokeLinecap="round" aria-hidden>
@@ -198,7 +209,7 @@ export function Navbar() {
           <motion.div
             role="dialog"
             aria-modal="true"
-            aria-label="메뉴"
+            aria-label={t('메뉴', 'Menu')}
             className="fixed inset-0 z-[220] flex flex-col items-center justify-center gap-7 bg-glacier/[.98] text-white backdrop-blur-3xl"
             initial={{ clipPath: 'inset(0 0 100% 0)' }}
             animate={{ clipPath: 'inset(0 0 0% 0)' }}
@@ -210,7 +221,7 @@ export function Navbar() {
               type="button"
               onClick={() => setOpen(false)}
               className="absolute right-5 top-5 flex h-10 w-10 items-center justify-center rounded-full bg-white/[.08]"
-              aria-label="메뉴 닫기"
+              aria-label={t('메뉴 닫기', 'Close menu')}
               autoFocus
             >
               <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={1.5} strokeLinecap="round" aria-hidden>

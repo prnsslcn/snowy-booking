@@ -1,12 +1,31 @@
 import type { Metadata } from 'next';
 
 import { LegalPage } from '@/components/site/LegalPage';
+import { getLocale } from '@/lib/i18n/server';
 
-export const metadata: Metadata = { title: '취소·환불정책', description: '스노위 카바나·카라반 취소 및 환불정책' };
+export async function generateMetadata(): Promise<Metadata> {
+  return (await getLocale()) === 'en'
+    ? { title: 'Cancellation & Refund Policy', description: 'Snowy Cabana & Caravan cancellation and refund policy' }
+    : { title: '취소·환불정책', description: '스노위 카바나·카라반 취소 및 환불정책' };
+}
 
-export default function RefundPolicyPage() {
+export default async function RefundPolicyPage() {
+  const locale = await getLocale();
   return (
-    <LegalPage display="Refund Policy" title="취소·환불정책" current="/refund-policy">
+    <LegalPage
+      display="Refund Policy"
+      title={locale === 'en' ? 'Cancellation & Refund Policy' : '취소·환불정책'}
+      current="/refund-policy"
+      locale={locale}
+    >
+      {locale === 'en' ? <RefundEn /> : <RefundKo />}
+    </LegalPage>
+  );
+}
+
+function RefundKo() {
+  return (
+    <>
       <p>
         스노위 카바나·카라반은 전액 선결제로 운영됩니다. 예약 취소 시 환불 금액은 결제 금액을 기준으로,{' '}
         <strong>이용일 자정(00:00, 한국 표준시)</strong>을 기준으로 남은 기간에 따라 아래와 같이 산정됩니다.
@@ -71,6 +90,80 @@ export default function RefundPolicyPage() {
 
       <h2>문의</h2>
       <p>취소·환불 관련 문의: campingclub2020@naver.com</p>
-    </LegalPage>
+    </>
+  );
+}
+
+function RefundEn() {
+  return (
+    <>
+      <p>
+        Snowy Cabana &amp; Caravan requires full payment in advance. When a booking is cancelled, the refund is
+        calculated from the amount paid, according to how much time remains before{' '}
+        <strong>midnight (00:00 Korea Standard Time) at the start of the date of use</strong>, as shown below.
+      </p>
+
+      <h2>Refund Rules</h2>
+      <table>
+        <thead>
+          <tr>
+            <th>When you cancel</th>
+            <th>Refund</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>Up to 2 days before the date of use</td>
+            <td>100% of the amount paid</td>
+          </tr>
+          <tr>
+            <td>1 day before the date of use</td>
+            <td>50% of the amount paid</td>
+          </tr>
+          <tr>
+            <td>On the date of use</td>
+            <td>No refund</td>
+          </tr>
+          <tr>
+            <td>No-show (booked but did not come)</td>
+            <td>No refund (same as cancelling on the day)</td>
+          </tr>
+        </tbody>
+      </table>
+      <p>
+        Example: for a booking on December 26, cancelling by December 24 gives a 100% refund, cancelling on December 25
+        gives a 50% refund, and there is no refund on December 26 itself.
+      </p>
+
+      <h2>How to Cancel</h2>
+      <ul>
+        <li>
+          Look up your booking under <a href="/booking/lookup">Find or Cancel a Booking</a> with your mobile number and
+          4-digit booking number, then cancel it yourself. You can also cancel on the date of use as long as you have not
+          checked in, but no refund is given.
+        </li>
+        <li>Only the whole booking can be cancelled.</li>
+        <li>The date of use cannot be changed. Please cancel and book again; the refund rules above still apply.</li>
+      </ul>
+
+      <h2>Refund Processing</h2>
+      <ul>
+        <li>When you cancel, the refund under the rules above is requested immediately.</li>
+        <li>
+          Refunds go back to the original payment method (by cancelling the payment through Toss Payments) and may take
+          3–5 business days depending on your card issuer or payment method.
+        </li>
+      </ul>
+
+      <h2>Natural Disasters and Similar Events</h2>
+      <p>
+        If the Facilities cannot be used because of natural disasters, severe weather such as heavy snow, or other causes
+        beyond the Company&rsquo;s control, the affected bookings are handled separately from these rules, as the Company
+        will advise.
+      </p>
+
+      <h2>Contact</h2>
+      <p>Questions about cancellations and refunds: campingclub2020@naver.com</p>
+    </>
   );
 }

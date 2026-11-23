@@ -8,7 +8,9 @@ import { BusinessInfo } from '@/components/site/BusinessInfo';
 import { blockIn, WILL } from '@/components/site/motion';
 import { usePageTransition } from '@/components/site/PageTransition';
 import { useStickyCover } from '@/components/site/useStickyCover';
-import { FACILITIES, type FacilityPhoto } from '@/lib/content/facilities';
+import { useLocale } from '@/components/site/LocaleProvider';
+import { FACILITIES, photoAlt, type FacilityPhoto } from '@/lib/content/facilities';
+import { tr, type Locale } from '@/lib/i18n';
 import { LOCATION_ENABLED } from '@/lib/site-config';
 
 /*
@@ -25,7 +27,7 @@ const ALL = FACILITIES.flatMap((f) => f.photos).filter((p) => !SKIP.has(p.src));
 // 두 줄로 나누되 상품이 섞이도록 번갈아
 const ROWS: FacilityPhoto[][] = [ALL.filter((_, i) => i % 2 === 0), ALL.filter((_, i) => i % 2 === 1)];
 
-function MarqueeRow({ photos, reverse, seconds }: { photos: FacilityPhoto[]; reverse?: boolean; seconds: number }) {
+function MarqueeRow({ photos, reverse, seconds, locale }: { photos: FacilityPhoto[]; reverse?: boolean; seconds: number; locale: Locale }) {
   // 한 묶음 = 사진 ×2(화면 폭보다 길게), 트랙 = 묶음 ×2 → -50% 까지 흘리면 이음매 없음
   const set = [...photos, ...photos];
   return (
@@ -42,7 +44,7 @@ function MarqueeRow({ photos, reverse, seconds }: { photos: FacilityPhoto[]; rev
               p.orientation === 'landscape' ? 'aspect-[4/3]' : 'aspect-[3/4]'
             }`}
           >
-            <Image src={p.src} alt={i < photos.length ? p.alt : ''} fill sizes="(min-width: 1024px) 320px, 180px" className="object-cover" />
+            <Image src={p.src} alt={i < photos.length ? photoAlt(p, locale) : ''} fill sizes="(min-width: 1024px) 320px, 180px" className="object-cover" />
           </div>
         ))}
       </div>
@@ -50,38 +52,41 @@ function MarqueeRow({ photos, reverse, seconds }: { photos: FacilityPhoto[]; rev
   );
 }
 
-const NAV: { title: string; links: { label: string; href: string; internal?: boolean }[] }[] = [
-  {
-    title: 'Spaces',
-    links: [
-      { label: '카바나', href: '/#cabana', internal: true },
-      { label: '카라반', href: '/#caravan', internal: true },
-      { label: '단체카라반', href: '/#caravan-group', internal: true },
-    ],
-  },
-  {
-    title: 'Visit',
-    links: [
-      { label: '이용 안내', href: '/guide', internal: true },
-      ...(LOCATION_ENABLED ? [{ label: '오시는 길', href: '/location', internal: true }] : []),
-    ],
-  },
-  {
-    title: 'Booking',
-    links: [
-      { label: '예약하기', href: '/booking', internal: true },
-      { label: '예약 조회·취소', href: '/booking/lookup', internal: true },
-    ],
-  },
-  {
-    title: 'Policy',
-    links: [
-      { label: '이용약관', href: '/terms', internal: true },
-      { label: '개인정보처리방침', href: '/privacy', internal: true },
-      { label: '취소·환불정책', href: '/refund-policy', internal: true },
-    ],
-  },
-];
+function navGroups(locale: Locale): { title: string; links: { label: string; href: string; internal?: boolean }[] }[] {
+  const t = tr(locale);
+  return [
+    {
+      title: 'Spaces',
+      links: [
+        { label: t('카바나', 'Cabana'), href: '/#cabana', internal: true },
+        { label: t('카라반', 'Caravan'), href: '/#caravan', internal: true },
+        { label: t('단체카라반', 'Group Caravan'), href: '/#caravan-group', internal: true },
+      ],
+    },
+    {
+      title: 'Visit',
+      links: [
+        { label: t('이용 안내', 'Guide'), href: '/guide', internal: true },
+        ...(LOCATION_ENABLED ? [{ label: t('오시는 길', 'Directions'), href: '/location', internal: true }] : []),
+      ],
+    },
+    {
+      title: 'Booking',
+      links: [
+        { label: t('예약하기', 'Book Now'), href: '/booking', internal: true },
+        { label: t('예약 조회·취소', 'Find or Cancel a Booking'), href: '/booking/lookup', internal: true },
+      ],
+    },
+    {
+      title: 'Policy',
+      links: [
+        { label: t('이용약관', 'Terms of Service'), href: '/terms', internal: true },
+        { label: t('개인정보처리방침', 'Privacy Policy'), href: '/privacy', internal: true },
+        { label: t('취소·환불정책', 'Cancellation & Refund Policy'), href: '/refund-policy', internal: true },
+      ],
+    },
+  ];
+}
 
 export function Closing({ z }: { z: number }) {
   const { ref, radius } = useStickyCover<HTMLElement>();
@@ -90,6 +95,8 @@ export function Closing({ z }: { z: number }) {
   const seen = useInView(bodyRef, { once: true, margin: '0px 0px -10% 0px' });
   const markSeen = useInView(markRef, { once: true, margin: '0px 0px -5% 0px' });
   const { ready, leaveTo } = usePageTransition();
+  const locale = useLocale();
+  const NAV = navGroups(locale);
   const inView = seen && ready;
 
   const go = (e: React.MouseEvent<HTMLAnchorElement>) => {
@@ -109,12 +116,12 @@ export function Closing({ z }: { z: number }) {
       <div ref={bodyRef}>
         {/* 사진 흐름 */}
         <motion.div className="flex flex-col gap-2.5 md:gap-3" style={WILL} {...blockIn(8, '8%', 0.9, 0.05, inView)}>
-          <MarqueeRow photos={ROWS[0]} seconds={70} />
-          <MarqueeRow photos={ROWS[1]} seconds={80} reverse />
+          <MarqueeRow photos={ROWS[0]} seconds={70} locale={locale} />
+          <MarqueeRow photos={ROWS[1]} seconds={80} reverse locale={locale} />
         </motion.div>
 
         {/* 메뉴 묶음 */}
-        <nav aria-label="사이트 메뉴" className="mt-12 grid grid-cols-2 gap-x-6 gap-y-8 px-5 md:mt-20 md:grid-cols-4 md:px-8 lg:px-10">
+        <nav aria-label={tr(locale)('사이트 메뉴', 'Site menu')} className="mt-12 grid grid-cols-2 gap-x-6 gap-y-8 px-5 md:mt-20 md:grid-cols-4 md:px-8 lg:px-10">
           {NAV.map((g, i) => (
             <motion.div key={g.title} style={WILL} {...blockIn(8, '14%', 0.78, 0.2 + i * 0.08, inView)}>
               <p className="font-display text-[13px] font-semibold tracking-[0.02em] text-ice-600 md:text-sm">{g.title}</p>

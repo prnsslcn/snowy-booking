@@ -1,12 +1,26 @@
 import type { Metadata } from 'next';
 
 import { LegalPage } from '@/components/site/LegalPage';
+import { getLocale } from '@/lib/i18n/server';
 
-export const metadata: Metadata = { title: '개인정보처리방침', description: '스노위 카바나·카라반 개인정보처리방침' };
+export async function generateMetadata(): Promise<Metadata> {
+  return (await getLocale()) === 'en'
+    ? { title: 'Privacy Policy', description: 'Snowy Cabana & Caravan Privacy Policy' }
+    : { title: '개인정보처리방침', description: '스노위 카바나·카라반 개인정보처리방침' };
+}
 
-export default function PrivacyPage() {
+export default async function PrivacyPage() {
+  const locale = await getLocale();
   return (
-    <LegalPage display="Privacy" title="개인정보처리방침" current="/privacy">
+    <LegalPage display="Privacy" title={locale === 'en' ? 'Privacy Policy' : '개인정보처리방침'} current="/privacy" locale={locale}>
+      {locale === 'en' ? <PrivacyEn /> : <PrivacyKo />}
+    </LegalPage>
+  );
+}
+
+function PrivacyKo() {
+  return (
+    <>
       <p>
         주식회사 에이비씨웍스글로벌(이하 &lsquo;회사&rsquo;)은 정보주체의 개인정보를 중요하게 생각하며, 「개인정보
         보호법」 등 관련 법령을 준수합니다. 회사는 본 방침을 통해 스노위 카바나·카라반 예약 서비스에서 수집하는
@@ -158,6 +172,169 @@ export default function PrivacyPage() {
         본 방침은 법령·서비스의 변경에 따라 개정될 수 있으며, 변경 시 시행일과 변경 내용을 본 페이지를 통해
         공지합니다.
       </p>
-    </LegalPage>
+    </>
+  );
+}
+
+function PrivacyEn() {
+  return (
+    <>
+      <p>
+        주식회사 에이비씨웍스글로벌 (the &lsquo;Company&rsquo;) values the personal information of data subjects and
+        complies with the Personal Information Protection Act and other applicable laws of Korea. This policy explains
+        what personal information the Snowy Cabana &amp; Caravan booking service collects, why it is processed and how
+        long it is kept.
+      </p>
+
+      <h2>Article 1 (Purposes of Processing)</h2>
+      <p>The Company processes personal information for the following purposes only and does not use it for any other purpose.</p>
+      <ul>
+        <li>Receiving and confirming bookings, and managing booking records</li>
+        <li>Processing payments and refunds</li>
+        <li>Sending text messages (SMS) such as booking confirmations and cancellations</li>
+        <li>Verifying identity and preventing misuse when bookings are looked up</li>
+        <li>Responding to customer inquiries and handling disputes</li>
+      </ul>
+
+      <h2>Article 2 (Personal Information Collected)</h2>
+      <ul>
+        <li>
+          <strong>Required:</strong> name of the person booking, mobile number, booking details (date of use and product)
+        </li>
+        <li>
+          <strong>During payment:</strong> payment approval details (payment method, approval number, amount, etc.).
+          Detailed payment information such as card numbers is handled by the payment service provider (Toss Payments)
+          and is not stored by the Company.
+        </li>
+        <li>
+          <strong>Generated or collected automatically:</strong> service usage records, access logs, and booking lookup
+          attempts (mobile number and IP address)
+        </li>
+      </ul>
+
+      <h2>Article 3 (Retention Period)</h2>
+      <p>
+        The Company destroys personal information without delay once the purpose of processing has been achieved.
+        However, the following information is kept for the periods stated, as required by law.
+      </p>
+      <table>
+        <thead>
+          <tr>
+            <th>Record</th>
+            <th>Basis</th>
+            <th>Retention</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>Records of contracts or withdrawal of offers</td>
+            <td>Act on Consumer Protection in Electronic Commerce</td>
+            <td>5 years</td>
+          </tr>
+          <tr>
+            <td>Records of payment and supply of goods or services</td>
+            <td>Act on Consumer Protection in Electronic Commerce</td>
+            <td>5 years</td>
+          </tr>
+          <tr>
+            <td>Records of consumer complaints or dispute handling</td>
+            <td>Act on Consumer Protection in Electronic Commerce</td>
+            <td>3 years</td>
+          </tr>
+          <tr>
+            <td>Booking lookup attempts</td>
+            <td>Preventing misuse of lookups</td>
+            <td>30 days</td>
+          </tr>
+        </tbody>
+      </table>
+
+      <h2>Article 4 (Provision to Third Parties)</h2>
+      <p>
+        The Company does not use personal information beyond the purposes in Article 1 or provide it to third parties,
+        except where specifically required by law or upon a lawful request from an investigative authority.
+      </p>
+
+      <h2>Article 5 (Outsourcing of Processing)</h2>
+      <p>To provide the Service smoothly, the Company outsources the following processing work.</p>
+      <table>
+        <thead>
+          <tr>
+            <th>Contractor</th>
+            <th>Work</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>Toss Payments Co., Ltd.</td>
+            <td>Payment processing and fraud prevention</td>
+          </tr>
+          <tr>
+            <td>Solapi Inc.</td>
+            <td>Sending booking text messages (SMS)</td>
+          </tr>
+          <tr>
+            <td>Supabase Inc.</td>
+            <td>Database hosting (storage of personal information)</td>
+          </tr>
+          <tr>
+            <td>Vercel Inc.</td>
+            <td>Website hosting</td>
+          </tr>
+        </tbody>
+      </table>
+
+      <h2>Article 6 (Transfer Abroad)</h2>
+      <p>To provide the Service, the Company entrusts some processing of personal information to companies outside Korea.</p>
+      <ul>
+        <li>
+          <strong>Supabase Inc.</strong> (USA) — Information transferred: the items in Article 2 / Purpose: database
+          hosting / Retention: until the outsourcing contract ends or the purpose is achieved / Data region: Seoul,
+          Republic of Korea
+        </li>
+        <li>
+          <strong>Vercel Inc.</strong> (USA) — Information transferred: service usage records such as access logs /
+          Purpose: website hosting / Retention: until the outsourcing contract ends or the purpose is achieved
+        </li>
+      </ul>
+
+      <h2>Article 7 (Rights of Data Subjects and How to Exercise Them)</h2>
+      <p>
+        Data subjects may at any time request access to, correction or deletion of, or suspension of processing of
+        their personal information, and the Company will act without delay. Requests can be made to the Privacy Officer
+        listed in Article 10.
+      </p>
+
+      <h2>Article 8 (Destruction)</h2>
+      <p>
+        Personal information whose retention period has expired or whose purpose has been achieved is destroyed without
+        delay. Electronic files are permanently deleted in a way that cannot be recovered, and printed materials are
+        shredded or incinerated.
+      </p>
+
+      <h2>Article 9 (Security Measures)</h2>
+      <ul>
+        <li>Minimizing and controlling access to personal information</li>
+        <li>Encryption in transit (HTTPS)</li>
+        <li>No storage of detailed payment information (handled by the payment service provider)</li>
+        <li>Matching of mobile number and booking number, and a limit on lookup attempts</li>
+      </ul>
+
+      <h2>Article 10 (Privacy Officer)</h2>
+      <ul>
+        <li>Name: 황혜진</li>
+        <li>Email: campingclub2020@naver.com</li>
+      </ul>
+      <p>
+        For other advice on privacy violations, you may contact the Personal Information Dispute Mediation Committee
+        (+82-1833-6972) or the Personal Information Infringement Report Center (118).
+      </p>
+
+      <h2>Article 11 (Changes to This Policy)</h2>
+      <p>
+        This policy may be revised following changes in law or the Service. Any change will be announced on this page
+        together with its effective date.
+      </p>
+    </>
   );
 }

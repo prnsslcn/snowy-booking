@@ -5,6 +5,8 @@ import Image from 'next/image';
 import { Fragment, useEffect, useId, useRef, useState } from 'react';
 
 import { blockIn, WILL } from '@/components/site/motion';
+import { useLocale } from '@/components/site/LocaleProvider';
+import { tr } from '@/lib/i18n';
 import { usePageTransition } from '@/components/site/PageTransition';
 import { useStickyCover } from '@/components/site/useStickyCover';
 
@@ -62,6 +64,7 @@ function Details({
   onToggle: () => void;
 }) {
   const id = useId();
+  const t = tr(useLocale());
   const line = dark ? 'border-white/20' : 'border-ice-700/20';
   const soft = dark ? 'text-ice-50/80' : 'text-glacier/75';
   return (
@@ -73,7 +76,7 @@ function Details({
         aria-controls={id}
         className="flex w-full items-center justify-between gap-4 py-3 text-left"
       >
-        <span className="text-[15px] font-semibold md:text-base">{name} 자세히 보기</span>
+        <span className="text-[15px] font-semibold md:text-base">{t(`${name} 자세히 보기`, `More about the ${name.toLowerCase()}`)}</span>
         <span
           aria-hidden
           className={`flex h-8 w-8 flex-none items-center justify-center rounded-full border ${line} transition-transform duration-700 ${OPEN_EASE} ${open ? 'rotate-45' : ''}`}
@@ -140,9 +143,11 @@ function SpacePanel({ space, index, total, dark }: { space: Space; index: number
     leaveTo(e.currentTarget.getAttribute('href') ?? '/');
   };
 
+  const locale = useLocale();
+  const t = tr(locale);
   const facts: [string, string][] = [
-    ['최대 인원', `${space.maxCapacity}인`],
-    ['요금', space.price],
+    [t('최대 인원', 'Max. guests'), t(`${space.maxCapacity}인`, `${space.maxCapacity} people`)],
+    [t('요금', 'Price'), space.price],
   ];
 
   return (
@@ -175,9 +180,12 @@ function SpacePanel({ space, index, total, dark }: { space: Space; index: number
               <span className="sr-only">{space.name}</span>
             </motion.h2>
           </div>
-          <motion.p className="mt-2 text-lg font-semibold md:text-2xl lg:order-1 lg:mt-3" style={WILL} {...blockIn(8, '14%', 0.78, 0.18, inView)} aria-hidden>
-            {space.name}
-          </motion.p>
+          {/* 한글 이름 줄 — 영어 보기에서는 큰 영문 제목과 같아서 뺀다 */}
+          {locale === 'ko' && (
+            <motion.p className="mt-2 text-lg font-semibold md:text-2xl lg:order-1 lg:mt-3" style={WILL} {...blockIn(8, '14%', 0.78, 0.18, inView)} aria-hidden>
+              {space.name}
+            </motion.p>
+          )}
 
           <motion.dl
             className={`mt-4 grid grid-cols-[auto_1fr] border-t ${rule} md:mt-6 lg:order-3 lg:mt-auto lg:grid-cols-[0.6fr_1.4fr]`}
@@ -195,7 +203,7 @@ function SpacePanel({ space, index, total, dark }: { space: Space; index: number
             ))}
           </motion.dl>
           <motion.p className={`mt-2.5 text-[12px] lg:order-3 lg:mt-3 lg:text-[13px] ${soft}`} style={WILL} {...blockIn(8, '14%', 0.78, 0.34, inView)}>
-            1{space.type === 'cabana' ? '동' : '대'} 1일 · 10:00–17:00 당일 이용
+            {t(`1${space.type === 'cabana' ? '동' : '대'} 1일 · 10:00–17:00 당일 이용`, 'Per unit, per day · Day use 10:00–17:00')}
           </motion.p>
 
           <motion.div className="mt-4 flex flex-wrap items-center gap-5 lg:order-3 lg:mt-6" style={WILL} {...blockIn(8, '14%', 0.78, 0.4, inView)}>
@@ -204,7 +212,7 @@ function SpacePanel({ space, index, total, dark }: { space: Space; index: number
               onClick={go}
               className={`inline-flex items-center rounded-full px-6 py-3 text-[15px] font-semibold transition-transform duration-300 ease-[cubic-bezier(0.16,1,0.3,1)] active:scale-[0.97] lg:px-7 lg:py-3.5 lg:text-base ${dark ? 'bg-white text-glacier-deep' : 'bg-glacier text-white'}`}
             >
-              예약하기
+              {t('예약하기', 'Book Now')}
             </a>
           </motion.div>
 

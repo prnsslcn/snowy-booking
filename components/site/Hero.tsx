@@ -4,10 +4,12 @@ import { motion, useMotionValueEvent, useScroll, useTransform } from 'framer-mot
 import { getImageProps } from 'next/image';
 import { Fragment, useState } from 'react';
 
+import { useLocale } from '@/components/site/LocaleProvider';
 import { usePageTransition } from '@/components/site/PageTransition';
 import { Snowfall } from '@/components/site/Snowfall';
 import { TLink } from '@/components/site/TLink';
 import { buttonClass } from '@/components/ui/Button';
+import { tr } from '@/lib/i18n';
 
 /*
   첫 화면 — 사진 한 장이 화면을 채우고(하늘 위로 nav, 흰 글씨), 아래 눈밭 위에 작은 소제목 "Snowy" + 아주 큰 겨울 파랑 "Cabana & Caravan".
@@ -34,6 +36,7 @@ export interface HeroProps {
 
 export function Hero({ src, phoneSrc, alt, notice }: HeroProps) {
   const { ready } = usePageTransition();
+  const t = tr(useLocale());
 
   // 아트 디렉션: 폰은 세로 크롭, md 이상은 가로 — <picture> 로 한 장만 받는다
   const common = { alt, fill: true, priority: true, sizes: '100vw' } as const;
@@ -129,7 +132,7 @@ export function Hero({ src, phoneSrc, alt, notice }: HeroProps) {
               <p className="hidden max-w-[22rem] rounded-full bg-white/80 px-4 py-2 text-[13px] font-medium text-glacier md:block">{notice}</p>
             )}
             <TLink href="/booking" className={buttonClass('primary', 'md')}>
-              예약하기
+              {t('예약하기', 'Book Now')}
             </TLink>
           </motion.div>
           {notice && (
@@ -149,7 +152,7 @@ export function Hero({ src, phoneSrc, alt, notice }: HeroProps) {
           className="font-display text-[17.5vw] font-extrabold text-glacier md:text-[min(10.2vw,14.5rem)]"
           style={{ lineHeight: 0.9, letterSpacing: '-0.022em' }}
         >
-          <span className="sr-only">스노위 카바나·카라반</span>
+          <span className="sr-only">{t('스노위 카바나·카라반', 'Snowy Cabana & Caravan')}</span>
           <span aria-hidden className="flex flex-wrap items-baseline gap-x-[0.22em] md:flex-nowrap">
             {TITLE.map((word, w) => (
               // 낱말마다 가린 칸 안에서 글자가 솟아오름 — 아래 여백으로 꼬리(y 등) 보호. 폰은 '&' 앞에서 줄바꿈

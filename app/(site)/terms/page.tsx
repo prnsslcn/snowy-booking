@@ -1,12 +1,26 @@
 import type { Metadata } from 'next';
 
 import { LegalPage } from '@/components/site/LegalPage';
+import { getLocale } from '@/lib/i18n/server';
 
-export const metadata: Metadata = { title: '이용약관', description: '스노위 카바나·카라반 이용약관' };
+export async function generateMetadata(): Promise<Metadata> {
+  return (await getLocale()) === 'en'
+    ? { title: 'Terms of Service', description: 'Snowy Cabana & Caravan Terms of Service' }
+    : { title: '이용약관', description: '스노위 카바나·카라반 이용약관' };
+}
 
-export default function TermsPage() {
+export default async function TermsPage() {
+  const locale = await getLocale();
   return (
-    <LegalPage display="Terms" title="이용약관" current="/terms">
+    <LegalPage display="Terms" title={locale === 'en' ? 'Terms of Service' : '이용약관'} current="/terms" locale={locale}>
+      {locale === 'en' ? <TermsEn /> : <TermsKo />}
+    </LegalPage>
+  );
+}
+
+function TermsKo() {
+  return (
+    <>
       <h2>제1조 (목적)</h2>
       <p>
         본 약관은 주식회사 에이비씨웍스글로벌(이하 &lsquo;회사&rsquo;)이 운영하는 스노위 카바나·카라반 예약
@@ -107,6 +121,113 @@ export default function TermsPage() {
         본 약관과 관련하여 분쟁이 발생한 경우 회사와 이용자는 성실히 협의하여 해결하며, 협의가 이루어지지 않을
         경우 관계 법령 및 상관례에 따릅니다. 본 약관은 대한민국 법령을 준거법으로 합니다.
       </p>
-    </LegalPage>
+    </>
+  );
+}
+
+function TermsEn() {
+  return (
+    <>
+      <h2>Article 1 (Purpose)</h2>
+      <p>
+        These Terms set out the rights, obligations and responsibilities of 주식회사 에이비씨웍스글로벌 (the
+        &lsquo;Company&rsquo;) and its users in connection with the Snowy Cabana &amp; Caravan booking service (the
+        &lsquo;Service&rsquo;) operated by the Company.
+      </p>
+
+      <h2>Article 2 (Definitions)</h2>
+      <ul>
+        <li>
+          &lsquo;Service&rsquo; means the online booking and payment service provided by the Company for day use of the
+          cabanas, caravans and group caravans (the &lsquo;Facilities&rsquo;) at Snowyland, Vivaldi Park, Hongcheon.
+        </li>
+        <li>&lsquo;User&rsquo; means anyone who uses the Service under these Terms.</li>
+        <li>
+          &lsquo;Booking&rsquo; means a User selecting a date of use and a Facility and completing payment, which confirms
+          the right to use that Facility.
+        </li>
+      </ul>
+
+      <h2>Article 3 (Posting and Amendment of the Terms)</h2>
+      <ul>
+        <li>The Company posts these Terms on the Service so that Users can read them.</li>
+        <li>
+          The Company may amend these Terms to the extent permitted by applicable law. When it does, it will announce
+          the effective date and the changes in advance.
+        </li>
+      </ul>
+
+      <h2>Article 4 (Provision of the Service)</h2>
+      <ul>
+        <li>
+          During the season, the Company provides the Facilities for day use <strong>every day from 10:00 to 17:00</strong>.
+          Early check-in and extensions are not available.
+        </li>
+        <li>The specific unit is assigned on site on the day of use.</li>
+        <li>
+          The season and operating days may change depending on the Company&rsquo;s circumstances. Any change will be
+          announced on the Service.
+        </li>
+        <li>Snowyland admission tickets are not included in the Service.</li>
+      </ul>
+
+      <h2>Article 5 (Booking and Payment)</h2>
+      <ul>
+        <li>
+          A Booking is confirmed when the User selects a date and a Facility and completes <strong>full payment in advance</strong>.
+        </li>
+        <li>Payments are processed through the payment service provider designated by the Company (Toss Payments).</li>
+        <li>
+          Bookings can be made for dates <strong>up to one month ahead</strong>. Same-day bookings are accepted{' '}
+          <strong>until 16:00</strong>.
+        </li>
+        <li>
+          Each person (identified by mobile number) can book <strong>one unit per day</strong>.
+        </li>
+        <li>
+          A booking that is not paid for within a set time is cancelled automatically, and the held unit is released to
+          other Users.
+        </li>
+      </ul>
+
+      <h2>Article 6 (Changes, Cancellations and Refunds)</h2>
+      <ul>
+        <li>The date of a Booking cannot be changed. To change it, please cancel and book again.</li>
+        <li>
+          Cancellations and refunds follow the separate <a href="/refund-policy">Cancellation &amp; Refund Policy</a>. The
+          refund is calculated from the amount paid, based on the time remaining until the date of use.
+        </li>
+      </ul>
+
+      <h2>Article 7 (Obligations of Users)</h2>
+      <ul>
+        <li>Users must provide accurate information when booking and bear any disadvantage caused by false information.</li>
+        <li>Users must observe the maximum number of guests for each product (infants included) and the hours of use.</li>
+        <li>Users must take due care of the Facilities and their furnishings.</li>
+        <li>Users are liable for any damage to the Facilities or furnishings caused intentionally or through negligence.</li>
+      </ul>
+
+      <h2>Article 8 (Obligations of the Company)</h2>
+      <ul>
+        <li>The Company complies with applicable law and these Terms and strives to provide the Service reliably.</li>
+        <li>
+          The Company protects Users&rsquo; personal information in accordance with its <a href="/privacy">Privacy Policy</a>.
+        </li>
+      </ul>
+
+      <h2>Article 9 (Disclaimer)</h2>
+      <p>
+        The Company is not liable where it cannot provide the Service because of natural disasters, severe weather such
+        as heavy snow, or other causes beyond its control. Affected Bookings are handled as set out in the{' '}
+        <a href="/refund-policy">Cancellation &amp; Refund Policy</a>.
+      </p>
+
+      <h2>Article 10 (Dispute Resolution and Governing Law)</h2>
+      <p>
+        If a dispute arises in connection with these Terms, the Company and the User will try in good faith to resolve it
+        through discussion. If no agreement is reached, the matter is governed by applicable law and commercial practice.
+        These Terms are governed by the laws of the Republic of Korea.
+      </p>
+    </>
   );
 }

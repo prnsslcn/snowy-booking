@@ -3,6 +3,7 @@ import type { ReactNode } from 'react';
 import { SubPage } from '@/components/site/SubPage';
 import { TLink } from '@/components/site/TLink';
 import { TransitionLinks } from '@/components/site/TransitionLinks';
+import { tr, type Locale } from '@/lib/i18n';
 
 /*
   약관 3종(이용약관 · 개인정보처리방침 · 취소·환불정책) 공통 틀.
@@ -12,11 +13,12 @@ import { TransitionLinks } from '@/components/site/TransitionLinks';
 */
 
 export const POLICY_EFFECTIVE_DATE = '2026년 11월 20일';
+export const POLICY_EFFECTIVE_DATE_EN = 'November 20, 2026';
 
 const DOCS = [
-  { href: '/terms', label: '이용약관' },
-  { href: '/privacy', label: '개인정보처리방침' },
-  { href: '/refund-policy', label: '취소·환불정책' },
+  { href: '/terms', label: '이용약관', en: 'Terms of Service' },
+  { href: '/privacy', label: '개인정보처리방침', en: 'Privacy Policy' },
+  { href: '/refund-policy', label: '취소·환불정책', en: 'Cancellation & Refund Policy' },
 ] as const;
 
 const PROSE = [
@@ -36,8 +38,10 @@ export function LegalPage({
   display,
   title,
   current,
+  locale,
   children,
 }: {
+  locale: Locale;
   /** 큰 영문 제목 */
   display: string;
   /** 한글 문서 이름 */
@@ -45,14 +49,19 @@ export function LegalPage({
   current: (typeof DOCS)[number]['href'];
   children: ReactNode;
 }) {
+  const t = tr(locale);
   return (
     <SubPage
       display={display}
       sub={title}
-      aside={<p className="mb-1 flex-none text-right text-[13px] text-ink/50">시행일 {POLICY_EFFECTIVE_DATE}</p>}
+      aside={
+        <p className="mb-1 flex-none text-right text-[13px] text-ink/50">
+          {t(`시행일 ${POLICY_EFFECTIVE_DATE}`, `Effective ${POLICY_EFFECTIVE_DATE_EN}`)}
+        </p>
+      }
     >
       {/* 세 문서 사이 이동 */}
-      <nav aria-label="약관" className="-mt-2 mb-10 flex flex-wrap gap-2 md:mb-14">
+      <nav aria-label={t('약관', 'Policies')} className="-mt-2 mb-10 flex flex-wrap gap-2 md:mb-14">
         {DOCS.map((d) => {
           const active = d.href === current;
           return (
@@ -64,11 +73,17 @@ export function LegalPage({
                 active ? 'bg-glacier text-white' : 'bg-white text-ink/70 hover:text-ink'
               }`}
             >
-              {d.label}
+              {locale === 'en' ? d.en : d.label}
             </TLink>
           );
         })}
       </nav>
+      {/* 영어 보기: 번역본임을 알리고 한국어 원문이 우선함을 밝힌다 */}
+      {locale === 'en' && (
+        <p className="-mt-4 mb-10 rounded-2xl bg-white px-5 py-4 text-[14px] leading-relaxed text-ink/70 md:-mt-8">
+          This is an English translation provided for convenience. If there is any difference between this translation and the Korean original, the Korean version prevails.
+        </p>
+      )}
       <TransitionLinks className={PROSE}>{children}</TransitionLinks>
     </SubPage>
   );

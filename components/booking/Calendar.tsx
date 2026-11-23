@@ -2,6 +2,9 @@
 
 import { useState } from 'react';
 
+import { useLocale } from '@/components/site/LocaleProvider';
+import { EN_MONTH_LONG, tr } from '@/lib/i18n';
+
 /**
  * 예약 달력. open 선택 가능 / closed 휴장 / locked·sold_out 마감 / unavailable 흐리게.
  * 선택: 파란 면(둥근 칸). 오늘: 얇은 테. (주말 요금 표시는 하지 않음)
@@ -14,7 +17,7 @@ export interface CalendarDay {
   weekendRate: boolean;
 }
 
-const WEEKDAYS = ['일', '월', '화', '수', '목', '금', '토'];
+const WEEKDAYS = { ko: ['일', '월', '화', '수', '목', '금', '토'], en: ['S', 'M', 'T', 'W', 'T', 'F', 'S'] };
 const pad = (n: number) => String(n).padStart(2, '0');
 const toIso = (y: number, m: number, d: number) => `${y}-${pad(m + 1)}-${pad(d)}`;
 
@@ -33,6 +36,8 @@ export function Calendar({
   minDate: string;
   maxDate: string;
 }) {
+  const locale = useLocale();
+  const t = tr(locale);
   const [y0, m0] = (value || minDate).split('-').map(Number);
   const [view, setView] = useState({ y: y0, m: m0 - 1 });
 
@@ -56,12 +61,12 @@ export function Calendar({
     <div className="rounded-3xl border border-black/[.08] bg-white p-3 md:p-5">
       <div className="flex items-center justify-between px-2 pb-3 pt-1">
         <span className="font-display text-[22px] font-extrabold tracking-[-0.03em] tabular-nums text-ink">
-          {view.y}. {pad(view.m + 1)}
+          {locale === 'en' ? `${EN_MONTH_LONG[view.m]} ${view.y}` : `${view.y}. ${pad(view.m + 1)}`}
         </span>
         <div className="flex gap-1">
           {[
-            { d: -1, ok: canPrev, label: '이전 달', path: 'M10 4 6 8l4 4' },
-            { d: 1, ok: canNext, label: '다음 달', path: 'M6 4l4 4-4 4' },
+            { d: -1, ok: canPrev, label: t('이전 달', 'Previous month'), path: 'M10 4 6 8l4 4' },
+            { d: 1, ok: canNext, label: t('다음 달', 'Next month'), path: 'M6 4l4 4-4 4' },
           ].map((b) => (
             <button
               key={b.d}
@@ -80,8 +85,8 @@ export function Calendar({
       </div>
 
       <div className="grid grid-cols-7 text-center">
-        {WEEKDAYS.map((w, i) => (
-          <div key={w} className={`pb-2 pt-1 text-[12px] font-medium ${i === 0 ? 'text-[#d4351c]' : i === 6 ? 'text-ice-600' : 'text-ink/45'}`}>
+        {WEEKDAYS[locale].map((w, i) => (
+          <div key={i} className={`pb-2 pt-1 text-[12px] font-medium ${i === 0 ? 'text-[#d4351c]' : i === 6 ? 'text-ice-600' : 'text-ink/45'}`}>
             {w}
           </div>
         ))}
@@ -103,7 +108,11 @@ export function Calendar({
               disabled={!selectable}
               onClick={() => onSelect(iso)}
               aria-pressed={selected}
-              aria-label={`${view.m + 1}월 ${d}일${closedLike ? (status === 'closed' ? ' 휴장' : ' 마감') : ''}`}
+              aria-label={
+                locale === 'en'
+                  ? `${EN_MONTH_LONG[view.m]} ${d}${closedLike ? (status === 'closed' ? ', closed' : ', sold out') : ''}`
+                  : `${view.m + 1}월 ${d}일${closedLike ? (status === 'closed' ? ' 휴장' : ' 마감') : ''}`
+              }
               className={`relative m-0.5 flex h-12 flex-col items-center justify-center rounded-2xl text-[16px] transition-[transform,background-color] duration-300 ease-[cubic-bezier(0.16,1,0.3,1)] md:h-14 ${
                 selected
                   ? 'bg-glacier font-semibold text-white'
@@ -115,7 +124,7 @@ export function Calendar({
               }`}
             >
               <span className="leading-none tabular-nums">{d}</span>
-              {closedLike && <span className="mt-1 text-[10px] font-normal leading-none text-ink/45">{status === 'closed' ? '휴장' : '마감'}</span>}
+              {closedLike && <span className="mt-1 text-[10px] font-normal leading-none text-ink/45">{status === 'closed' ? t('휴장', 'Closed') : t('마감', 'Full')}</span>}
             </button>
           );
         })}
@@ -123,7 +132,7 @@ export function Calendar({
 
       <div className="mt-3 flex items-center gap-5 border-t border-black/[.06] px-2 pt-3 text-[12px] text-ink/50">
         <span className="flex items-center gap-1.5">
-          <span className="h-3 w-3 rounded-[4px] bg-black/[.05]" /> 휴장·마감
+          <span className="h-3 w-3 rounded-[4px] bg-black/[.05]" /> {t('휴장·마감', 'Closed / full')}
         </span>
       </div>
     </div>

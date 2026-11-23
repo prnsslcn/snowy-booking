@@ -18,10 +18,12 @@ import { errorMessage } from '@/lib/booking/error-messages';
 import { PAYMENTS_FAKE, PayError, payAndConfirmFake, releaseClient, reserveClient } from '@/lib/client/pay';
 import { requestTossPayment } from '@/lib/client/toss-payment';
 import { thumbOf } from '@/lib/content/facilities';
-import { formatDateKorean, formatPhone, formatWon } from '@/lib/format';
+import { formatPhone } from '@/lib/format';
+import { formatDate, money, productName, tr } from '@/lib/i18n';
 import { SAME_DAY_CUTOFF_HOUR } from '@/lib/policy/booking-window';
 import { parseMobilePhone } from '@/lib/policy/phone';
-import { ONE_PER_DAY_NOTICE, PARKING_NOTICE, REFUND_SUMMARY, TICKET_NOTICE, USAGE_TIME } from '@/lib/site-config';
+import { notices, USAGE_TIME, usageTime } from '@/lib/site-config';
+import { useLocale } from '@/components/site/LocaleProvider';
 
 /*
   예약하기 — 홈과 같은 톤(밝은 바탕, Outfit 헤드라인, 알약 버튼, 둥근 카드).
@@ -51,8 +53,11 @@ interface AvailResponse {
   days: DayAvail[];
 }
 
-const STEPS = ['날짜', '상품', '예약자 정보', '결제'];
-const TITLES = ['이용할 날짜를 골라 주세요', '상품을 선택해 주세요', '예약자 정보를 입력해 주세요', '결제 내용을 확인해 주세요'];
+const STEPS = { ko: ['날짜', '상품', '예약자 정보', '결제'], en: ['Date', 'Type', 'Your details', 'Payment'] };
+const TITLES = {
+  ko: ['이용할 날짜를 골라 주세요', '상품을 선택해 주세요', '예약자 정보를 입력해 주세요', '결제 내용을 확인해 주세요'],
+  en: ['Choose your date', 'Choose a type', 'Enter your details', 'Review and pay'],
+};
 const CUTOFF = `${String(SAME_DAY_CUTOFF_HOUR).padStart(2, '0')}:00`;
 const EASE = [0.22, 1, 0.36, 1] as const;
 const BAR_EASE = [0.65, 0, 0.35, 1] as const;
@@ -60,6 +65,9 @@ const BAR_EASE = [0.65, 0, 0.35, 1] as const;
 export default function BookingPageClient({ preferredType }: { preferredType: string | null }) {
   const router = useRouter();
   const lenis = useLenis();
+  const locale = useLocale();
+  const L = tr(locale);
+  const N = notices(locale);
   const { ready } = usePageTransition();
   const [step, setStep] = useState(1);
   const [dir, setDir] = useState(1); // 1 = 앞으로, -1 = 되돌아감
@@ -84,7 +92,7 @@ export default function BookingPageClient({ preferredType }: { preferredType: st
           setAvail((await res.json()) as AvailResponse);
           setLoadError('');
         })
-        .catch(() => setLoadError('예약 현황을 불러오지 못했습니다. 새로고침해 주세요.')),
+        .catch(() => setLoadError('LOAD_FAILED')), // 문구는 그릴 때 언어에 맞게
     [],
   );
 
@@ -122,9 +130,9 @@ export default function BookingPageClient({ preferredType }: { preferredType: st
 
   function validateInfo(): boolean {
     const e: Record<string, string> = {};
-    if (!name.trim()) e.name = '이름을 입력해 주세요.';
-    if (!parseMobilePhone(phone)) e.phone = '휴대폰 번호를 정확히 입력해 주세요.';
-    if (!agreeRefund || !agreeRules) e.agree = '필수 항목에 모두 동의해 주세요.';
+    if (!name.trim()) e.name = L('이름을 입력해 주세요.', 'Please enter your name.');
+    if (!parseMobilePhone(phone)) e.phone = L('휴대폰 번호를 정확히 입력해 주세요.', 'Please enter a valid Korean mobile number.');
+    if (!agreeRefund || !agreeRules) e.agree = L('필수 항목에 모두 동의해 주세요.', 'Please agree to all required items.');
     setErrors(e);
     return Object.keys(e).length === 0;
   }
@@ -142,7 +150,7 @@ export default function BookingPageClient({ preferredType }: { preferredType: st
     };
     // 토스 키가 아직 없으면(가맹점 계약 전) 자리를 잡지 않고 안내만 — 키를 넣으면 자동으로 결제 진행
     if (!PAYMENTS_FAKE && !process.env.NEXT_PUBLIC_TOSS_CLIENT_KEY) {
-      setPayError('온라인 결제를 준비하고 있습니다. 결제가 열리면 바로 예약하실 수 있습니다.');
+      setPayError(L('온라인 결제를 준비하고 있습니다. 결제가 열리면 바로 예약하실 수 있습니다.', 'Online payment is being set up. You’ll be able to book as soon as it opens.'));
       setSubmitting(false);
       return;
     }
@@ -166,11 +174,11 @@ export default function BookingPageClient({ preferredType }: { preferredType: st
       // 결제창이 안 떴거나 손님이 닫음 → 잡아 둔 자리를 바로 돌려준다(10분 기다리지 않게)
       if (heldOrderId) void releaseClient(heldOrderId).catch(() => {});
       if (err instanceof PayError) {
-        setPayError(errorMessage(err.code));
+        setPayError(errorMessage(err.code, locale));
         if (['SOLD_OUT', 'DATE_LOCKED', 'DATE_CLOSED', 'OUT_OF_WINDOW'].includes(err.code)) await load();
       } else {
         const code = (err as { code?: string }).code;
-        if (code !== 'USER_CANCEL') setPayError('결제가 취소되었거나 실패했습니다. 다시 시도해 주세요.');
+        if (code !== 'USER_CANCEL') setPayError(L('결제가 취소되었거나 실패했습니다. 다시 시도해 주세요.', 'The payment was cancelled or failed. Please try again.'));
       }
       setSubmitting(false);
     }
@@ -186,7 +194,7 @@ export default function BookingPageClient({ preferredType }: { preferredType: st
     Object.keys(errors).length > 0
       ? errors.agree && Object.keys(errors).length === 1
         ? errors.agree
-        : '입력하지 않았거나 잘못된 항목이 있습니다.'
+        : L('입력하지 않았거나 잘못된 항목이 있습니다.', 'Some fields are missing or incorrect.')
       : '';
 
   return (
@@ -194,7 +202,7 @@ export default function BookingPageClient({ preferredType }: { preferredType: st
       <div className="mx-auto w-full max-w-3xl flex-1 px-5 pb-10 pt-28 md:px-8 md:pt-32">
         <PageTitle
           display="Booking"
-          sub="예약하기"
+          sub={L('예약하기', 'Book your day')}
           aside={
             <span className="mb-1 flex-none overflow-hidden font-mono text-xs tracking-[.22em] text-ink/50" aria-hidden>
               <AnimatePresence mode="popLayout" initial={false}>
@@ -215,17 +223,17 @@ export default function BookingPageClient({ preferredType }: { preferredType: st
         />
 
         {/* 진행 막대 — 단계마다 차오름. 지난 단계 이름은 눌러서 되돌아감 */}
-        <motion.nav aria-label="예약 단계" style={WILL} {...blockIn(8, '14%', 0.78, 0.28, ready)}>
+        <motion.nav aria-label={L('예약 단계', 'Booking steps')} style={WILL} {...blockIn(8, '14%', 0.78, 0.28, ready)}>
           <div className="relative h-[3px] overflow-hidden rounded-full bg-ice-100">
             <motion.div
               className="absolute inset-y-0 left-0 rounded-full bg-gradient-to-r from-ice-400 to-ice-600"
               initial={{ width: '0%' }}
-              animate={{ width: ready ? `${(step / STEPS.length) * 100}%` : '0%' }}
+              animate={{ width: ready ? `${(step / STEPS[locale].length) * 100}%` : '0%' }}
               transition={{ duration: 0.9, ease: BAR_EASE }}
             />
           </div>
           <ol className="mt-3 grid grid-cols-4">
-            {STEPS.map((label, i) => {
+            {STEPS[locale].map((label, i) => {
               const n = i + 1;
               const active = n === step;
               const done = n < step;
@@ -249,7 +257,7 @@ export default function BookingPageClient({ preferredType }: { preferredType: st
           </ol>
         </motion.nav>
 
-        {loadError && <p className="mt-8 rounded-2xl border border-[#d4351c]/25 bg-[#d4351c]/[.05] px-5 py-4 text-[14px] text-[#b02a15]">{loadError}</p>}
+        {loadError && <p className="mt-8 rounded-2xl border border-[#d4351c]/25 bg-[#d4351c]/[.05] px-5 py-4 text-[14px] text-[#b02a15]">{L('예약 현황을 불러오지 못했습니다. 새로고침해 주세요.', 'We couldn’t load availability. Please refresh the page.')}</p>}
 
         <AnimatePresence mode="wait" initial={false} custom={dir}>
           <motion.div
@@ -278,24 +286,24 @@ export default function BookingPageClient({ preferredType }: { preferredType: st
                 <svg aria-hidden viewBox="0 0 16 16" className="h-4 w-4 transition-transform duration-300 ease-[cubic-bezier(0.16,1,0.3,1)] group-hover:-translate-x-0.5" fill="none">
                   <path d="M10 3.5 5.5 8 10 12.5" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round" />
                 </svg>
-                이전 단계
+                {L('이전 단계', 'Back')}
               </button>
             )}
-            <h2 className="text-[22px] font-bold tracking-[-0.02em] md:text-[28px]">{TITLES[step - 1]}</h2>
+            <h2 className="text-[22px] font-bold tracking-[-0.02em] md:text-[28px]">{TITLES[locale][step - 1]}</h2>
 
             {step >= 2 && date && (
               <div className="mt-4 flex flex-wrap gap-2">
                 <Chip>
-                  {formatDateKorean(date)} · {USAGE_TIME}
+                  {formatDate(date, locale)} · {usageTime(locale)}
                 </Chip>
-                {step >= 3 && selected && <Chip>{selected.name}</Chip>}
+                {step >= 3 && selected && <Chip>{productName(selected.type, selected.name, locale)}</Chip>}
               </div>
             )}
 
             {/* 1. 날짜 */}
             {step === 1 && (
               <div className="mt-6">
-                <p className="mb-5 text-[15px] text-ink/60">오늘부터 1개월 이내 · 당일 예약 {CUTOFF}까지</p>
+                <p className="mb-5 text-[15px] text-ink/60">{L(`오늘부터 1개월 이내 · 당일 예약 ${CUTOFF}까지`, `Up to one month ahead · same-day bookings until ${CUTOFF}`)}</p>
                 {avail ? (
                   <Calendar value={date} onSelect={pickDate} days={dayMap} today={avail.today} minDate={avail.minDate} maxDate={avail.maxDate} />
                 ) : (
@@ -307,7 +315,7 @@ export default function BookingPageClient({ preferredType }: { preferredType: st
             {/* 2. 공간 */}
             {step === 2 && day && (
               <div className="mt-6 space-y-3">
-                <p className="text-[15px] text-ink/60">1인 1동 · 자리는 현장 배정</p>
+                <p className="text-[15px] text-ink/60">{L('1인 1동 · 자리는 현장 배정', 'One unit per person · unit assigned on site')}</p>
                 {day.types.map((t) => {
                   const soldOut = t.remaining <= 0;
                   const thumb = thumbOf(t.type);
@@ -338,15 +346,15 @@ export default function BookingPageClient({ preferredType }: { preferredType: st
                       )}
                       <div className="min-w-0 flex-1">
                         <div className="flex flex-wrap items-baseline gap-x-2">
-                          <span className={`text-[18px] font-bold ${soldOut ? 'text-ink/35' : ''}`}>{t.name}</span>
-                          <span className="text-[13px] text-ink/50">최대 {t.maxCapacity}인</span>
+                          <span className={`text-[18px] font-bold ${soldOut ? 'text-ink/35' : ''}`}>{productName(t.type, t.name, locale)}</span>
+                          <span className="text-[13px] text-ink/50">{L(`최대 ${t.maxCapacity}인`, `Up to ${t.maxCapacity} people`)}</span>
                         </div>
                         <p className={`mt-1 font-display text-[22px] font-extrabold tracking-[-0.02em] tabular-nums ${soldOut ? 'text-ink/35' : ''}`}>
-                          {formatWon(t.price)}
+                          {money(t.price, locale)}
                         </p>
                         {soldOut && (
                           <div className="mt-2">
-                            <Badge tone="error">마감</Badge>
+                            <Badge tone="error">{L('마감', 'Sold out')}</Badge>
                           </div>
                         )}
                       </div>
@@ -369,10 +377,10 @@ export default function BookingPageClient({ preferredType }: { preferredType: st
             {/* 3. 예약자 정보 + 동의 */}
             {step === 3 && selected && (
               <div className="mt-8 space-y-6">
-                <Field label="이름" error={errors.name}>
+                <Field label={L('이름', 'Name')} error={errors.name}>
                   <Input value={name} onChange={(e) => setName(e.target.value)} autoComplete="name" aria-invalid={!!errors.name} />
                 </Field>
-                <Field label="휴대폰 번호" error={errors.phone} hint={ONE_PER_DAY_NOTICE}>
+                <Field label={L('휴대폰 번호', 'Mobile number (Korea)')} error={errors.phone} hint={N.onePerDay}>
                   <Input
                     value={phone}
                     onChange={(e) => setPhone(formatPhone(e.target.value))}
@@ -385,7 +393,7 @@ export default function BookingPageClient({ preferredType }: { preferredType: st
                 </Field>
 
                 <fieldset className="overflow-hidden rounded-3xl border border-black/[.08] bg-white">
-                  <legend className="sr-only">동의</legend>
+                  <legend className="sr-only">{L('동의', 'Agreement')}</legend>
                   <CheckRow
                     checked={agreeRefund && agreeRules}
                     onChange={(v) => {
@@ -394,17 +402,17 @@ export default function BookingPageClient({ preferredType }: { preferredType: st
                     }}
                     strong
                   >
-                    필수 항목 모두 동의
+                    {L('필수 항목 모두 동의', 'Agree to all required items')}
                   </CheckRow>
                   <div className="border-t border-black/[.06]">
                     <CheckRow checked={agreeRefund} onChange={setAgreeRefund}>
-                      [필수] 취소·환불 규정
-                      <span className="mt-0.5 block text-[13px] text-ink/50">{REFUND_SUMMARY}</span>
+                      {L('[필수] 취소·환불 규정', '[Required] Cancellation and refund policy')}
+                      <span className="mt-0.5 block text-[13px] text-ink/50">{N.refundSummary}</span>
                     </CheckRow>
                     <CheckRow checked={agreeRules} onChange={setAgreeRules}>
-                      [필수] 이용 수칙
+                      {L('[필수] 이용 수칙', '[Required] House rules')}
                       <span className="mt-0.5 block text-[13px] text-ink/50">
-                        이용 시간 {USAGE_TIME}, 최대 인원 준수. {TICKET_NOTICE} {PARKING_NOTICE}
+                        {L(`이용 시간 ${USAGE_TIME}, 최대 인원 준수.`, `Hours ${usageTime(locale)}; do not exceed the maximum number of guests.`)} {N.ticket} {N.parking}
                       </span>
                     </CheckRow>
                   </div>
@@ -412,7 +420,7 @@ export default function BookingPageClient({ preferredType }: { preferredType: st
 
                 <BottomBar error={infoError}>
                   <Button size="block" onClick={() => validateInfo() && moveTo(4)}>
-                    다음
+                    {L('다음', 'Next')}
                   </Button>
                 </BottomBar>
               </div>
@@ -423,29 +431,41 @@ export default function BookingPageClient({ preferredType }: { preferredType: st
               <div className="mt-8 space-y-6">
                 <div className="rounded-3xl border border-black/[.08] bg-white px-5 md:px-6">
                   <dl className="divide-y divide-black/[.06]">
-                    <SummaryRow label="이용일" value={`${formatDateKorean(date)} ${USAGE_TIME}`} />
-                    <SummaryRow label="상품" value={`${selected.name} 1${selected.type === 'cabana' ? '동' : '대'}`} />
-                    <SummaryRow label="예약자" value={`${name.trim()} · ${formatPhone(phone)}`} />
+                    <SummaryRow label={L('이용일', 'Date')} value={`${formatDate(date, locale)} ${usageTime(locale)}`} />
+                    <SummaryRow
+                      label={L('상품', 'Type')}
+                      value={L(`${selected.name} 1${selected.type === 'cabana' ? '동' : '대'}`, `${productName(selected.type, selected.name, locale)} × 1`)}
+                    />
+                    <SummaryRow label={L('예약자', 'Booked by')} value={`${name.trim()} · ${formatPhone(phone)}`} />
                     <div className="flex items-baseline justify-between gap-4 py-5">
-                      <dt className="text-[15px] font-semibold">결제 금액</dt>
-                      <dd className="font-display text-[32px] font-extrabold tracking-[-0.03em] tabular-nums md:text-[40px]">{formatWon(selected.price)}</dd>
+                      <dt className="text-[15px] font-semibold">{L('결제 금액', 'Total')}</dt>
+                      <dd className="font-display text-[32px] font-extrabold tracking-[-0.03em] tabular-nums md:text-[40px]">{money(selected.price, locale)}</dd>
                     </div>
                   </dl>
                 </div>
                 <ul className="space-y-1 text-[13px] text-ink/55">
-                  <li>취소·환불: {REFUND_SUMMARY}</li>
-                  <li>결제창에서 10분 안에 결제를 마쳐 주세요. 시간이 지나면 선점한 자리가 풀립니다.</li>
+                  <li>{L('취소·환불: ', 'Cancellation and refunds: ')}{N.refundSummary}</li>
+                  <li>
+                    {L(
+                      '결제창에서 10분 안에 결제를 마쳐 주세요. 시간이 지나면 선점한 자리가 풀립니다.',
+                      'Please complete payment within 10 minutes. After that, your held unit is released.',
+                    )}
+                  </li>
                 </ul>
 
                 {PAYMENTS_FAKE && (
                   <p className="rounded-2xl border border-amber-500/30 bg-amber-500/[.07] px-5 py-3 text-[13px] text-amber-800">
-                    개발 모드 — 테스트 결제로 진행됩니다.
+                    {L('개발 모드 — 테스트 결제로 진행됩니다.', 'Development mode — test payment only.')}
                   </p>
                 )}
 
                 <BottomBar error={payError}>
                   <Button size="block" onClick={pay} disabled={submitting}>
-                    {submitting ? '결제 준비 중…' : <span className="tabular-nums">{formatWon(selected.price)} 결제하기</span>}
+                    {submitting ? (
+                      L('결제 준비 중…', 'Preparing payment…')
+                    ) : (
+                      <span className="tabular-nums">{L(`${money(selected.price, locale)} 결제하기`, `Pay ${money(selected.price, locale)}`)}</span>
+                    )}
                   </Button>
                 </BottomBar>
               </div>
