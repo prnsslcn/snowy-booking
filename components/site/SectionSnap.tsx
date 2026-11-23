@@ -12,7 +12,7 @@ import { useLenis } from '@/components/site/SmoothScroll';
     표식은 흐름 안 요소라 sticky 영향이 없다. 멈출 때마다 다시 재므로 자세히 보기 펼침·창 크기 변화도 반영.
   - 손가락이 화면에 닿아 있는 동안, 메뉴가 열려 스크롤이 멈춘 동안에는 당기지 않는다.
 */
-const THRESHOLD = 0.1;
+const THRESHOLD = 0.15;
 const SETTLE_MS = 140;
 const SNAP = { duration: 0.75, easing: (t: number) => 1 - Math.pow(1 - t, 3) };
 
