@@ -164,6 +164,12 @@ export default function BookingPageClient({ preferredType }: { preferredType: st
       setSubmitting(false);
       return;
     }
+    // 받는 결제수단(카드·간편결제)이 아니면 자리를 잡지 않고 안내만
+    if (widget && !(await widget.isAllowedMethod())) {
+      setPayError(L('신용·체크카드 또는 간편결제로만 결제할 수 있습니다. 다른 결제수단을 선택해 주세요.', 'We only accept credit/debit cards and easy-pay options. Please choose another payment method.'));
+      setSubmitting(false);
+      return;
+    }
     const key = `${req.type}|${req.date}|${req.guestName}|${req.guestPhone}`;
     let heldOrderId: string | null = null;
     try {

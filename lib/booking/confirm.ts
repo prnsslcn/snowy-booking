@@ -7,6 +7,9 @@ import type { ConfirmPaymentInput, TossPaymentResult } from '@/lib/payments/type
 import { createAdminClient } from '@/lib/supabase/admin';
 import type { Json } from '@/types/database';
 
+/** 받는 결제수단(토스 승인 응답의 method 값). 카드 결제창(method: 'CARD')과 같은 범위. */
+const ALLOWED_PAYMENT_METHODS = ['카드', '간편결제'];
+
 type AdminClient = ReturnType<typeof createAdminClient>;
 
 /**
@@ -78,6 +81,11 @@ export async function settlePayment(
   if (tossResult.status !== 'DONE' || tossResult.orderId !== orderId) {
     await compensate(supabase, toss, tossResult, 'PAYMENT_NOT_COMPLETED');
     throw new PaymentError('PAYMENT_NOT_COMPLETED');
+  }
+  // 결제수단은 grill-booking 과 같게 카드 결제창 범위(카드·간편결제)만. 위젯 화면에서 먼저 막지만 서버에서 한 번 더
+  if (!ALLOWED_PAYMENT_METHODS.includes(tossResult.method ?? '')) {
+    await compensate(supabase, toss, tossResult, 'METHOD_NOT_ALLOWED');
+    throw new PaymentError('METHOD_NOT_ALLOWED', `허용되지 않은 결제수단: ${tossResult.method ?? '(없음)'}`);
   }
 
   const runTx = () =>

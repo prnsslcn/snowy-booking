@@ -15,6 +15,8 @@ export const AGREEMENT_ID = 'toss-agreement';
 
 export interface MountedWidget {
   widgets: TossPaymentsWidgets;
+  /** 손님이 고른 결제수단이 받는 범위(카드 결제창과 같은 CARD — 신용·체크카드, 토스페이·카카오페이 등 간편결제)인지 */
+  isAllowedMethod: () => Promise<boolean>;
   destroy: () => Promise<void>;
 }
 
@@ -43,6 +45,11 @@ async function render(amount: number): Promise<MountedWidget> {
   });
   return {
     widgets,
+    isAllowedMethod: async () => {
+      // 퀵계좌이체(TRANSFER)·가상계좌·휴대폰 등은 받지 않는다(grill-booking 의 method: 'CARD' 와 같은 범위)
+      const selected = await methods.getSelectedPaymentMethod().catch(() => null);
+      return !selected || selected.method === 'CARD';
+    },
     destroy: async () => {
       await Promise.allSettled([methods.destroy(), agreement.destroy()]);
     },

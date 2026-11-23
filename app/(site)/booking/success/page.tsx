@@ -41,7 +41,7 @@ export default function PaymentSuccessPage() {
   const message =
     error === 'INVALID'
       ? t('결제 정보가 올바르지 않습니다.', 'The payment details are invalid.')
-      : error === 'BOOKING_NOT_PENDING' || error === 'AMOUNT_MISMATCH' || error === 'PAYMENT_NOT_COMPLETED'
+      : error === 'BOOKING_NOT_PENDING' || error === 'AMOUNT_MISMATCH' || error === 'PAYMENT_NOT_COMPLETED' || error === 'METHOD_NOT_ALLOWED'
         ? errorMessage(error, locale)
         : t('결제 승인에 실패했습니다. 결제가 이뤄졌다면 자동으로 취소됩니다.', 'We couldn’t approve the payment. If you were charged, it will be cancelled automatically.');
 
