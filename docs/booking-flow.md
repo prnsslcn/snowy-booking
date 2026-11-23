@@ -8,7 +8,7 @@
 |---|---|---|
 | 이용 | 당일 10:00~17:00(조기 입실·연장 없음), 매일 운영 | 안내 문구 |
 | 시즌 | 성수기보다 넓음, **날짜 미정** → `site_settings.season_from/to`(null이면 제한 없음) | DB |
-| 예약 가능 기간 | 오늘(KST) ~ 오늘 + 4개월 − 1일 | `lib/policy/booking-window.ts` `BOOKING_WINDOW_MONTHS = 4` |
+| 예약 가능 기간 | 오늘(KST) ~ 오늘 + 3개월 − 1일 | `lib/policy/booking-window.ts` `BOOKING_WINDOW_MONTHS = 3` |
 | 당일 마감 | 당일 16:00(KST) 이후 당일 예약 불가 | `SAME_DAY_CUTOFF_HOUR = 16` |
 | 결제 대기 | 10분 | `PENDING_PAYMENT_MINUTES = 10` (+ DB 0015) |
 | 1인 1동 | 같은 휴대폰번호로 같은 날 온라인 활성 예약 1건 | DB partial unique |
@@ -58,7 +58,7 @@
 **서버 라우트(TS)**
 1. `site_settings.business_closed`이면 `BUSINESS_CLOSED`
 2. 휴대폰번호 정규화와 형식 검증
-3. `isWithinBookingWindow(date)` 확인(4개월, 당일 16시 마감, KST)
+3. `isWithinBookingWindow(date)` 확인(3개월, 당일 16시 마감, KST)
 4. RPC 호출
 
 **DB 함수 `reserve_booking` (단일 트랜잭션)**
@@ -219,7 +219,7 @@ grill-booking `lib/booking/confirm.ts`의 흐름을 그대로 쓴다.
 | SOLD_OUT | 선택하신 날짜의 {상품}이 모두 예약되었습니다. |
 | DUPLICATE_PHONE_DATE | 1인(휴대폰번호 기준) 1일 1동만 예약할 수 있습니다. 기존 예약은 예약 조회에서 확인해 주세요. |
 | DATE_CLOSED / DATE_LOCKED | 휴장일입니다 / 예약이 마감된 날짜입니다. |
-| OUT_OF_WINDOW | 예약은 오늘부터 4개월 이내 날짜만 가능합니다(당일 예약은 16시까지). |
+| OUT_OF_WINDOW | 예약은 오늘부터 3개월 이내 날짜만 가능합니다(당일 예약은 16시까지). |
 | OVER_CAPACITY | {상품}은 최대 {n}인까지 이용할 수 있습니다. |
 | BUSINESS_CLOSED | (→ /off) |
 | TOO_MANY_ATTEMPTS | 조회 시도가 너무 많습니다. 15분 후 다시 시도해 주세요. |

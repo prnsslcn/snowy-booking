@@ -37,7 +37,7 @@ BEFORE=$(j "o.days.find(d=>d.date==='$D3').types.find(t=>t.type==='caravan').rem
 post /api/bookings/reserve "$(reserve_body caravan "$D3" "$P1" 2 false)"
 check "동의 없으면 거부" "$CODE $(j o.error)" "400 AGREEMENT_REQUIRED"
 post /api/bookings/reserve "$(reserve_body caravan "$FAR" "$P1" 2)"
-check "4개월 밖 거부" "$CODE $(j o.error)" "400 OUT_OF_WINDOW"
+check "예약 가능 기간 밖 거부" "$CODE $(j o.error)" "400 OUT_OF_WINDOW"
 post /api/bookings/reserve "$(reserve_body cabana "$D3" "$P1" 7)"
 check "최대 인원 초과 거부" "$CODE $(j o.error)" "400 OVER_CAPACITY"
 post /api/bookings/reserve "$(reserve_body cabana "$D3" "02-123-4567" 2)"
