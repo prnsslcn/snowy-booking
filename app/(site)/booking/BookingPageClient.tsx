@@ -3,7 +3,7 @@
 import { AnimatePresence, motion } from 'framer-motion';
 import Image from 'next/image';
 import { useRouter } from 'next/navigation';
-import { useCallback, useEffect, useMemo, useState, type ReactNode } from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState, type ReactNode } from 'react';
 
 import { Calendar, type CalendarDay } from '@/components/booking/Calendar';
 import { blockIn, WILL } from '@/components/site/motion';
@@ -15,8 +15,8 @@ import { Badge } from '@/components/ui/Badge';
 import { Button } from '@/components/ui/Button';
 import { Field, Input } from '@/components/ui/Field';
 import { errorMessage } from '@/lib/booking/error-messages';
-import { PAYMENTS_FAKE, PayError, payAndConfirmFake, releaseClient, reserveClient } from '@/lib/client/pay';
-import { requestTossPayment } from '@/lib/client/toss-payment';
+import { PAYMENTS_FAKE, PayError, payAndConfirmFake, releaseClient, reserveClient, type ReserveResponse } from '@/lib/client/pay';
+import { AGREEMENT_ID, mountTossWidget, PAYMENT_METHODS_ID, requestTossPayment, unmountTossWidget, type MountedWidget } from '@/lib/client/toss-payment';
 import { thumbOf } from '@/lib/content/facilities';
 import { formatPhone } from '@/lib/format';
 import { formatDate, money, productName, tr } from '@/lib/i18n';
@@ -60,6 +60,7 @@ const TITLES = {
 };
 const CUTOFF = `${String(SAME_DAY_CUTOFF_HOUR).padStart(2, '0')}:00`;
 const EASE = [0.22, 1, 0.36, 1] as const;
+const msLeft = (iso: string) => new Date(iso).getTime() - Date.now();
 const BAR_EASE = [0.65, 0, 0.35, 1] as const;
 
 export default function BookingPageClient({ preferredType }: { preferredType: string | null }) {
@@ -83,6 +84,10 @@ export default function BookingPageClient({ preferredType }: { preferredType: st
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [submitting, setSubmitting] = useState(false);
   const [payError, setPayError] = useState('');
+  const widgetRef = useRef<MountedWidget | null>(null);
+  // 위젯 입력 미완료(NEED_*)로 결제 요청이 막혔을 때 잡아 둔 자리를 다음 클릭에 다시 쓴다(선점·반환 반복 방지)
+  const holdRef = useRef<{ key: string; hold: ReserveResponse } | null>(null);
+  const [widgetReady, setWidgetReady] = useState(false);
 
   const load = useCallback(
     () =>
@@ -154,6 +159,12 @@ export default function BookingPageClient({ preferredType }: { preferredType: st
       setSubmitting(false);
       return;
     }
+    const widget = widgetRef.current;
+    if (!PAYMENTS_FAKE && !widget) {
+      setSubmitting(false);
+      return;
+    }
+    const key = `${req.type}|${req.date}|${req.guestName}|${req.guestPhone}`;
     let heldOrderId: string | null = null;
     try {
       if (PAYMENTS_FAKE) {
@@ -161,9 +172,19 @@ export default function BookingPageClient({ preferredType }: { preferredType: st
         router.push(`/booking/complete?o=${encodeURIComponent(orderId)}`);
         return;
       }
-      const r = await reserveClient(req);
+      // 앞서 잡아 둔 자리가 같은 내용이고 1분 이상 남았으면 그대로, 아니면 돌려주고 새로 잡는다
+      const prev = holdRef.current;
+      holdRef.current = null;
+      let r: ReserveResponse;
+      if (prev && prev.key === key && msLeft(prev.hold.expiresAt) > 60_000) {
+        r = prev.hold;
+      } else {
+        if (prev) await releaseClient(prev.hold.orderId).catch(() => {});
+        r = await reserveClient(req);
+      }
       heldOrderId = r.orderId;
-      await requestTossPayment({
+      holdRef.current = { key, hold: r };
+      await requestTossPayment(widget!.widgets, {
         amount: r.amount,
         orderId: r.orderId,
         orderName: r.orderName,
@@ -171,13 +192,19 @@ export default function BookingPageClient({ preferredType }: { preferredType: st
         customerMobilePhone: parseMobilePhone(phone) ?? undefined,
       });
     } catch (err) {
+      const code = (err as { code?: string }).code ?? '';
+      // 위젯 입력 미완료(NEED_* — 카드사·할부 미선택, 약관 미동의 등)는 위젯이 직접 안내 → 자리 유지, 다음 클릭에 재사용
+      if (code.startsWith('NEED_')) {
+        setSubmitting(false);
+        return;
+      }
       // 결제창이 안 떴거나 손님이 닫음 → 잡아 둔 자리를 바로 돌려준다(10분 기다리지 않게)
+      holdRef.current = null;
       if (heldOrderId) void releaseClient(heldOrderId).catch(() => {});
       if (err instanceof PayError) {
         setPayError(errorMessage(err.code, locale));
         if (['SOLD_OUT', 'DATE_LOCKED', 'DATE_CLOSED', 'OUT_OF_WINDOW'].includes(err.code)) await load();
       } else {
-        const code = (err as { code?: string }).code;
         if (code !== 'USER_CANCEL') setPayError(L('결제가 취소되었거나 실패했습니다. 다시 시도해 주세요.', 'The payment was cancelled or failed. Please try again.'));
       }
       setSubmitting(false);
@@ -453,6 +480,10 @@ export default function BookingPageClient({ preferredType }: { preferredType: st
                   </li>
                 </ul>
 
+                {!PAYMENTS_FAKE && process.env.NEXT_PUBLIC_TOSS_CLIENT_KEY && (
+                  <TossWidget amount={selected.price} widgetRef={widgetRef} onReady={setWidgetReady} failText={L('결제 화면을 불러오지 못했습니다. 새로고침 후 다시 시도해 주세요.', 'We couldn’t load the payment form. Please refresh and try again.')} />
+                )}
+
                 {PAYMENTS_FAKE && (
                   <p className="rounded-2xl border border-amber-500/30 bg-amber-500/[.07] px-5 py-3 text-[13px] text-amber-800">
                     {L('개발 모드 — 테스트 결제로 진행됩니다.', 'Development mode — test payment only.')}
@@ -460,7 +491,7 @@ export default function BookingPageClient({ preferredType }: { preferredType: st
                 )}
 
                 <BottomBar error={payError}>
-                  <Button size="block" onClick={pay} disabled={submitting}>
+                  <Button size="block" onClick={pay} disabled={submitting || (!PAYMENTS_FAKE && !!process.env.NEXT_PUBLIC_TOSS_CLIENT_KEY && !widgetReady)}>
                     {submitting ? (
                       L('결제 준비 중…', 'Preparing payment…')
                     ) : (
@@ -475,6 +506,51 @@ export default function BookingPageClient({ preferredType }: { preferredType: st
       </div>
       <SiteFooter />
     </main>
+  );
+}
+
+/** 토스 결제위젯(결제수단·약관 UI). 결제 단계에 들어올 때 그리고, 나가면 지운다. */
+function TossWidget({
+  amount,
+  widgetRef,
+  onReady,
+  failText,
+}: {
+  amount: number;
+  widgetRef: { current: MountedWidget | null };
+  onReady: (ready: boolean) => void;
+  failText: string;
+}) {
+  const [failed, setFailed] = useState(false);
+  const amountRef = useRef(amount); // 처음 그릴 때 금액 — 결제 요청 때 서버 금액으로 다시 맞춘다
+
+  useEffect(() => {
+    let alive = true;
+    const mounting = mountTossWidget(amountRef.current);
+    mounting
+      .then((w) => {
+        if (!alive) return;
+        widgetRef.current = w;
+        onReady(true);
+      })
+      .catch((err: unknown) => {
+        console.error('[toss widget]', err);
+        if (alive) setFailed(true);
+      });
+    return () => {
+      alive = false;
+      widgetRef.current = null;
+      onReady(false);
+      unmountTossWidget(mounting);
+    };
+  }, [widgetRef, onReady]);
+
+  return (
+    <div className="overflow-hidden rounded-3xl border border-black/[.08] bg-white">
+      {failed && <p className="px-5 py-4 text-[14px] text-red-600">{failText}</p>}
+      <div id={PAYMENT_METHODS_ID} />
+      <div id={AGREEMENT_ID} />
+    </div>
   );
 }
 
