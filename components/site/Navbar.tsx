@@ -171,7 +171,7 @@ export function Navbar() {
                 </a>
               ))}
             </div>
-            <span aria-hidden className="hidden h-4 w-px bg-current opacity-20 lg:block" />
+            <span aria-hidden data-swap-piece className="hidden h-4 w-px bg-current opacity-20 lg:block" />
             <div className="hidden items-center gap-6 lg:flex xl:gap-7">
               {INFO_ITEMS.map((item) => (
                 <a key={item.href} href={item.href} onClick={(e) => go(e, item.href)} className={link}>
@@ -179,16 +179,16 @@ export function Navbar() {
                 </a>
               ))}
             </div>
-            <span aria-hidden className="hidden h-4 w-px bg-current opacity-20 lg:block" />
+            <span aria-hidden data-swap-piece className="hidden h-4 w-px bg-current opacity-20 lg:block" />
             <a href={LOOKUP.href} onClick={(e) => go(e, LOOKUP.href)} className={`${link} hidden lg:inline`}>
               <span className={underline(pathname === LOOKUP.href)}>{LOOKUP.label}</span>
             </a>
-            <span aria-hidden className="hidden h-4 w-px bg-current opacity-20 lg:block" />
+            <span aria-hidden data-swap-piece className="hidden h-4 w-px bg-current opacity-20 lg:block" />
             <a href={BOOK.href} onClick={(e) => go(e, BOOK.href)} className={`${link} hidden md:inline`}>
               <span className={underline(pathname === BOOK.href)}>{BOOK.label}</span>
             </a>
             {/* 한/영 전환 — 맨 오른쪽(폰에서는 메뉴 버튼 왼쪽) */}
-            <LangToggle className={`-mx-1 p-1.5 transition-colors ${isDark ? 'text-white/80 hover:text-white' : 'text-ink/70 hover:text-ink'} lg:order-last`} />
+            <LangToggle className={`-my-1 -mr-1.5 ${isDark ? 'text-white/85 hover:text-white' : 'text-ink/75 hover:text-ink'}`} />
             <button
               type="button"
               onClick={() => setOpen(true)}

@@ -5,6 +5,7 @@ import { usePathname, useRouter } from 'next/navigation';
 import { createContext, useCallback, useContext, useEffect, useRef, useState, type ReactNode } from 'react';
 
 import { SCROLL_OPTS, useLenis } from '@/components/site/SmoothScroll';
+import { byPosition, collectPieces, inView } from '@/components/site/swapPieces';
 
 /*
   화면 전환.
@@ -23,15 +24,22 @@ const EASE: [number, number, number, number] = [0.87, 0, 0.13, 1];
 const SHEET_D = 1.1;
 const SHEET_EASE: [number, number, number, number] = [0.76, 0, 0.24, 1];
 const RADIUS = 48;
+/** 언어 바꾸기: 사라짐 · 한 조각 등장 · 조각 사이 간격(최대) · 전체 순차 등장 최대 길이 (ms) — site.css [data-swap] 와 맞춤 */
+const OUT_MS = 300;
+const IN_MS = 700;
+const STEP_MS = 60;
+const MAX_STAGGER_MS = 700;
 /** 종이 진행도가 이 값을 넘으면 새 화면 등장 애니메이션 시작 */
 const ENTER_AT = 0.55;
 
 interface Ctx {
   ready: boolean;
   leaveTo: (href: string) => void;
+  /** 글자만 흐려졌다가 run(언어 바꾸기) 뒤 새 글자로 또렷해진다 — 바탕·카드·사진·배치는 그대로 */
+  replay: (run: () => void | Promise<void>) => void;
 }
 
-const TransitionContext = createContext<Ctx>({ ready: true, leaveTo: () => {} });
+const TransitionContext = createContext<Ctx>({ ready: true, leaveTo: () => {}, replay: (run) => void run() });
 
 export function usePageTransition() {
   return useContext(TransitionContext);
@@ -144,6 +152,56 @@ export function PageTransition({ navbar, children }: { navbar?: ReactNode; child
     return () => window.removeEventListener('pageshow', onShow);
   }, []);
 
+  /**
+   * 언어 바꾸기: 바탕·사진·배치는 그대로 두고 '조각'(글자, 글자가 든 상자는 상자째 — swapPieces.ts)만
+   * 완전히 사라졌다가(투명 100%) 새 언어로 위에서부터 차례로 다시 나타난다. 스크롤 위치 그대로.
+   */
+  async function replay(run: () => void | Promise<void>) {
+    if (busy.current) return;
+    const reduce = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    if (reduce) {
+      await run();
+      return;
+    }
+    busy.current = true;
+    const roots = () => [document.querySelector('nav'), sheetRef.current].filter((x): x is HTMLElement => !!x);
+
+    // 1) 지금 조각들이 흐려지며 완전히 사라짐
+    const before = collectPieces(roots());
+    for (const el of before) el.setAttribute('data-swap', 'out');
+    await new Promise((r) => setTimeout(r, OUT_MS + 40));
+
+    // 2) 바꾸고 새 화면이 커밋될 때까지 기다림 — 대기 단계 동안은 새로 생기는 글자도 처음부터 숨김(site.css)
+    const html = document.documentElement;
+    html.setAttribute('data-swap-phase', 'wait');
+    const changed = new Promise<void>((r) => (waiter.current = r));
+    await run();
+    await Promise.race([changed, new Promise<void>((r) => setTimeout(r, 1500))]);
+    await frames2();
+
+    // 3) 새로 생긴 조각까지 다시 모아 모두 숨긴 상태로 맞춘 뒤(전환 없이) → 위에서부터 차례로 등장
+    const after = byPosition(collectPieces(roots()));
+    for (const el of after) el.setAttribute('data-swap', 'hidden');
+    for (const el of before) if (!after.includes(el)) el.removeAttribute('data-swap');
+    html.removeAttribute('data-swap-phase');
+    await frames2();
+    const visible = after.filter(inView);
+    const step = visible.length > 1 ? Math.min(STEP_MS, MAX_STAGGER_MS / (visible.length - 1)) : 0;
+    let i = 0;
+    for (const el of after) {
+      const delay = inView(el) ? Math.round(i++ * step) : 0;
+      el.style.setProperty('--swap-delay', `${delay}ms`);
+      el.setAttribute('data-swap', 'in');
+    }
+    await new Promise((r) => setTimeout(r, MAX_STAGGER_MS + IN_MS + 60));
+    for (const el of after) {
+      el.removeAttribute('data-swap');
+      el.style.removeProperty('--swap-delay');
+    }
+    window.dispatchEvent(new Event('scroll'));
+    busy.current = false;
+  }
+
   async function leaveTo(href: string) {
     const url = new URL(href, window.location.href);
     // 같은 화면 안 앵커는 스크롤만
@@ -202,7 +260,9 @@ export function PageTransition({ navbar, children }: { navbar?: ReactNode; child
   }
 
   return (
-    <TransitionContext.Provider value={{ ready: !active && !entering, leaveTo: (href) => void leaveTo(href) }}>
+    <TransitionContext.Provider
+      value={{ ready: !active && !entering, leaveTo: (href) => void leaveTo(href), replay: (run) => void replay(run) }}
+    >
       {navbar}
       <motion.div
         ref={sheetRef}

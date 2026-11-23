@@ -180,12 +180,16 @@ function SpacePanel({ space, index, total, dark }: { space: Space; index: number
               <span className="sr-only">{space.name}</span>
             </motion.h2>
           </div>
-          {/* 한글 이름 줄 — 영어 보기에서는 큰 영문 제목과 같아서 뺀다 */}
-          {locale === 'ko' && (
-            <motion.p className="mt-2 text-lg font-semibold md:text-2xl lg:order-1 lg:mt-3" style={WILL} {...blockIn(8, '14%', 0.78, 0.18, inView)} aria-hidden>
-              {space.name}
-            </motion.p>
-          )}
+          {/* 한글 이름 줄 — 영어 보기에서는 큰 영문 제목과 같아서 숨긴다.
+              언어를 바꿀 때 새로 생기지 않게(차례 등장에서 혼자 먼저 나오지 않게) 늘 그려 두고 감추기만 한다 */}
+          <motion.p
+            className={`mt-2 text-lg font-semibold md:text-2xl lg:order-1 lg:mt-3 ${locale === 'ko' ? '' : 'hidden'}`}
+            style={WILL}
+            {...blockIn(8, '14%', 0.78, 0.18, inView)}
+            aria-hidden
+          >
+            {locale === 'ko' ? space.name : ''}
+          </motion.p>
 
           <motion.dl
             className={`mt-4 grid grid-cols-[auto_1fr] border-t ${rule} md:mt-6 lg:order-3 lg:mt-auto lg:grid-cols-[0.6fr_1.4fr]`}

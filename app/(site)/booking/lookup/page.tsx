@@ -154,7 +154,7 @@ export default function LookupPage() {
               placeholder={t('4자리', '4 digits')}
               inputMode="numeric"
               maxLength={4}
-              className="tabular-nums tracking-[0.3em]"
+              className={`tabular-nums tracking-[0.3em] ${locale === 'en' ? 'placeholder:tracking-normal' : ''}`}
             />
           </Field>
           <Button type="submit" className="h-14" disabled={loading || !canSubmit}>

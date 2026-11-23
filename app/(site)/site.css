@@ -46,3 +46,35 @@
     animation: none !important;
   }
 }
+
+/*
+  한/영 전환(PageTransition.replay + swapPieces.ts) — 바뀌는 '조각'(글자, 글자가 든 상자는 상자째)만
+  완전히 사라졌다가(out) 새 언어로 위에서부터 차례로(--swap-delay) 다시 나타난다(in).
+  !important: 등장 애니메이션(framer)이 남긴 인라인 opacity·filter 보다 우선. 이동은 transform 대신 translate(겹침 방지).
+*/
+[data-swap='out'] {
+  opacity: 0 !important;
+  filter: blur(8px) !important;
+  transition:
+    opacity 0.3s cubic-bezier(0.4, 0, 1, 1),
+    filter 0.3s cubic-bezier(0.4, 0, 1, 1) !important;
+}
+[data-swap='hidden'] {
+  opacity: 0 !important;
+  filter: blur(10px) !important;
+  translate: 0 14px;
+  transition: none !important;
+}
+/* 등장: 숨김 덮어쓰기를 풀어 원래 투명도(구분선의 옅음 등)로 돌아가게 — 전환만 걸고 값은 강제하지 않는다 */
+[data-swap='in'] {
+  translate: 0 0;
+  transition:
+    opacity 0.7s cubic-bezier(0.22, 1, 0.36, 1) var(--swap-delay, 0ms),
+    filter 0.7s cubic-bezier(0.22, 1, 0.36, 1) var(--swap-delay, 0ms),
+    translate 0.7s cubic-bezier(0.22, 1, 0.36, 1) var(--swap-delay, 0ms) !important;
+}
+/* 바뀌는 순간 새로 생기는 글자(한국어에만 있는 줄 등)도 처음부터 숨김 — 조각으로 다시 잡힌 뒤 차례로 등장 */
+html[data-swap-phase='wait'] :is(h1, h2, h3, h4, p, li, dt, dd, th, td, label, legend, a, button, small, strong, b, input, textarea, select) {
+  opacity: 0 !important;
+  transition: none !important;
+}
