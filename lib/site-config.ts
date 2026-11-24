@@ -23,16 +23,19 @@ export function siteUrl(): string | null {
   return process.env.NEXT_PUBLIC_SITE_URL?.replace(/\/$/, '') || null;
 }
 
-/** 오시는 길(/location) 공개 여부 — false 면 메뉴에서 숨기고 주소로 들어와도 404(운영자 확인 전까지 꺼 둠) */
-export const LOCATION_ENABLED = false;
+/** 오시는 길(/location) 공개 여부 — false 면 링크를 숨기고 주소로 들어와도 404. 2026-11-24 켬(링크는 마지막 장 Visit 묶음에만, nav 에는 없음) */
+export const LOCATION_ENABLED = true;
 
 /** 위치 — 비발디파크(스노위랜드) 도로명 주소. 소노호텔앤리조트 공식 오시는 길 기준 */
 export const PLACE_NAME = '홍천 비발디파크 스노위랜드';
 export const ADDRESS = '강원특별자치도 홍천군 서면 한치골길 262';
+/** 영어 보기 — 도로명 주소 영문 표기 */
+export const PLACE_NAME_EN = 'Vivaldi Park Snowyland, Hongcheon';
+export const ADDRESS_EN = '262 Hanchigol-gil, Seo-myeon, Hongcheon-gun, Gangwon State, Korea';
 const MAP_QUERY = encodeURIComponent('비발디파크 스노위랜드');
 export const MAP_LINKS = [
-  { label: '네이버 지도', href: `https://map.naver.com/p/search/${MAP_QUERY}` },
-  { label: '카카오맵', href: `https://map.kakao.com/?q=${MAP_QUERY}` },
+  { label: '네이버 지도', labelEn: 'Naver Map', href: `https://map.naver.com/p/search/${MAP_QUERY}` },
+  { label: '카카오맵', labelEn: 'KakaoMap', href: `https://map.kakao.com/?q=${MAP_QUERY}` },
 ] as const;
 
 /** 사업자 정보(전자상거래법 제10조 — 결제 사이트 필수 표시). 푸터에서 '© 회사명'을 눌러 펼친다 */

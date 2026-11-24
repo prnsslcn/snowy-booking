@@ -5,7 +5,7 @@ import { useState } from 'react';
 import { buttonClass } from '@/components/ui/Button';
 
 /** 글자 복사 버튼 — 복사되면 잠깐 '복사됨'. 클립보드를 못 쓰면 조용히 넘어간다. */
-export function CopyButton({ text, label = '주소 복사' }: { text: string; label?: string }) {
+export function CopyButton({ text, label = '주소 복사', doneLabel = '복사됨' }: { text: string; label?: string; doneLabel?: string }) {
   const [done, setDone] = useState(false);
   return (
     <button
@@ -21,7 +21,7 @@ export function CopyButton({ text, label = '주소 복사' }: { text: string; la
         }
       }}
     >
-      {done ? '복사됨' : label}
+      {done ? doneLabel : label}
     </button>
   );
 }

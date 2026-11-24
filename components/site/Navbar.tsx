@@ -9,7 +9,6 @@ import { LangToggle, useLocale } from '@/components/site/LocaleProvider';
 import { usePageTransition } from '@/components/site/PageTransition';
 import { useBusinessClosed } from '@/components/site/SiteStatus';
 import { SCROLL_OPTS, useLenis } from '@/components/site/SmoothScroll';
-import { LOCATION_ENABLED } from '@/lib/site-config';
 import { Snowflake } from '@/components/ui/Snowflake';
 import { tr, type Locale } from '@/lib/i18n';
 
@@ -32,10 +31,8 @@ function navItems(locale: Locale) {
       { label: t('카라반', 'Caravan'), href: '#caravan' },
       { label: t('단체카라반', 'Group Caravan'), href: '#caravan-group' },
     ],
-    INFO_ITEMS: [
-      { label: t('이용 안내', 'Guide'), href: '/guide' },
-      ...(LOCATION_ENABLED ? [{ label: t('오시는 길', 'Directions'), href: '/location' }] : []),
-    ],
+    // 오시는 길은 nav 에 넣지 않는다(마지막 장 Visit 묶음에만)
+    INFO_ITEMS: [{ label: t('이용 안내', 'Guide'), href: '/guide' }],
     LOOKUP: { label: t('예약 조회', 'My Booking'), href: '/booking/lookup' },
     BOOK: { label: t('예약하기', 'Book Now'), href: '/booking' },
   };

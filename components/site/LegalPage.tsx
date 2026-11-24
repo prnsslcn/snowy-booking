@@ -1,5 +1,6 @@
 import type { ReactNode } from 'react';
 
+import { BlockIn } from '@/components/site/BlockIn';
 import { SubPage } from '@/components/site/SubPage';
 import { TLink } from '@/components/site/TLink';
 import { TransitionLinks } from '@/components/site/TransitionLinks';
@@ -61,6 +62,8 @@ export function LegalPage({
       }
     >
       {/* 세 문서 사이 이동 */}
+      {/* 탭·안내·본문도 제목 다음 차례로 등장(blockIn) */}
+      <BlockIn delay={0.28}>
       <nav aria-label={t('약관', 'Policies')} className="-mt-2 mb-10 flex flex-wrap gap-2 md:mb-14">
         {DOCS.map((d) => {
           const active = d.href === current;
@@ -78,13 +81,18 @@ export function LegalPage({
           );
         })}
       </nav>
+      </BlockIn>
       {/* 영어 보기: 번역본임을 알리고 한국어 원문이 우선함을 밝힌다 */}
       {locale === 'en' && (
-        <p className="-mt-4 mb-10 rounded-2xl bg-white px-5 py-4 text-[14px] leading-relaxed text-ink/70 md:-mt-8">
-          This is an English translation provided for convenience. If there is any difference between this translation and the Korean original, the Korean version prevails.
-        </p>
+        <BlockIn delay={0.34}>
+          <p className="-mt-4 mb-10 rounded-2xl bg-white px-5 py-4 text-[14px] leading-relaxed text-ink/70 md:-mt-8">
+            This is an English translation provided for convenience. If there is any difference between this translation and the Korean original, the Korean version prevails.
+          </p>
+        </BlockIn>
       )}
-      <TransitionLinks className={PROSE}>{children}</TransitionLinks>
+      <BlockIn delay={0.4}>
+        <TransitionLinks className={PROSE}>{children}</TransitionLinks>
+      </BlockIn>
     </SubPage>
   );
 }

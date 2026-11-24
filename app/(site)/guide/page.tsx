@@ -1,6 +1,7 @@
 import type { Metadata } from 'next';
 import type { ReactNode } from 'react';
 
+import { BlockIn } from '@/components/site/BlockIn';
 import { Faq, type FaqItem } from '@/components/site/Faq';
 import { SubPage } from '@/components/site/SubPage';
 import { TLink } from '@/components/site/TLink';
@@ -25,13 +26,14 @@ export async function generateMetadata(): Promise<Metadata> {
 */
 export const dynamic = 'force-dynamic';
 
-function Card({ label, title, wide = false, children }: { label: string; title?: string; wide?: boolean; children?: ReactNode }) {
+/** 카드 — 제목 다음 차례로 등장(blockIn). delay 는 카드 순서 */
+function Card({ label, title, wide = false, delay = 0.28, children }: { label: string; title?: string; wide?: boolean; delay?: number; children?: ReactNode }) {
   return (
-    <section className={`rounded-3xl bg-white p-6 md:p-7 ${wide ? 'md:col-span-2' : ''}`}>
+    <BlockIn as="section" delay={delay} className={`rounded-3xl bg-white p-6 md:p-7 ${wide ? 'md:col-span-2' : ''}`}>
       <h2 className="text-[13px] font-semibold text-ice-600">{label}</h2>
       {title && <p className="mt-2 text-[19px] font-bold leading-snug tracking-[-0.015em] md:text-[22px]">{title}</p>}
       {children}
-    </section>
+    </BlockIn>
   );
 }
 
@@ -102,11 +104,11 @@ export default async function GuidePage() {
   return (
     <SubPage display="Guide" sub={t('이용 안내', 'Hours, booking, rates and refunds')}>
       <div className="grid gap-3 md:grid-cols-2 md:gap-4">
-        <Card label={t('이용 시간', 'Hours')} title={t('시즌 중 매일 10:00~17:00', `Every day of the season, ${usageTime('en')}`)}>
+        <Card delay={0.28} label={t('이용 시간', 'Hours')} title={t('시즌 중 매일 10:00~17:00', `Every day of the season, ${usageTime('en')}`)}>
           <Notes items={[t('당일 이용, 하루 1회입니다.', 'Day use, once a day.'), t('조기 입실·연장 이용은 없습니다.', 'Early check-in and extensions are not available.')]} />
         </Card>
 
-        <Card label={t('예약', 'Booking')} title={t(`오늘부터 ${BOOKING_WINDOW_KO} 이내`, `Up to ${BOOKING_WINDOW_EN} ahead`)}>
+        <Card delay={0.34} label={t('예약', 'Booking')} title={t(`오늘부터 ${BOOKING_WINDOW_KO} 이내`, `Up to ${BOOKING_WINDOW_EN} ahead`)}>
           <Notes
             items={[
               t('당일 예약은 16:00까지 받습니다.', 'Same-day bookings close at 16:00.'),
@@ -116,7 +118,7 @@ export default async function GuidePage() {
           />
         </Card>
 
-        <Card label={t('상품과 요금', 'Rooms and Rates')} wide>
+        <Card delay={0.4} label={t('상품과 요금', 'Rooms and Rates')} wide>
           <table className={TABLE}>
             <thead>
               <tr>
@@ -158,11 +160,11 @@ export default async function GuidePage() {
           />
         </Card>
 
-        <Card label={t('현장 이용', 'On Site')} title={t('자리는 이용 당일 현장에서 배정합니다', 'Your unit is assigned on site on the day')}>
+        <Card delay={0.46} label={t('현장 이용', 'On Site')} title={t('자리는 이용 당일 현장에서 배정합니다', 'Your unit is assigned on site on the day')}>
           <Notes items={[N.ticket, N.parking]} />
         </Card>
 
-        <Card label={t('취소와 환불', 'Cancellations and Refunds')} title={t('이용 2일 전까지 100% 환불', 'Full refund up to 2 days before')}>
+        <Card delay={0.52} label={t('취소와 환불', 'Cancellations and Refunds')} title={t('이용 2일 전까지 100% 환불', 'Full refund up to 2 days before')}>
           <Notes
             items={[
               t('이용 1일 전 50%, 이용 당일·노쇼는 환불되지 않습니다.', '50% the day before. No refund on the day of use or for no-shows.'),
@@ -193,17 +195,21 @@ export default async function GuidePage() {
 
       {/* 자주 묻는 질문 */}
       <section id="faq" className="mt-16 scroll-mt-28 md:mt-20">
-        <h2 className="mb-5 text-[22px] font-bold tracking-[-0.02em] md:text-[28px]">{t('자주 묻는 질문', 'FAQ')}</h2>
-        <Faq items={faqItems(locale)} />
+        <BlockIn delay={0.1}>
+          <h2 className="mb-5 text-[22px] font-bold tracking-[-0.02em] md:text-[28px]">{t('자주 묻는 질문', 'FAQ')}</h2>
+        </BlockIn>
+        <BlockIn delay={0.18}>
+          <Faq items={faqItems(locale)} />
+        </BlockIn>
       </section>
 
       {/* 영업 종료 중엔 예약하기 버튼 숨김 */}
       {!(await getSiteSettings()).businessClosed && (
-        <div className="mt-12 flex justify-center">
+        <BlockIn delay={0.1} className="mt-12 flex justify-center">
           <TLink href="/booking" className={buttonClass('primary', 'md')}>
             {t('예약하기', 'Book Now')}
           </TLink>
-        </div>
+        </BlockIn>
       )}
     </SubPage>
   );

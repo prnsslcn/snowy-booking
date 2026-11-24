@@ -365,6 +365,7 @@ pending_payment ──(결제 승인)──▶ confirmed ──(취소 요청)�
 - [x] (2026-11-23) **특수 S1·S2:** 예약 오류·지인 방문 등 특수 상황에 관리자가 유선 등록하는 자리(무상 comp, 0원). `product_types.special`(is_active=false → 고객 화면·온라인 예약·가용성·대시보드·매출·요금에서 제외), 배치도에서 빈 S 칸을 눌러 등록·취소(`admin_register_special`). 11-21 '관리자 직접 등록 없음'의 유일한 예외
 - [x] (2026-11-23) **손님 화면 한/영 전환:** nav 맨 오른쪽 번역 아이콘(폰은 메뉴 버튼 왼쪽). 주소는 그대로, 쿠키 `lang`(1년)으로 기억. 서버 `getLocale()`(lib/i18n/server.ts), 클라이언트 `useLocale()`(components/site/LocaleProvider.tsx), 문구는 쓰는 자리에서 `tr(locale)('한국어', 'English')`. **새 손님 화면 문구는 반드시 두 언어로.** 약관 3종은 영문 번역 + "한국어 원문 우선" 안내. 회사·대표 이름·등록번호는 공식 한국어 그대로(영문 상호 미확정). 관리자 화면·문자는 한국어만
 - [x] (2026-11-21) 오시는 길(`/location`)·편의시설·소개 문구는 당분간 필요 없음(필요해지면 운영자가 요청)
+- [x] (2026-11-24) **오시는 길(`/location`) 켬** — 링크는 홈 마지막 장 Visit 묶음에만(nav 에는 넣지 않음). 화면 한/영, 영문 주소 `ADDRESS_EN`(주소 복사는 한국어 주소)
 - [x] 공휴일: 공공데이터포털 특일 API 키로 연도별 불러오기(env `HOLIDAY_API_KEY`)
 - [x] UI 방향: **겨울·스노우 테마의 밝은 톤 + 애플식 미니멀 + 토스식 깔끔함** (고객·관리자 모두 리뉴얼 예정, 시설 사진 준비됨)
 
@@ -393,7 +394,7 @@ pending_payment ──(결제 승인)──▶ confirmed ──(취소 요청)�
   - 3단계: 유닛·점검(`/admin/units`: 유닛 추가·철수, 점검 = 확인→걸린 예약 이동→재확인→잠그기) · 요금(`/admin/pricing`: 주중/주말·성수기·공휴일 직접/공공데이터 불러오기 `lib/admin/holidays.ts`) · 운영 달력(`/admin/calendar`: 휴무·잠금) · 운영 설정(`/admin/settings`: 영업 종료·시즌·공지). 액션 `lib/admin/config-actions.ts`
   - **`HOLIDAY_API_KEY`는 로컬 `.env.local`에 값이 비어 있음** — 공공데이터 불러오기는 키 넣은 뒤 확인 필요(Vercel에도 설정)
   - 4단계: 매출(`/admin/sales`: 이용일 기준, 프리셋·직접 기간(새로고침 시 이번 달), 매출·예약 수·점유율·취소율·상품별·일별) + 월말보고 xlsx(`/api/admin/report?from&to`: 요약·예약 내역(토스) 시트). 집계 `lib/admin/sales.ts`
-- **관리자 1차 범위 완료(2026-11-20).** 남은 것: `HOLIDAY_API_KEY` (약관 3종 · 이용 안내 `/guide`(+`/faq`→`#faq`) 은 2026-11-20 게시. 오시는 길 `/location` 은 만들어 두었으나 **`LOCATION_ENABLED=false`로 비활성**(메뉴 숨김·404). 2026-11-21 운영자: 당분간 필요 없음, 필요해지면 요청. 약관은 운영자 검토 대기, 주소는 소노 공식 오시는 길 기준 `ADDRESS`)
+- **관리자 1차 범위 완료(2026-11-20).** 남은 것: `HOLIDAY_API_KEY` (약관 3종 · 이용 안내 `/guide`(+`/faq`→`#faq`) 은 2026-11-20 게시. 오시는 길 `/location` 은 2026-11-24 `LOCATION_ENABLED=true`로 공개(마지막 장 Visit 에만 링크). 약관은 운영자 검토 대기, 주소는 소노 공식 오시는 길 기준 `ADDRESS`)
 - **운영 DB 관리자 계정 발급됨(2026-11-20, 공유 계정 1개 — 비밀번호는 문서에 적지 않음).** 운영 데이터 확인은 배포 사이트(`snowy-booking.vercel.app/admin`)에서
 - 관리자 DB 함수는 이미 있음(0010) — 화면만 만들면 된다. 환불 재시도 경로(토스 취소 실패 → cancel_requested → 재시도)는 관리자 화면에서 e2e 검증 예정. fake 토스는 cancelReason에 `[FAIL:CODE]`를 넣으면 실패를 시뮬레이션한다
 
