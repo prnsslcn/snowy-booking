@@ -5,6 +5,7 @@ import { getImageProps } from 'next/image';
 import { Fragment, useState } from 'react';
 
 import { useLocale } from '@/components/site/LocaleProvider';
+import { blockIn, WILL } from '@/components/site/motion';
 import { usePageTransition } from '@/components/site/PageTransition';
 import { Snowfall } from '@/components/site/Snowfall';
 import { TLink } from '@/components/site/TLink';
@@ -13,7 +14,7 @@ import { tr } from '@/lib/i18n';
 
 /*
   첫 화면 — 사진 한 장이 화면을 채우고(하늘 위로 nav, 흰 글씨), 아래 눈밭 위에 작은 소제목 "Snowy" + 아주 큰 겨울 파랑 "Cabana & Caravan".
-  - 등장(ready): 사진이 1.16 → 1 로 천천히 자리 잡고, 제목 글자가 한 자씩 아래에서 솟아오른다. 그 뒤 아랫줄이 떠오름.
+  - 등장(ready): 사진이 1.16 → 1 로 천천히 자리 잡고, 제목(Snowy → Cabana & Caravan)이 blockIn(blur 해제 + 상승 + fade)으로 차례로 나타난다. 그 뒤 아랫줄이 떠오름.
   - 하늘엔 눈이 천천히 내린다(Snowfall).
   - 스크롤(다음 장이 덮는 동안): 사진은 살짝 확대, 제목은 천천히 위로 흘러가며 화면 전체가 조금 어두워진다.
   글은 확정 사실만 — 상품 이름 셋, 예약 버튼, 관리자 공지(있을 때만).
@@ -22,8 +23,6 @@ import { tr } from '@/lib/i18n';
 const EASE = [0.22, 1, 0.36, 1] as const;
 /** 큰 제목 낱말(폰에선 'Cabana' / '& Caravan' 으로 줄바꿈) */
 const TITLE = ['Cabana', '&', 'Caravan'];
-/** 낱말별 글자 순번 시작값 — 전체 글자가 한 줄기로 차례차례 솟도록 */
-const OFFSETS = TITLE.map((_, i) => TITLE.slice(0, i).join('').length);
 const NAMES = ['Cabana', 'Caravan', 'Group Caravan'];
 
 export interface HeroProps {
@@ -91,6 +90,22 @@ export function Hero({ src, phoneSrc, alt, notice }: HeroProps) {
           WebkitMaskImage: 'linear-gradient(to top, #000 30%, rgba(0,0,0,0.6) 60%, transparent)',
         }}
       />
+      {/*
+        PC: 좌우만 눈안개를 더 높이 — 왼쪽 'Snowy'·오른쪽 예약 버튼 뒤를 흐리고, 가운데(카라반)는 그대로.
+        세로(아래 진함 → 위 사라짐)와 가로(양 끝 진함 → 가운데 없음) 마스크의 교집합.
+      */}
+      <div
+        aria-hidden
+        className="absolute inset-x-0 bottom-0 hidden h-[70%] bg-white/25 md:block"
+        style={{
+          backdropFilter: 'blur(9px) saturate(1.05)',
+          WebkitBackdropFilter: 'blur(9px) saturate(1.05)',
+          maskImage: 'linear-gradient(to top, #000 40%, transparent), linear-gradient(to right, #000 8%, transparent 38%, transparent 62%, #000 92%)',
+          WebkitMaskImage: 'linear-gradient(to top, #000 40%, transparent), linear-gradient(to right, #000 8%, transparent 38%, transparent 62%, #000 92%)',
+          maskComposite: 'intersect',
+          WebkitMaskComposite: 'source-in',
+        }}
+      />
       <div aria-hidden className="absolute inset-x-0 bottom-0 h-[42%] bg-gradient-to-t from-white/70 via-[#eef4fa]/35 to-transparent md:h-[56%] md:from-white/75" />
       <Snowfall active={snowing} className="absolute inset-0 h-full w-full" />
 
@@ -111,37 +126,16 @@ export function Hero({ src, phoneSrc, alt, notice }: HeroProps) {
 
       {/* 아래: 예약 버튼 + 큰 제목 */}
       <motion.div className="absolute inset-x-0 bottom-0 px-5 pb-5 md:px-8 md:pb-7 lg:px-10 lg:pb-9" style={{ y: titleY }}>
-        {/* 아래로 스크롤 안내 — 화살표가 천천히 아래로 흘러내림. 스크롤을 시작하면 사라짐 */}
-        <motion.div style={{ opacity: hintOpacity }}>
-          <motion.p
-            className="mb-4 inline-flex items-center gap-2 rounded-full border border-white/70 bg-white/60 py-1.5 pl-1.5 pr-3.5 text-[12px] font-semibold text-glacier backdrop-blur-md md:mb-6 md:text-[13px]"
-            initial={{ opacity: 0, y: 8, filter: 'blur(6px)' }}
-            animate={ready ? { opacity: 1, y: 0, filter: 'blur(0px)' } : undefined}
-            transition={{ duration: 1, ease: EASE, delay: 1.5 }}
-          >
-            <span aria-hidden className="relative flex h-6 w-4 justify-center overflow-hidden rounded-full border-[1.5px] border-glacier/70">
-              <motion.span
-                className="absolute top-1 h-1.5 w-[3px] rounded-full bg-glacier"
-                animate={{ y: [0, 8, 8], opacity: [1, 0, 0] }}
-                transition={{ duration: 1.8, ease: 'easeInOut', repeat: Infinity, times: [0, 0.7, 1] }}
-              />
-            </span>
-            {t('아래로 스크롤', 'Scroll down')}
-          </motion.p>
-        </motion.div>
-
         {/* 소제목 Snowy(왼쪽, 큰 제목의 약 55%) · 예약 버튼(오른쪽) */}
         <div className="mb-1 flex flex-wrap items-end justify-between gap-x-6 gap-y-3 md:mb-[1.4vw]">
-          <span aria-hidden className="block overflow-hidden pb-[0.14em]">
-            <motion.span
-              className="block font-display text-[9.6vw] font-medium md:text-[min(5.8vw,8.25rem)] leading-none tracking-[-0.02em] text-glacier"
-              initial={{ y: '140%' }}
-              animate={ready ? { y: '0%' } : undefined}
-              transition={{ duration: 1.1, ease: EASE, delay: 0.1 }}
-            >
-              Snowy
-            </motion.span>
-          </span>
+          <motion.span
+            aria-hidden
+            className="block pb-[0.14em] font-display text-[9.6vw] font-medium md:text-[min(5.8vw,8.25rem)] leading-none tracking-[-0.02em] text-glacier"
+            style={WILL}
+            {...blockIn(11, '18%', 1.1, 0.15, ready)}
+          >
+            Snowy
+          </motion.span>
           <motion.div
             className="ml-auto flex items-center gap-3"
             initial={{ opacity: 0, y: 16, filter: 'blur(8px)' }}
@@ -173,28 +167,35 @@ export function Hero({ src, phoneSrc, alt, notice }: HeroProps) {
           style={{ lineHeight: 0.9, letterSpacing: '-0.022em' }}
         >
           <span className="sr-only">{t('스노위 카바나·카라반', 'Snowy Cabana & Caravan')}</span>
-          <span aria-hidden className="flex flex-wrap items-baseline gap-x-[0.22em] md:flex-nowrap">
+          <motion.span aria-hidden className="flex flex-wrap items-baseline gap-x-[0.22em] pb-[0.16em] md:flex-nowrap" style={WILL} {...blockIn(11, '18%', 1.1, 0.3, ready)}>
             {TITLE.map((word, w) => (
-              // 낱말마다 가린 칸 안에서 글자가 솟아오름 — 아래 여백으로 꼬리(y 등) 보호. 폰은 '&' 앞에서 줄바꿈
+              // 폰은 '&' 앞에서 줄바꿈
               <Fragment key={w}>
                 {word === '&' && <span aria-hidden className="h-0 basis-full md:hidden" />}
-                <span className="inline-flex overflow-hidden pb-[0.16em]">
-                {word.split('').map((ch, i) => (
-                  <motion.span
-                    key={i}
-                    className="inline-block"
-                    initial={{ y: '140%', rotate: 6 }}
-                    animate={ready ? { y: '0%', rotate: 0 } : undefined}
-                    transition={{ duration: 1.25, ease: EASE, delay: 0.2 + (OFFSETS[w] + i) * 0.045 }}
-                  >
-                    {ch}
-                  </motion.span>
-                ))}
-                </span>
+                <span>{word}</span>
               </Fragment>
             ))}
-          </span>
+          </motion.span>
         </h1>
+
+        {/* 아래로 스크롤 안내 — 제목 아래 가운데, 배경 없이 글자 + 가는 선 위로 빛이 천천히 흘러내림. 스크롤을 시작하면 사라짐 */}
+        <motion.div style={{ opacity: hintOpacity }} className="mt-2 flex justify-center md:mt-3">
+          <motion.div
+            className="flex flex-col items-center gap-2 text-glacier"
+            initial={{ opacity: 0, y: 8, filter: 'blur(6px)' }}
+            animate={ready ? { opacity: 1, y: 0, filter: 'blur(0px)' } : undefined}
+            transition={{ duration: 1, ease: EASE, delay: 1.5 }}
+          >
+            <span className="text-[12px] font-semibold tracking-[0.08em] md:text-[13px]">{t('아래로 스크롤', 'Scroll down')}</span>
+            <span aria-hidden className="relative h-8 w-[1.5px] overflow-hidden rounded-full bg-glacier/25 md:h-10">
+              <motion.span
+                className="absolute inset-x-0 top-0 h-1/2 bg-gradient-to-b from-transparent via-glacier to-glacier"
+                animate={{ y: ['-100%', '200%'] }}
+                transition={{ duration: 1.8, ease: [0.65, 0, 0.35, 1], repeat: Infinity, repeatDelay: 0.3 }}
+              />
+            </span>
+          </motion.div>
+        </motion.div>
       </motion.div>
 
       {/* 덮이는 동안 어두워짐 */}
