@@ -27,7 +27,7 @@ function Toggle({ on, onChange, label }: { on: boolean; onChange: (v: boolean) =
       onClick={() => onChange(!on)}
       className={`relative h-7 w-12 flex-none rounded-full transition-colors ${on ? 'bg-ice-600' : 'bg-ink/15'}`}
     >
-      <span className={`absolute top-0.5 h-6 w-6 rounded-full bg-white shadow transition-transform ${on ? 'translate-x-[22px]' : 'translate-x-0.5'}`} />
+      <span className={`absolute left-0 top-0.5 h-6 w-6 rounded-full bg-white shadow transition-transform ${on ? 'translate-x-[22px]' : 'translate-x-0.5'}`} />
     </button>
   );
 }
