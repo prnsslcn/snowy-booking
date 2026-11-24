@@ -54,6 +54,7 @@ export function Hero({ src, phoneSrc, alt, notice }: HeroProps) {
   const photoScale = useTransform(p, [0, 1], [1, 1.1]);
   const titleY = useTransform(p, [0, 1], ['0%', '-38%']);
   const shade = useTransform(p, [0, 1], [0, 0.45]);
+  const hintOpacity = useTransform(p, [0, 0.25], [1, 0]);
   const [snowing, setSnowing] = useState(true);
   useMotionValueEvent(p, 'change', (v) => setSnowing(v < 1));
 
@@ -110,6 +111,25 @@ export function Hero({ src, phoneSrc, alt, notice }: HeroProps) {
 
       {/* 아래: 예약 버튼 + 큰 제목 */}
       <motion.div className="absolute inset-x-0 bottom-0 px-5 pb-5 md:px-8 md:pb-7 lg:px-10 lg:pb-9" style={{ y: titleY }}>
+        {/* 아래로 스크롤 안내 — 화살표가 천천히 아래로 흘러내림. 스크롤을 시작하면 사라짐 */}
+        <motion.div style={{ opacity: hintOpacity }}>
+          <motion.p
+            className="mb-4 inline-flex items-center gap-2 rounded-full border border-white/70 bg-white/60 py-1.5 pl-1.5 pr-3.5 text-[12px] font-semibold text-glacier backdrop-blur-md md:mb-6 md:text-[13px]"
+            initial={{ opacity: 0, y: 8, filter: 'blur(6px)' }}
+            animate={ready ? { opacity: 1, y: 0, filter: 'blur(0px)' } : undefined}
+            transition={{ duration: 1, ease: EASE, delay: 1.5 }}
+          >
+            <span aria-hidden className="relative flex h-6 w-4 justify-center overflow-hidden rounded-full border-[1.5px] border-glacier/70">
+              <motion.span
+                className="absolute top-1 h-1.5 w-[3px] rounded-full bg-glacier"
+                animate={{ y: [0, 8, 8], opacity: [1, 0, 0] }}
+                transition={{ duration: 1.8, ease: 'easeInOut', repeat: Infinity, times: [0, 0.7, 1] }}
+              />
+            </span>
+            {t('아래로 스크롤', 'Scroll down')}
+          </motion.p>
+        </motion.div>
+
         {/* 소제목 Snowy(왼쪽, 큰 제목의 약 55%) · 예약 버튼(오른쪽) */}
         <div className="mb-1 flex flex-wrap items-end justify-between gap-x-6 gap-y-3 md:mb-[1.4vw]">
           <span aria-hidden className="block overflow-hidden pb-[0.14em]">

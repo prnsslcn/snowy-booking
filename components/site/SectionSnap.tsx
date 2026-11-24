@@ -17,7 +17,11 @@ import { useLenis } from '@/components/site/SmoothScroll';
     끝(밀어 올림)·처음(끌어 내림)에 닿은 뒤 미는 손짓만 장 넘기기로 바꾼다.
   - 넘기기로 정한 손짓은 화면이 손가락을 따라가지 않게 막고(preventDefault), PAGE_PX 를 넘는 순간 바로 넘긴다.
   - 가로 손짓(사진 넘기기 등)·메뉴/사진 보기로 스크롤이 멈춘 동안은 건드리지 않는다.
-  - 긴 장 안 자유 스크롤의 관성이 장 사이(다음 장이 덮는 중)에 멈추면, 마지막 손짓 방향으로 마저 넘긴다.
+  - 긴 장 안 자유 스크롤의 관성은 그 장의 끝(처음)에서 끊는다(iOS 관성이 다음 장들을 그대로 지나가지 않게).
+    손가락으로 끝을 넘겨 끌었거나 장 사이에 멈추면 마지막 손짓 방향으로 마저 넘긴다.
+  - [data-scroll-y] 안(장 안 세로 스크롤 상자)에서 그 방향으로 더 스크롤할 수 있으면 상자에 맡긴다.
+  - [data-lock-page] 가 있으면(상품 장이 옆 안내 쪽으로 넘어가 있는 동안) 페이지는 위아래로 움직이지 않는다.
+    안내 상자 안 스크롤만 된다 — 돌아가기로 나와야 다음 장으로 갈 수 있다.
 */
 const THRESHOLD = 0.15;
 const SETTLE_MS = 140;
@@ -34,12 +38,14 @@ export function SectionSnap() {
     const mobile = window.matchMedia('(max-width: 1023px)');
     let startX = 0;
     let startY = 0;
-    let mode: 'none' | 'native' | 'page' = 'none';
+    let mode: 'none' | 'native' | 'page' | 'locked' = 'none';
     let fired = false;
     let busy = false;
     let touching = false;
     let lastDir: 1 | -1 = 1;
     let settle = 0;
+    /** 자유 스크롤 중인 긴 장의 범위 — 관성이 이 밖으로 나가면 끊는다 */
+    let range: [number, number] | null = null;
 
     const points = () => {
       const y = lenis.scroll;
@@ -63,8 +69,32 @@ export function SectionSnap() {
       }
     };
     const onScroll = () => {
+      if (range && !touching && !busy) {
+        const y = lenis.scroll;
+        const [lo, hi] = range;
+        if (y > hi + 1 || y < lo - 1) {
+          range = null;
+          return halt(y > hi ? hi : lo);
+        }
+      }
       window.clearTimeout(settle);
       settle = window.setTimeout(settleCheck, 120);
+    };
+    const sectionRange = (): [number, number] => {
+      const y = lenis.scroll;
+      const ps = points();
+      let i = 0;
+      for (let k = 0; k < ps.length; k++) if (ps[k] <= y + 2) i = k;
+      const end = i + 1 < ps.length ? Math.max(ps[i], ps[i + 1] - window.innerHeight) : Math.max(ps[i], lenis.limit);
+      return [ps[i], end];
+    };
+    /** 관성 끊기 — iOS 는 overflow 를 잠깐 막아야 관성이 멈춘다 */
+    const halt = (to: number) => {
+      const html = document.documentElement;
+      html.style.overflow = 'hidden';
+      window.scrollTo(0, to);
+      lenis.scrollTo(to, { immediate: true, force: true });
+      requestAnimationFrame(() => (html.style.overflow = ''));
     };
     /** 손짓 방향(1 = 아래 장으로)에 대해 넘길 목표. null 이면 자유 스크롤 */
     const target = (dir: 1 | -1): number | null => {
@@ -86,6 +116,7 @@ export function SectionSnap() {
 
     const onStart = (e: TouchEvent) => {
       touching = true;
+      range = null;
       window.clearTimeout(settle);
       mode = 'none';
       fired = false;
@@ -98,12 +129,26 @@ export function SectionSnap() {
       if (mode === 'native' || lenis.isStopped || !mobile.matches) return;
       const dx = e.touches[0].clientX - startX;
       const dy = e.touches[0].clientY - startY;
+      if (mode === 'locked') return e.cancelable && e.preventDefault();
       if (mode === 'none') {
         if (Math.abs(dx) < 6 && Math.abs(dy) < 6) return;
+        if (document.querySelector('[data-lock-page]')) {
+          const box = (e.target as Element | null)?.closest?.('[data-scroll-y]') as HTMLElement | null;
+          const canBox = !!box && Math.abs(dy) > Math.abs(dx) && (dy < 0 ? box.scrollTop + box.clientHeight < box.scrollHeight - 1 : box.scrollTop > 0);
+          if (canBox || Math.abs(dx) > Math.abs(dy)) return (mode = 'native'), undefined;
+          mode = 'locked';
+          return e.cancelable && e.preventDefault();
+        }
         if (Math.abs(dy) >= Math.abs(dx)) lastDir = dy < 0 ? 1 : -1;
         if (Math.abs(dx) > Math.abs(dy)) return (mode = 'native'), undefined;
+        // 장 안 세로 스크롤 상자가 그 방향으로 더 움직일 수 있으면 상자에 맡긴다
+        const box = (e.target as Element | null)?.closest?.('[data-scroll-y]') as HTMLElement | null;
+        if (box && (dy < 0 ? box.scrollTop + box.clientHeight < box.scrollHeight - 1 : box.scrollTop > 0)) return (mode = 'native'), undefined;
         mode = target(dy < 0 ? 1 : -1) === null ? 'native' : 'page';
-        if (mode === 'native') return;
+        if (mode === 'native') {
+          if (!box) range = sectionRange();
+          return;
+        }
       }
       if (e.cancelable) e.preventDefault();
       if (fired || Math.abs(dy) < PAGE_PX) return;
@@ -114,6 +159,8 @@ export function SectionSnap() {
     };
     const onEnd = () => {
       touching = false;
+      // 손가락으로 이미 장 끝을 넘겨 끌었으면 끊지 않고 장 넘기기(settle)에 맡긴다
+      if (range && (lenis.scroll > range[1] + 1 || lenis.scroll < range[0] - 1)) range = null;
       onScroll();
     };
 
