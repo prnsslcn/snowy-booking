@@ -81,7 +81,7 @@ export function AdminCalendar({ ym, days, today }: { ym: string; days: Record<st
                 key={iso}
                 type="button"
                 onClick={() => setSel(iso)}
-                className={`relative flex min-h-[64px] flex-col items-start rounded-xl border p-1.5 pt-3 text-left transition-colors md:min-h-[92px] md:p-2.5 md:pt-4 ${
+                className={`relative flex min-h-[64px] flex-col items-start rounded-xl border p-1.5 pt-4 text-left transition-colors md:min-h-[92px] md:p-2.5 md:pt-5 ${
                   d.closed !== null
                     ? 'border-ink/10 bg-ink/[.06]'
                     : d.locked !== null
@@ -91,16 +91,17 @@ export function AdminCalendar({ ym, days, today }: { ym: string; days: Record<st
                         : 'border-line hover:border-ice-400'
                 } ${iso === today ? 'ring-2 ring-ice-400' : ''} ${past ? 'opacity-50' : ''} ${sel === iso ? 'border-glacier' : ''}`}
               >
-                {d.peak && (
-                  <span aria-hidden className="absolute inset-x-1.5 top-1 h-1 rounded-full bg-ice-500 md:top-1.5" />
-                )}
+                {/* 위 막대: 성수기(파랑) · 공휴일(빨강). 둘 다면 두 줄 */}
+                <span aria-hidden className="absolute inset-x-1.5 top-1 flex flex-col gap-0.5 md:top-1.5">
+                  {d.peak && <span className="h-1 rounded-full bg-ice-500" />}
+                  {d.holiday && <span className="h-1 rounded-full bg-[#d4351c]" />}
+                </span>
                 <span className="text-[13px] font-semibold tabular-nums md:text-[15px]">{Number(iso.slice(8))}</span>
                 {d.booked > 0 && <span className="mt-0.5 text-[11px] tabular-nums text-ink-2 md:text-[12px]">예약 {d.booked}</span>}
                 <span className="mt-auto flex flex-wrap gap-0.5">
                   {d.closed !== null && <span className="rounded bg-ink/70 px-1 text-[10px] font-medium text-white">휴무</span>}
                   {d.locked !== null && <span className="rounded bg-amber-500 px-1 text-[10px] font-medium text-white">잠금</span>}
                   {d.holiday && <span className="hidden truncate text-[10px] text-[#d4351c] md:inline">{d.holiday}</span>}
-                  {d.holiday && <span className="h-1.5 w-1.5 rounded-full bg-[#d4351c] md:hidden" />}
                 </span>
               </button>
             );
@@ -115,7 +116,7 @@ export function AdminCalendar({ ym, days, today }: { ym: string; days: Record<st
           <span className="h-1 w-4 rounded-full bg-ice-500" /> 성수기
         </li>
         <li className="flex items-center gap-1.5">
-          <span className="h-1.5 w-1.5 rounded-full bg-[#d4351c]" /> 공휴일
+          <span className="h-1 w-4 rounded-full bg-[#d4351c]" /> 공휴일
         </li>
         <li>휴무: 운영 안 함 · 잠금: 운영은 하되 새 온라인 예약만 막음</li>
       </ul>
