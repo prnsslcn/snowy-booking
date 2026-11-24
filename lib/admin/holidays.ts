@@ -33,6 +33,6 @@ export async function fetchHolidays(year: number): Promise<{ date: string; name:
     .filter((i) => (i.isHoliday ?? 'Y') === 'Y')
     .map((i) => {
       const s = String(i.locdate);
-      return { date: `${s.slice(0, 4)}-${s.slice(4, 6)}-${s.slice(6, 8)}`, name: i.dateName };
+      return { date: `${s.slice(0, 4)}-${s.slice(4, 6)}-${s.slice(6, 8)}`, name: i.dateName === '기독탄신일' ? '성탄절' : i.dateName };
     });
 }

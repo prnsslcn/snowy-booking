@@ -5,6 +5,7 @@ import { revalidatePath, revalidateTag } from 'next/cache';
 import type { ActionResult } from '@/lib/admin/actions';
 import { logAdminAction } from '@/lib/admin/audit';
 import { getAdminUser } from '@/lib/admin/auth';
+import { holidayRange } from '@/lib/admin/config';
 import { adminErrorMessage } from '@/lib/admin/errors';
 import { fetchHolidays } from '@/lib/admin/holidays';
 import { SITE_SETTINGS_TAG } from '@/lib/site-settings';
@@ -123,7 +124,7 @@ export async function addPeakAction(name: string, from: string, to: string): Pro
   const { error } = await createAdminClient().from('peak_periods').insert({ name: name.trim(), from_date: from, to_date: to });
   if (error) return { ok: false, error: error.message };
   await logAdminAction(a.email, 'peak_add', null, { name, from, to });
-  revalidatePath('/admin/pricing');
+  revalidatePath('/admin/settings');
   revalidatePath('/admin/calendar');
   return { ok: true };
 }
@@ -134,7 +135,7 @@ export async function deletePeakAction(id: string): Promise<ActionResult> {
   const { error } = await createAdminClient().from('peak_periods').delete().eq('id', id);
   if (error) return { ok: false, error: error.message };
   await logAdminAction(a.email, 'peak_delete', null, { id });
-  revalidatePath('/admin/pricing');
+  revalidatePath('/admin/settings');
   revalidatePath('/admin/calendar');
   return { ok: true };
 }
@@ -146,7 +147,7 @@ export async function addHolidayAction(date: string, name: string): Promise<Acti
   const { error } = await createAdminClient().from('holidays').upsert({ date, name: name.trim(), source: 'manual' });
   if (error) return { ok: false, error: error.message };
   await logAdminAction(a.email, 'holiday_add', null, { date, name });
-  revalidatePath('/admin/pricing');
+  revalidatePath('/admin/settings');
   revalidatePath('/admin/calendar');
   return { ok: true };
 }
@@ -157,32 +158,33 @@ export async function deleteHolidayAction(date: string): Promise<ActionResult> {
   const { error } = await createAdminClient().from('holidays').delete().eq('date', date);
   if (error) return { ok: false, error: error.message };
   await logAdminAction(a.email, 'holiday_delete', null, { date });
-  revalidatePath('/admin/pricing');
+  revalidatePath('/admin/settings');
   revalidatePath('/admin/calendar');
   return { ok: true };
 }
 
-/** 공공데이터포털 특일 정보(공휴일)로 한 해 불러오기 — 이미 있는 날짜(직접 입력 포함)는 그대로 둔다 */
-export async function importHolidaysAction(year: number): Promise<ActionResult<{ added: number; total: number }>> {
+/** 공공데이터포털 특일 정보(공휴일)로 관리 범위(오늘 ~ 다가오는 3월 1일) 불러오기 — 이미 있는 날짜(직접 입력 포함)는 그대로 둔다 */
+export async function importHolidaysAction(): Promise<ActionResult<{ added: number; total: number }>> {
   const a = await guard();
   if (!a) return NEED_LOGIN;
-  if (!Number.isInteger(year) || year < 2020 || year > 2100) return { ok: false, error: '연도를 확인해 주세요.' };
+  const { from, to } = holidayRange();
+  const years = Array.from({ length: Number(to.slice(0, 4)) - Number(from.slice(0, 4)) + 1 }, (_, i) => Number(from.slice(0, 4)) + i);
   let list: { date: string; name: string }[];
   try {
-    list = await fetchHolidays(year);
+    list = (await Promise.all(years.map((y) => fetchHolidays(y)))).flat().filter((h) => h.date >= from && h.date <= to);
   } catch (e) {
     return { ok: false, error: `공휴일을 불러오지 못했습니다: ${e instanceof Error ? e.message : String(e)}` };
   }
   const supabase = createAdminClient();
-  const { data: existing } = await supabase.from('holidays').select('date').gte('date', `${year}-01-01`).lte('date', `${year}-12-31`);
+  const { data: existing } = await supabase.from('holidays').select('date').gte('date', from).lte('date', to);
   const have = new Set((existing ?? []).map((h) => h.date));
   const rows = list.filter((h) => !have.has(h.date)).map((h) => ({ date: h.date, name: h.name, source: 'api' }));
   if (rows.length) {
     const { error } = await supabase.from('holidays').insert(rows);
     if (error) return { ok: false, error: error.message };
   }
-  await logAdminAction(a.email, 'holiday_import', null, { year, added: rows.length, total: list.length });
-  revalidatePath('/admin/pricing');
+  await logAdminAction(a.email, 'holiday_import', null, { from, to, added: rows.length, total: list.length });
+  revalidatePath('/admin/settings');
   revalidatePath('/admin/calendar');
   return { ok: true, data: { added: rows.length, total: list.length } };
 }

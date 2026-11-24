@@ -51,19 +51,28 @@ export async function getUnitsData() {
   };
 }
 
-export async function getPricingData(year: number) {
+/** 공휴일 관리 범위 — 오늘(KST)부터 다가오는 3월 1일까지(겨울 시즌 한 번). 목록·불러오기 모두 이 범위 */
+export function holidayRange(today: string = kstToday()) {
+  const y = Number(today.slice(0, 4));
+  const to = today <= `${y}-03-01` ? `${y}-03-01` : `${y + 1}-03-01`;
+  return { from: today, to };
+}
+
+export async function getPricingData() {
   await requireAdmin();
   const supabase = createAdminClient();
+  const range = holidayRange();
   const [types, peaks, holidays] = await Promise.all([
     // 요금은 판매 상품만(특수 S1·S2 는 요금 없음)
     supabase.from('product_types').select('type, name, price_weekday, price_weekend, sort').eq('is_active', true).order('sort'),
     supabase.from('peak_periods').select('id, name, from_date, to_date').order('from_date', { ascending: false }),
-    supabase.from('holidays').select('date, name, source').gte('date', `${year}-01-01`).lte('date', `${year}-12-31`).order('date'),
+    supabase.from('holidays').select('date, name, source').gte('date', range.from).lte('date', range.to).order('date'),
   ]);
   return {
     products: (types.data ?? []).map((t) => ({ type: t.type, name: t.name, weekday: t.price_weekday, weekend: t.price_weekend })),
     peaks: (peaks.data ?? []).map((p) => ({ id: p.id, name: p.name, from: p.from_date, to: p.to_date })),
     holidays: (holidays.data ?? []).map((h) => ({ date: h.date, name: h.name, source: h.source })),
+    holidayRange: range,
   };
 }
 
