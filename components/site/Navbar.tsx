@@ -38,7 +38,6 @@ function navItems(locale: Locale) {
   };
 }
 
-const BLUR_EXTEND = 48;
 const BLUR_LAYERS = [
   { blur: 1, mask: 'linear-gradient(to bottom, #000 0%, #000 70%, transparent 100%)' },
   { blur: 4, mask: 'linear-gradient(to bottom, #000 0%, #000 50%, transparent 100%)' },
@@ -141,7 +140,8 @@ export function Navbar() {
   return (
     <>
       <nav className="fixed inset-x-0 top-0 z-[100]">
-        <div aria-hidden className="pointer-events-none absolute inset-x-0 top-0 isolate" style={{ height: `calc(100% + ${BLUR_EXTEND}px)` }}>
+        {/* 폰은 흐림 꼬리를 짧게 — 툴바로 화면이 낮아지면 상품 장 제목이 nav 바로 밑까지 올라와 흐림에 걸린다 */}
+        <div aria-hidden className="pointer-events-none absolute inset-x-0 top-0 isolate h-[calc(100%+12px)] lg:h-[calc(100%+48px)]">
           {BLUR_LAYERS.map((l) => (
             <div
               key={l.blur}
