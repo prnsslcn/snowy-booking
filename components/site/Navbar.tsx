@@ -7,6 +7,7 @@ import { Fragment, useEffect, useState } from 'react';
 
 import { LangToggle, useLocale } from '@/components/site/LocaleProvider';
 import { usePageTransition } from '@/components/site/PageTransition';
+import { useBusinessClosed } from '@/components/site/SiteStatus';
 import { SCROLL_OPTS, useLenis } from '@/components/site/SmoothScroll';
 import { LOCATION_ENABLED } from '@/lib/site-config';
 import { Snowflake } from '@/components/ui/Snowflake';
@@ -74,6 +75,8 @@ export function Navbar() {
   const locale = useLocale();
   const t = tr(locale);
   const { NAV_ITEMS, INFO_ITEMS, LOOKUP, BOOK } = navItems(locale);
+  // 영업 종료 중엔 예약 조회·예약하기를 뺀다
+  const closed = useBusinessClosed();
 
   useEffect(() => {
     const detect = () => {
@@ -121,12 +124,15 @@ export function Navbar() {
     // 모바일 메뉴가 열려 있던 동안 Lenis 가 멈춰 있다. start() 는 진행 중 애니메이션을 reset 하므로
     // 메뉴 닫힘 effect 보다 먼저 여기서 켜고 나서 스크롤한다(effect 의 start 는 그때 no-op).
     lenis?.start();
-    if (href === '/' && pathname === '/') {
+    // 영업 종료 중엔 홈 = /off(홈과 같은 구성)
+    const home = closed ? '/off' : '/';
+    if (href === '/') href = home;
+    if (href === home && pathname === home) {
       lenis?.scrollTo(0, SCROLL_OPTS);
       return;
     }
     // 상품 앵커(#cabana 등)는 홈 기준 — 다른 화면에서는 홈으로 전환 뒤 그 자리로(leaveTo 가 처리)
-    leaveTo(href.startsWith('#') ? `/${href}` : href);
+    leaveTo(href.startsWith('#') ? `${home}${href}` : href);
   }
 
   const isDark = theme === 'dark';
@@ -179,14 +185,18 @@ export function Navbar() {
                 </a>
               ))}
             </div>
-            <span aria-hidden data-swap-piece className="hidden h-4 w-px bg-current opacity-20 lg:block" />
-            <a href={LOOKUP.href} onClick={(e) => go(e, LOOKUP.href)} className={`${link} hidden lg:inline`}>
-              <span className={underline(pathname === LOOKUP.href)}>{LOOKUP.label}</span>
-            </a>
-            <span aria-hidden data-swap-piece className="hidden h-4 w-px bg-current opacity-20 lg:block" />
-            <a href={BOOK.href} onClick={(e) => go(e, BOOK.href)} className={`${link} hidden md:inline`}>
-              <span className={underline(pathname === BOOK.href)}>{BOOK.label}</span>
-            </a>
+            {!closed && (
+              <>
+                <span aria-hidden data-swap-piece className="hidden h-4 w-px bg-current opacity-20 lg:block" />
+                <a href={LOOKUP.href} onClick={(e) => go(e, LOOKUP.href)} className={`${link} hidden lg:inline`}>
+                  <span className={underline(pathname === LOOKUP.href)}>{LOOKUP.label}</span>
+                </a>
+                <span aria-hidden data-swap-piece className="hidden h-4 w-px bg-current opacity-20 lg:block" />
+                <a href={BOOK.href} onClick={(e) => go(e, BOOK.href)} className={`${link} hidden md:inline`}>
+                  <span className={underline(pathname === BOOK.href)}>{BOOK.label}</span>
+                </a>
+              </>
+            )}
             {/* 한/영 전환 — 맨 오른쪽(폰에서는 메뉴 버튼 왼쪽) */}
             <LangToggle className={`-my-1 -mr-1.5 ${isDark ? 'text-white/85 hover:text-white' : 'text-ink/75 hover:text-ink'}`} />
             <button
@@ -230,7 +240,7 @@ export function Navbar() {
               </svg>
             </button>
 
-            {[...NAV_ITEMS, ...INFO_ITEMS, LOOKUP].map((item, i) => (
+            {[...NAV_ITEMS, ...INFO_ITEMS, ...(closed ? [] : [LOOKUP])].map((item, i) => (
               <Fragment key={item.href}>
                 {/* 상품 링크와 안내·예약 조회 사이 얇은 구분선 */}
                 {item === INFO_ITEMS[0] && (
@@ -254,6 +264,7 @@ export function Navbar() {
               </Fragment>
             ))}
 
+            {!closed && (
             <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ duration: 0.4, delay: 0.4 }}>
               <a
                 href={BOOK.href}
@@ -263,6 +274,7 @@ export function Navbar() {
                 {BOOK.label}
               </a>
             </motion.div>
+            )}
           </motion.div>
         )}
       </AnimatePresence>

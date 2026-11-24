@@ -12,7 +12,7 @@ import { DatePicker } from '@/components/ui/DatePicker';
 
 /*
   운영 설정(grill-booking 일반설정 이식).
-  - 영업 종료: 켜면 홈·예약 화면 → /off, 새 예약 API 차단. 문구의 {year} 는 올해로 바뀐다.
+  - 영업 종료: 켜면 홈·예약 화면 → /off(홈과 같은 구성, 첫 화면만 Closed, 예약 버튼·링크 없음), 새 예약 API 차단. 문구의 {year} 는 올해로 바뀐다.
   - 시즌 기간: 이 기간 밖 날짜는 예약 불가(비우면 제한 없음).
   - 공지: 홈 첫 화면에 한 줄(기간 지정 가능).
 */
@@ -67,7 +67,7 @@ export function SettingsForm({ initial, year, defaults }: { initial: SettingsInp
         <div className="flex items-start justify-between gap-4">
           <div>
             <h2 className="panel-title">영업 종료</h2>
-            <p className="mt-1 text-[13px] text-ink-2">켜면 홈·예약 화면이 영업 종료 안내(/off)로 바뀌고 새 예약이 막힙니다. 예약 조회·취소는 그대로 됩니다.</p>
+            <p className="mt-1 text-[13px] text-ink-2">켜면 홈·예약 화면이 영업 종료 안내(/off)로 바뀌고 새 예약이 막힙니다. 시설 소개는 그대로 보이고, 예약하기·예약 조회 버튼은 사라집니다.</p>
           </div>
           <Toggle on={s.businessClosed} onChange={(v) => set('businessClosed', v)} label="영업 종료" />
         </div>

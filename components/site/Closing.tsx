@@ -7,6 +7,7 @@ import { useRef } from 'react';
 import { BusinessInfo } from '@/components/site/BusinessInfo';
 import { blockIn, WILL } from '@/components/site/motion';
 import { usePageTransition } from '@/components/site/PageTransition';
+import { useBusinessClosed } from '@/components/site/SiteStatus';
 import { useStickyCover } from '@/components/site/useStickyCover';
 import { useLocale } from '@/components/site/LocaleProvider';
 import { FACILITIES, photoAlt, type FacilityPhoto } from '@/lib/content/facilities';
@@ -52,15 +53,17 @@ function MarqueeRow({ photos, reverse, seconds, locale }: { photos: FacilityPhot
   );
 }
 
-function navGroups(locale: Locale): { title: string; links: { label: string; href: string; internal?: boolean }[] }[] {
+function navGroups(locale: Locale, closed: boolean): { title: string; links: { label: string; href: string; internal?: boolean }[] }[] {
   const t = tr(locale);
+  // 영업 종료 중엔 홈 = /off(홈과 같은 구성)
+  const home = closed ? '/off' : '/';
   return [
     {
       title: 'Spaces',
       links: [
-        { label: t('카바나', 'Cabana'), href: '/#cabana', internal: true },
-        { label: t('카라반', 'Caravan'), href: '/#caravan', internal: true },
-        { label: t('단체카라반', 'Group Caravan'), href: '/#caravan-group', internal: true },
+        { label: t('카바나', 'Cabana'), href: `${home}#cabana`, internal: true },
+        { label: t('카라반', 'Caravan'), href: `${home}#caravan`, internal: true },
+        { label: t('단체카라반', 'Group Caravan'), href: `${home}#caravan-group`, internal: true },
       ],
     },
     {
@@ -70,13 +73,14 @@ function navGroups(locale: Locale): { title: string; links: { label: string; hre
         ...(LOCATION_ENABLED ? [{ label: t('오시는 길', 'Directions'), href: '/location', internal: true }] : []),
       ],
     },
-    {
+    // 영업 종료 중엔 예약 묶음을 뺀다
+    ...(closed ? [] : [{
       title: 'Booking',
       links: [
         { label: t('예약하기', 'Book Now'), href: '/booking', internal: true },
         { label: t('예약 조회·취소', 'Find or Cancel a Booking'), href: '/booking/lookup', internal: true },
       ],
-    },
+    }]),
     {
       title: 'Policy',
       links: [
@@ -96,7 +100,7 @@ export function Closing({ z }: { z: number }) {
   const markSeen = useInView(markRef, { once: true, margin: '0px 0px -5% 0px' });
   const { ready, leaveTo } = usePageTransition();
   const locale = useLocale();
-  const NAV = navGroups(locale);
+  const NAV = navGroups(locale, useBusinessClosed());
   const inView = seen && ready;
 
   const go = (e: React.MouseEvent<HTMLAnchorElement>) => {

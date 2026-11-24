@@ -9,7 +9,9 @@ import { Navbar } from '@/components/site/Navbar';
 import { PageTransition } from '@/components/site/PageTransition';
 import { SmoothScroll } from '@/components/site/SmoothScroll';
 import { DialogHost } from '@/components/ui/Dialog';
+import { SiteStatusProvider } from '@/components/site/SiteStatus';
 import { getLocale } from '@/lib/i18n/server';
+import { getSiteSettings } from '@/lib/site-settings';
 
 /*
   홈 — aftc(ABC 비행교육원) 홈 구조 이식: 픽셀아트 Hero(sticky) → 위로 덮는 다크 #intro,
@@ -56,7 +58,7 @@ export const viewport: Viewport = {
 };
 
 export default async function HomeLayout({ children }: { children: React.ReactNode }) {
-  const locale = await getLocale();
+  const [locale, settings] = await Promise.all([getLocale(), getSiteSettings()]);
   return (
     <html lang={locale} className={`${outfit.variable} antialiased`}>
       <head>
@@ -65,10 +67,12 @@ export default async function HomeLayout({ children }: { children: React.ReactNo
       <body className="flex min-h-[100dvh] flex-col">
         <script dangerouslySetInnerHTML={{ __html: "history.scrollRestoration='manual';window.scrollTo(0,0);" }} />
         <LocaleProvider locale={locale}>
-          <SmoothScroll>
-            <PageTransition navbar={<Navbar />}>{children}</PageTransition>
-          </SmoothScroll>
-          <DialogHost />
+          <SiteStatusProvider closed={settings.businessClosed}>
+            <SmoothScroll>
+              <PageTransition navbar={<Navbar />}>{children}</PageTransition>
+            </SmoothScroll>
+            <DialogHost />
+          </SiteStatusProvider>
         </LocaleProvider>
       </body>
     </html>

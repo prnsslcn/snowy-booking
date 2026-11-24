@@ -11,6 +11,7 @@ import { productName, tr, type Locale } from '@/lib/i18n';
 import { getLocale } from '@/lib/i18n/server';
 import { BOOKING_WINDOW_EN, BOOKING_WINDOW_KO } from '@/lib/policy/booking-window';
 import { notices, usageTime } from '@/lib/site-config';
+import { getSiteSettings } from '@/lib/site-settings';
 
 export async function generateMetadata(): Promise<Metadata> {
   return (await getLocale()) === 'en'
@@ -196,11 +197,14 @@ export default async function GuidePage() {
         <Faq items={faqItems(locale)} />
       </section>
 
-      <div className="mt-12 flex justify-center">
-        <TLink href="/booking" className={buttonClass('primary', 'md')}>
-          {t('예약하기', 'Book Now')}
-        </TLink>
-      </div>
+      {/* 영업 종료 중엔 예약하기 버튼 숨김 */}
+      {!(await getSiteSettings()).businessClosed && (
+        <div className="mt-12 flex justify-center">
+          <TLink href="/booking" className={buttonClass('primary', 'md')}>
+            {t('예약하기', 'Book Now')}
+          </TLink>
+        </div>
+      )}
     </SubPage>
   );
 }

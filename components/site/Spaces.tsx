@@ -8,6 +8,7 @@ import { blockIn, WILL } from '@/components/site/motion';
 import { useLocale } from '@/components/site/LocaleProvider';
 import { tr } from '@/lib/i18n';
 import { usePageTransition } from '@/components/site/PageTransition';
+import { useBusinessClosed } from '@/components/site/SiteStatus';
 import { useStickyCover } from '@/components/site/useStickyCover';
 
 /*
@@ -142,6 +143,8 @@ function SpacePanel({ space, index, total, dark }: { space: Space; index: number
     e.preventDefault();
     leaveTo(e.currentTarget.getAttribute('href') ?? '/');
   };
+  // 영업 종료 중엔 예약하기 버튼을 빼고 소개만
+  const closed = useBusinessClosed();
 
   const locale = useLocale();
   const t = tr(locale);
@@ -210,6 +213,7 @@ function SpacePanel({ space, index, total, dark }: { space: Space; index: number
             {t(`1${space.type === 'cabana' ? '동' : '대'} 1일 · 10:00–17:00 당일 이용`, 'Per unit, per day · Day use 10:00–17:00')}
           </motion.p>
 
+          {!closed && (
           <motion.div className="mt-4 flex flex-wrap items-center gap-5 lg:order-3 lg:mt-6" style={WILL} {...blockIn(8, '14%', 0.78, 0.4, inView)}>
             <a
               href={`/booking?type=${space.slug}`}
@@ -219,6 +223,7 @@ function SpacePanel({ space, index, total, dark }: { space: Space; index: number
               {t('예약하기', 'Book Now')}
             </a>
           </motion.div>
+          )}
 
           {/* 세부 안내 — 폰: 버튼 아래 / 데스크톱: 이름과 요금 사이 빈 칸에서 펼침 */}
           <motion.div className="mt-3 lg:order-2 lg:mt-8" style={WILL} {...blockIn(8, '14%', 0.78, 0.46, inView)}>
