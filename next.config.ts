@@ -18,6 +18,8 @@ const nextConfig: NextConfig = {
   ...(process.env.NEXT_DIST_DIR ? { distDir: process.env.NEXT_DIST_DIR } : {}),
   // 개발 중 좌측 하단 Next.js 인디케이터 숨김
   devIndicators: false,
+  // 개발 서버: 같은 와이파이의 휴대폰에서 내부 IP(192.168.x.x:3000 등)로 열 때 JS·HMR 이 막히지 않게(운영 빌드와 무관)
+  allowedDevOrigins: ['192.168.*.*', '10.*.*.*', '172.*.*.*'],
   env: {
     NEXT_PUBLIC_SUPABASE_URL: supabaseUrl,
     NEXT_PUBLIC_SUPABASE_ANON_KEY: supabaseAnonKey,

@@ -38,6 +38,9 @@ function navItems(locale: Locale) {
   };
 }
 
+/** 베타 화면의 상품 메뉴 → 베타 시설 안내 */
+const BETA_ANCHOR: Record<string, string> = { '#cabana': '/beta1', '#caravan': '/beta2', '#caravan-group': '/beta3' };
+
 const BLUR_LAYERS = [
   { blur: 1, mask: 'linear-gradient(to bottom, #000 0%, #000 70%, transparent 100%)' },
   { blur: 4, mask: 'linear-gradient(to bottom, #000 0%, #000 50%, transparent 100%)' },
@@ -128,6 +131,11 @@ export function Navbar() {
       return;
     }
     // 상품 앵커(#cabana 등)는 홈 기준 — 다른 화면에서는 홈으로 전환 뒤 그 자리로(leaveTo 가 처리)
+    // 베타(/beta, /beta1~3)에서는 상품 메뉴가 베타 시설 안내로
+    if (href.startsWith('#') && pathname.startsWith('/beta')) {
+      const to = BETA_ANCHOR[href];
+      if (to) return leaveTo(to);
+    }
     leaveTo(href.startsWith('#') ? `${home}${href}` : href);
   }
 

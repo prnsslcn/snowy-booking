@@ -31,9 +31,11 @@ export interface HeroProps {
   alt: string;
   /** 운영자 공지(관리자 설정) — 있을 때만 한 줄 */
   notice?: string | null;
+  /** 베타 홈(/beta): 아래 끝을 바탕색(ice-50)으로 물들여 다음 섹션과 이음 + 스크롤 때 어두워지지 않음 */
+  fade?: boolean;
 }
 
-export function Hero({ src, phoneSrc, alt, notice }: HeroProps) {
+export function Hero({ src, phoneSrc, alt, notice, fade = false }: HeroProps) {
   const { ready } = usePageTransition();
   const t = tr(useLocale());
 
@@ -108,6 +110,8 @@ export function Hero({ src, phoneSrc, alt, notice }: HeroProps) {
       />
       <div aria-hidden className="absolute inset-x-0 bottom-0 h-[42%] bg-gradient-to-t from-white/70 via-[#eef4fa]/35 to-transparent md:h-[56%] md:from-white/75" />
       <Snowfall active={snowing} className="absolute inset-0 h-full w-full" />
+      {/* 베타: 눈안개 아래를 바탕색으로 서서히 — 다음 섹션(ice-50)과 경계 없이 이어진다. 글자는 이 위에 */}
+      {fade && <div aria-hidden className="absolute inset-x-0 bottom-0 h-[32%] bg-gradient-to-b from-ice-50/0 via-ice-50/70 to-ice-50" />}
 
       {/* 위: 하늘 위 상품 이름 줄(흰 글씨) */}
       <motion.p
@@ -199,7 +203,7 @@ export function Hero({ src, phoneSrc, alt, notice }: HeroProps) {
       </motion.div>
 
       {/* 덮이는 동안 어두워짐 */}
-      <motion.div aria-hidden className="pointer-events-none absolute inset-0 bg-[#0a1a2e]" style={{ opacity: shade }} />
+      {!fade && <motion.div aria-hidden className="pointer-events-none absolute inset-0 bg-[#0a1a2e]" style={{ opacity: shade }} />}
     </section>
   );
 }

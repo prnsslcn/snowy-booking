@@ -53,7 +53,7 @@ const CELL = ['border-r pr-3 lg:pr-4', 'pl-3 lg:pl-4'];
 */
 const OPEN_EASE = 'ease-[cubic-bezier(0.22,1,0.36,1)]';
 
-function Details({
+export function Details({
   name,
   items,
   dark,
