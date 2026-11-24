@@ -11,7 +11,8 @@ import { setDateFlagAction } from '@/lib/admin/config-actions';
 
 /*
   운영 달력 — 날짜를 눌러 휴무(휴장: 운영 안 함, 신규 예약 불가) / 예약 잠금(운영은 하되 신규 온라인 예약만 막음).
-  칸: 날짜 · 예약 수(확정·입실·퇴실) · 표시(휴무/잠금/공휴일/성수기). 주말 요금일은 날짜 숫자가 파랑.
+  칸: 날짜 · 예약 수(확정·입실·퇴실) · 표시(휴무/잠금/공휴일). 주말 요금일은 칸 바탕이 옅은 파랑,
+  성수기는 칸마다 위쪽에 막대.
 */
 
 const WEEK = ['일', '월', '화', '수', '목', '금', '토'];
@@ -80,18 +81,26 @@ export function AdminCalendar({ ym, days, today }: { ym: string; days: Record<st
                 key={iso}
                 type="button"
                 onClick={() => setSel(iso)}
-                className={`flex min-h-[64px] flex-col items-start rounded-xl border p-1.5 text-left transition-colors md:min-h-[92px] md:p-2.5 ${
-                  d.closed !== null ? 'border-ink/10 bg-ink/[.06]' : d.locked !== null ? 'border-amber-400/50 bg-amber-50' : 'border-line hover:border-ice-400'
+                className={`relative flex min-h-[64px] flex-col items-start rounded-xl border p-1.5 pt-3 text-left transition-colors md:min-h-[92px] md:p-2.5 md:pt-4 ${
+                  d.closed !== null
+                    ? 'border-ink/10 bg-ink/[.06]'
+                    : d.locked !== null
+                      ? 'border-amber-400/50 bg-amber-50'
+                      : weekendRate(iso)
+                        ? 'border-ice-200 bg-ice-100 hover:border-ice-400'
+                        : 'border-line hover:border-ice-400'
                 } ${iso === today ? 'ring-2 ring-ice-400' : ''} ${past ? 'opacity-50' : ''} ${sel === iso ? 'border-glacier' : ''}`}
               >
-                <span className={`text-[13px] font-semibold tabular-nums md:text-[15px] ${weekendRate(iso) ? 'text-ice-600' : ''}`}>{Number(iso.slice(8))}</span>
+                {d.peak && (
+                  <span aria-hidden className="absolute inset-x-1.5 top-1 h-1 rounded-full bg-ice-500 md:top-1.5" />
+                )}
+                <span className="text-[13px] font-semibold tabular-nums md:text-[15px]">{Number(iso.slice(8))}</span>
                 {d.booked > 0 && <span className="mt-0.5 text-[11px] tabular-nums text-ink-2 md:text-[12px]">예약 {d.booked}</span>}
                 <span className="mt-auto flex flex-wrap gap-0.5">
                   {d.closed !== null && <span className="rounded bg-ink/70 px-1 text-[10px] font-medium text-white">휴무</span>}
                   {d.locked !== null && <span className="rounded bg-amber-500 px-1 text-[10px] font-medium text-white">잠금</span>}
                   {d.holiday && <span className="hidden truncate text-[10px] text-[#d4351c] md:inline">{d.holiday}</span>}
                   {d.holiday && <span className="h-1.5 w-1.5 rounded-full bg-[#d4351c] md:hidden" />}
-                  {d.peak && <span className="h-1.5 w-1.5 self-center rounded-full bg-ice-500" title="성수기" />}
                 </span>
               </button>
             );
@@ -99,11 +108,11 @@ export function AdminCalendar({ ym, days, today }: { ym: string; days: Record<st
         </div>
       </div>
       <ul className="mt-3 flex flex-wrap gap-x-4 gap-y-1 px-1 text-[12px] text-ink-2">
-        <li>
-          <span className="font-semibold text-ice-600">파란 날짜</span> 주말 요금일
+        <li className="flex items-center gap-1.5">
+          <span className="h-3 w-4 rounded border border-ice-200 bg-ice-100" /> 주말 요금일
         </li>
         <li className="flex items-center gap-1.5">
-          <span className="h-1.5 w-1.5 rounded-full bg-ice-500" /> 성수기
+          <span className="h-1 w-4 rounded-full bg-ice-500" /> 성수기
         </li>
         <li className="flex items-center gap-1.5">
           <span className="h-1.5 w-1.5 rounded-full bg-[#d4351c]" /> 공휴일
