@@ -17,6 +17,7 @@ import {
   type Conflict,
 } from '@/lib/admin/config-actions';
 import { statusBadge } from '@/lib/admin/labels';
+import { DatePicker } from '@/components/ui/DatePicker';
 
 /*
   유닛·점검.
@@ -174,17 +175,17 @@ export function UnitsManager({ types, units, blackouts, today }: { types: { type
           </label>
           <label>
             <span className="field-label">시작</span>
-            <input type="date" min={today} value={from} onChange={(e) => {
-                setFrom(e.target.value);
+            <DatePicker min={today} value={from} onChange={(v) => {
+                setFrom(v);
                 setConflicts(null);
-              }} className={fieldClass('light', 'tabular-nums', 'cs')} />
+              }} />
           </label>
           <label>
             <span className="field-label">끝</span>
-            <input type="date" min={from} value={to} onChange={(e) => {
-                setTo(e.target.value);
+            <DatePicker min={from} value={to} onChange={(v) => {
+                setTo(v);
                 setConflicts(null);
-              }} className={fieldClass('light', 'tabular-nums', 'cs')} />
+              }} />
           </label>
           <Button size="cs" variant="tint" className="col-span-2 md:col-span-1" disabled={pending || !bUnit} onClick={check}>
             예약 확인

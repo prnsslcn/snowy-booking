@@ -16,6 +16,7 @@ import {
   updatePricesAction,
 } from '@/lib/admin/config-actions';
 import { formatWon } from '@/lib/format';
+import { DatePicker } from '@/components/ui/DatePicker';
 
 /*
   요금 — 상품별 주중·주말 요금 / 성수기(기간 내 매일 주말 요금) / 공휴일(연도별, 공공데이터 불러오기 + 직접 추가).
@@ -149,8 +150,8 @@ export function PricingManager({
           }}
         >
           <input value={pName} onChange={(e) => setPName(e.target.value)} placeholder="이름 (예: 2027-28 동계 성수기)" aria-label="성수기 이름" className={fieldClass('light', 'col-span-2 md:col-span-1', 'cs')} />
-          <input type="date" value={pFrom} onChange={(e) => setPFrom(e.target.value)} aria-label="시작" className={fieldClass('light', 'tabular-nums', 'cs')} />
-          <input type="date" value={pTo} min={pFrom} onChange={(e) => setPTo(e.target.value)} aria-label="끝" className={fieldClass('light', 'tabular-nums', 'cs')} />
+          <DatePicker value={pFrom} onChange={setPFrom} aria-label="시작" placeholder="시작" />
+          <DatePicker value={pTo} min={pFrom || undefined} onChange={setPTo} aria-label="끝" placeholder="끝" />
           <Button type="submit" size="cs" variant="tint" className="col-span-2 md:col-span-1" disabled={peak.pending || !pName || !pFrom || !pTo}>
             추가
           </Button>
@@ -212,7 +213,7 @@ export function PricingManager({
             }, '추가했습니다.');
           }}
         >
-          <input type="date" value={hDate} onChange={(e) => setHDate(e.target.value)} aria-label="날짜" className={fieldClass('light', 'tabular-nums', 'cs')} />
+          <DatePicker value={hDate} onChange={setHDate} aria-label="날짜" />
           <input value={hName} onChange={(e) => setHName(e.target.value)} placeholder="이름 (예: 임시공휴일)" aria-label="공휴일 이름" className={fieldClass('light', '', 'cs')} />
           <Button type="submit" size="cs" variant="tint" className="col-span-2 md:col-span-1" disabled={hol.pending || !hDate || !hName}>
             직접 추가

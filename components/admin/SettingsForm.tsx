@@ -8,6 +8,7 @@ import { confirmDialog } from '@/components/ui/Dialog';
 import { Field, fieldClass } from '@/components/ui/Field';
 import { saveSettingsAction, type SettingsInput } from '@/lib/admin/config-actions';
 import { BOOKING_WINDOW_KO } from '@/lib/policy/booking-window';
+import { DatePicker } from '@/components/ui/DatePicker';
 
 /*
   운영 설정(grill-booking 일반설정 이식).
@@ -91,10 +92,10 @@ export function SettingsForm({ initial, year, defaults }: { initial: SettingsInp
         <p className="mt-1 text-[13px] text-ink-2">이 기간 밖 날짜는 손님이 예약할 수 없습니다. 비우면 제한 없음(예약 가능 기간 {BOOKING_WINDOW_KO}만 적용).</p>
         <div className="mt-4 grid grid-cols-2 gap-3">
           <Field label="시작">
-            <input type="date" value={s.seasonFrom} onChange={(e) => set('seasonFrom', e.target.value)} className={fieldClass('light', 'tabular-nums', 'cs')} />
+            <DatePicker value={s.seasonFrom} onChange={(v) => set('seasonFrom', v)} placeholder="제한 없음" clearable />
           </Field>
           <Field label="끝">
-            <input type="date" value={s.seasonTo} min={s.seasonFrom} onChange={(e) => set('seasonTo', e.target.value)} className={fieldClass('light', 'tabular-nums', 'cs')} />
+            <DatePicker value={s.seasonTo} min={s.seasonFrom || undefined} onChange={(v) => set('seasonTo', v)} placeholder="제한 없음" clearable />
           </Field>
         </div>
       </section>
@@ -113,10 +114,10 @@ export function SettingsForm({ initial, year, defaults }: { initial: SettingsInp
           </Field>
           <div className="grid grid-cols-2 gap-3">
             <Field label="보이기 시작">
-              <input type="date" value={s.notice.from} onChange={(e) => setN('from', e.target.value)} className={fieldClass('light', 'tabular-nums', 'cs')} />
+              <DatePicker value={s.notice.from} onChange={(v) => setN('from', v)} placeholder="바로" clearable />
             </Field>
             <Field label="보이기 끝">
-              <input type="date" value={s.notice.to} min={s.notice.from} onChange={(e) => setN('to', e.target.value)} className={fieldClass('light', 'tabular-nums', 'cs')} />
+              <DatePicker value={s.notice.to} min={s.notice.from || undefined} onChange={(v) => setN('to', v)} placeholder="계속" clearable />
             </Field>
           </div>
         </div>

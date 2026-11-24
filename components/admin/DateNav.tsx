@@ -3,7 +3,7 @@
 import { useRouter } from 'next/navigation';
 
 import { buttonClass } from '@/components/ui/Button';
-import { fieldClass } from '@/components/ui/Field';
+import { DatePicker } from '@/components/ui/DatePicker';
 
 /** 날짜 이동 — 이전 날 · 날짜 고르기 · 다음 날 · 오늘. 주소(?date=)에 남는다. */
 function shift(iso: string, days: number) {
@@ -20,8 +20,8 @@ export function DateNav({ date, today, basePath }: { date: string; today: string
       <button type="button" onClick={() => go(shift(date, -1))} aria-label="이전 날" className={buttonClass('tint', 'cs', 'w-11 px-0')}>
         ‹
       </button>
-      <div className="w-[150px]">
-        <input type="date" value={date} onChange={(e) => e.target.value && go(e.target.value)} aria-label="날짜" className={fieldClass('light', 'tabular-nums', 'cs')} />
+      <div className="w-[170px]">
+        <DatePicker value={date} onChange={(v) => v && go(v)} aria-label="날짜" />
       </div>
       <button type="button" onClick={() => go(shift(date, 1))} aria-label="다음 날" className={buttonClass('tint', 'cs', 'w-11 px-0')}>
         ›

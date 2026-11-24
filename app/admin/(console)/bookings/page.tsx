@@ -8,6 +8,7 @@ import { fieldClass } from '@/components/ui/Field';
 import { requireAdmin } from '@/lib/admin/auth';
 import { listBookings, PAGE_SIZE, STATUS_FILTERS, type ListFilters, type StatusFilter } from '@/lib/admin/bookings';
 import { kstToday } from '@/lib/policy/booking-window';
+import { DatePicker } from '@/components/ui/DatePicker';
 
 export const metadata: Metadata = { title: '예약 관리' };
 export const dynamic = 'force-dynamic';
@@ -65,11 +66,11 @@ export default async function BookingsPage({ searchParams }: { searchParams: Pro
         </label>
         <label>
           <span className="field-label">이용일 부터</span>
-          <input type="date" name="from" defaultValue={filters.from ?? kstToday()} className={input} />
+          <DatePicker name="from" defaultValue={filters.from ?? kstToday()} clearable />
         </label>
         <label>
           <span className="field-label">까지</span>
-          <input type="date" name="to" defaultValue={filters.to} className={input} />
+          <DatePicker name="to" defaultValue={filters.to ?? ''} clearable />
         </label>
         <div className="col-span-2 flex gap-2 md:col-span-1">
           <button type="submit" className={buttonClass('primary', 'cs', 'flex-1 md:flex-none')}>

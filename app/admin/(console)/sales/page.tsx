@@ -5,10 +5,10 @@ import { AdminTitle } from '@/components/admin/AdminShell';
 import { EphemeralRange } from '@/components/admin/EphemeralRange';
 import { StatStrip } from '@/components/admin/StatStrip';
 import { buttonClass } from '@/components/ui/Button';
-import { fieldClass } from '@/components/ui/Field';
 import { requireAdmin } from '@/lib/admin/auth';
 import { getSales, salesRanges } from '@/lib/admin/sales';
 import { formatDateKorean, formatWon } from '@/lib/format';
+import { DatePicker } from '@/components/ui/DatePicker';
 
 export const metadata: Metadata = { title: '매출' };
 export const dynamic = 'force-dynamic';
@@ -35,7 +35,6 @@ export default async function SalesPage({ searchParams }: { searchParams: Promis
   ];
   const sold = s.byType.reduce((a, t) => a + t.sold, 0);
   const cap = s.byType.reduce((a, t) => a + t.capacity, 0);
-  const input = fieldClass('light', 'tabular-nums', 'cs');
 
   return (
     <>
@@ -70,11 +69,11 @@ export default async function SalesPage({ searchParams }: { searchParams: Promis
         <form className="mt-3 grid grid-cols-2 gap-2 md:flex md:items-end" method="get">
           <label className="md:w-44">
             <span className="field-label">시작(이용일)</span>
-            <input type="date" name="from" defaultValue={from} className={input} />
+            <DatePicker name="from" defaultValue={from} />
           </label>
           <label className="md:w-44">
             <span className="field-label">끝(이용일)</span>
-            <input type="date" name="to" defaultValue={to} className={input} />
+            <DatePicker name="to" defaultValue={to} />
           </label>
           <button className={buttonClass('tint', 'cs', 'col-span-2')}>조회</button>
         </form>
