@@ -30,7 +30,7 @@ export default async function SettingsPage() {
           notice: { enabled: n.enabled, title: n.title ?? '', body: n.body ?? '', from: n.from ?? '', to: n.to ?? '' },
         }}
       />
-      {/* 성수기·공휴일 — 바로 저장되는 항목이라 위 '설정 저장'과 따로 */}
+      {/* 성수기·공휴일 — 추가·삭제 즉시 저장 */}
       <div className="mt-5">
         <PeakHolidayManager peaks={d.peaks} holidays={d.holidays} range={d.holidayRange} />
       </div>
