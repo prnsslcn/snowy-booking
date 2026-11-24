@@ -4,6 +4,7 @@ import { revalidatePath } from 'next/cache';
 
 import { getAdminUser } from '@/lib/admin/auth';
 import { logAdminAction } from '@/lib/admin/audit';
+import { listBookingsOnDate, type BookingListItem } from '@/lib/admin/bookings';
 import { adminErrorMessage } from '@/lib/admin/errors';
 import { RefundError, refundBooking } from '@/lib/booking/refund';
 import { getTossClient } from '@/lib/payments/toss';
@@ -22,6 +23,17 @@ function refresh(bookingId: string) {
   revalidatePath('/admin');
   revalidatePath('/admin/bookings');
   revalidatePath(`/admin/bookings/${bookingId}`);
+}
+
+/** 운영 달력 — 날짜를 누르면 그날 예약 목록 */
+export async function dayBookingsAction(date: string): Promise<ActionResult<BookingListItem[]>> {
+  if (!(await getAdminUser())) return { ok: false, error: '로그인이 필요합니다.' };
+  if (!/^\d{4}-\d{2}-\d{2}$/.test(date)) return { ok: false, error: '날짜를 확인해 주세요.' };
+  try {
+    return { ok: true, data: await listBookingsOnDate(date) };
+  } catch (e) {
+    return { ok: false, error: e instanceof Error ? e.message : String(e) };
+  }
 }
 
 const REFUND_MESSAGES: Record<string, string> = {

@@ -8,6 +8,7 @@ import { Field, fieldClass } from '@/components/ui/Field';
 import { saveSettingsAction, type SettingsInput } from '@/lib/admin/config-actions';
 import { BOOKING_WINDOW_KO } from '@/lib/policy/booking-window';
 import { DatePicker } from '@/components/ui/DatePicker';
+import { Toggle } from '@/components/admin/Toggle';
 
 /*
   운영 설정(grill-booking 일반설정 이식). 저장 버튼 없음 — 토글·날짜는 바꾸면 바로, 글자 칸은 벗어날 때 저장.
@@ -15,21 +16,6 @@ import { DatePicker } from '@/components/ui/DatePicker';
   - 시즌 기간: 이 기간 밖 날짜는 예약 불가(비우면 제한 없음).
   - 공지: 홈 첫 화면에 한 줄(기간 지정 가능).
 */
-
-function Toggle({ on, onChange, label }: { on: boolean; onChange: (v: boolean) => void; label: string }) {
-  return (
-    <button
-      type="button"
-      role="switch"
-      aria-checked={on}
-      aria-label={label}
-      onClick={() => onChange(!on)}
-      className={`relative h-7 w-12 flex-none rounded-full transition-colors ${on ? 'bg-ice-600' : 'bg-ink/15'}`}
-    >
-      <span className={`absolute left-0 top-0.5 h-6 w-6 rounded-full bg-white shadow transition-transform ${on ? 'translate-x-[22px]' : 'translate-x-0.5'}`} />
-    </button>
-  );
-}
 
 export function SettingsForm({ initial, year, defaults }: { initial: SettingsInput; year: string; defaults: { title: string; message: string } }) {
   const router = useRouter();

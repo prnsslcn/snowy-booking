@@ -128,6 +128,22 @@ export async function listBookings(f: ListFilters): Promise<{ items: BookingList
   return { items: ((data ?? []) as unknown as Row[]).map(toItem), total: count ?? 0 };
 }
 
+/** 한 이용일의 예약(유효 상태 — 확정·입실·퇴실·환불 처리 중·환불 완료). 상품 순서 → 예약 순 */
+export async function listBookingsOnDate(date: string): Promise<BookingListItem[]> {
+  await requireAdmin();
+  const { data, error } = await createAdminClient()
+    .from('bookings')
+    .select(LIST_COLUMNS)
+    .eq('date', date)
+    .in('status', [...STATUS_FILTERS.valid.statuses])
+    .order('created_at', { ascending: true });
+  if (error) throw new Error(error.message);
+  const items = ((data ?? []) as unknown as (Row & { product_types: { name: string; sort?: number } | null })[]).map(toItem);
+  const order = ['cabana', 'caravan', 'caravan_group'];
+  const rank = (t: string) => (order.indexOf(t) < 0 ? 99 : order.indexOf(t));
+  return items.sort((a, b) => rank(a.type) - rank(b.type));
+}
+
 export interface BookingDetail extends BookingListItem {
   priceSnapshot: Json;
   note: string | null;

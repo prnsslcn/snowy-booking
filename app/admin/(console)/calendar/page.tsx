@@ -17,7 +17,7 @@ export default async function CalendarPage({ searchParams }: { searchParams: Pro
   const days = await getCalendarMonth(ym);
   return (
     <>
-      <AdminTitle title="운영 달력" sub="날짜를 눌러 휴무·예약 잠금을 지정합니다" />
+      <AdminTitle title="운영 달력" sub="날짜를 누르면 그날 예약 목록 · 휴무·예약 잠금 지정" />
       <AdminCalendar ym={ym} days={days} today={today} />
     </>
   );
