@@ -8,6 +8,7 @@ import { blockIn, WILL } from '@/components/site/motion';
 import { useLocale } from '@/components/site/LocaleProvider';
 import { tr } from '@/lib/i18n';
 import { usePageTransition } from '@/components/site/PageTransition';
+import { PhotoViewer } from '@/components/site/PhotoViewer';
 import { useBusinessClosed } from '@/components/site/SiteStatus';
 import { useStickyCover } from '@/components/site/useStickyCover';
 
@@ -132,6 +133,15 @@ function SpacePanel({ space, index, total, dark }: { space: Space; index: number
 
   const [main, ...rest] = space.photos;
   const side = rest.slice(0, 2);
+  // 폰·태블릿: 사진을 누르면 크게 보기(데스크톱은 그대로)
+  const shown = [main, ...side].filter(Boolean);
+  const [viewing, setViewing] = useState<number | null>(null);
+  const [viewerOn, setViewerOn] = useState(false); // 처음 누를 때 붙인다(서버 렌더와 어긋나지 않게)
+  const view = (k: number) => {
+    if (!window.matchMedia('(max-width: 1023px)').matches) return;
+    setViewerOn(true);
+    setViewing(k);
+  };
   const landscape = main?.orientation === 'landscape';
 
   const ink = dark ? 'text-ice-50' : 'text-glacier';
@@ -238,16 +248,28 @@ function SpacePanel({ space, index, total, dark }: { space: Space; index: number
           {...blockIn(8, '6%', 0.9, 0.3, inView)}
         >
           {main && (
-            <div className={`relative overflow-hidden rounded-xl md:rounded-2xl ${landscape ? 'col-span-2' : 'row-span-2'}`}>
+            <button
+              type="button"
+              onClick={() => view(0)}
+              aria-label={t(`${main.alt} 크게 보기`, `View larger: ${main.alt}`)}
+              className={`relative overflow-hidden rounded-xl transition-transform duration-300 active:scale-[0.98] md:rounded-2xl lg:pointer-events-none ${landscape ? 'col-span-2' : 'row-span-2'}`}
+            >
               <Image src={main.src} alt={main.alt} fill sizes="(min-width: 1024px) 55vw, 100vw" className="object-cover" />
-            </div>
+            </button>
           )}
-          {side.map((p) => (
-            <div key={p.src} className="relative overflow-hidden rounded-xl md:rounded-2xl">
+          {side.map((p, k) => (
+            <button
+              key={p.src}
+              type="button"
+              onClick={() => view(k + 1)}
+              aria-label={t(`${p.alt} 크게 보기`, `View larger: ${p.alt}`)}
+              className="relative overflow-hidden rounded-xl transition-transform duration-300 active:scale-[0.98] md:rounded-2xl lg:pointer-events-none"
+            >
               <Image src={p.src} alt={p.alt} fill sizes="(min-width: 1024px) 25vw, 50vw" className="object-cover" />
-            </div>
+            </button>
           ))}
         </motion.div>
+        {viewerOn && <PhotoViewer photos={shown} index={viewing} onClose={() => setViewing(null)} />}
       </div>
     </motion.section>
   );
