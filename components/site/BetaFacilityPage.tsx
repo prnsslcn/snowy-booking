@@ -15,9 +15,10 @@ export async function BetaFacilityPage({ type }: { type: string }) {
   const index = all.findIndex((s) => s.type === type);
   if (index < 0) notFound();
   return (
-    <>
+    // 푸터도 화면 바탕과 같은 색(카바나·단체카라반 = 겨울 파랑). 감싼 바탕도 같은 색 — 경계 소수점 픽셀에 밝은 줄이 비치지 않게
+    <div className={index % 2 === 0 ? 'bg-glacier' : 'bg-ice-50'}>
       <BetaFacility space={all[index]} index={index} all={all} />
-      <SiteFooter />
-    </>
+      <SiteFooter glacier={index % 2 === 0} />
+    </div>
   );
 }
