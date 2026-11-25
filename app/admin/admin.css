@@ -100,3 +100,24 @@
     animation: none;
   }
 }
+
+/* 불러오는 중 자리 표시(app/admin/(console)/loading.tsx) — 얼음빛 면이 은은하게 빛이 지나감 */
+@keyframes admin-skel-in {
+  from {
+    opacity: 0;
+  }
+}
+@keyframes admin-skel-shine {
+  to {
+    background-position: -200% 0;
+  }
+}
+.skel {
+  background: linear-gradient(90deg, var(--color-ice-100) 0%, #edf3f9 40%, var(--color-ice-100) 80%) 0 0 / 200% 100%;
+  animation: admin-skel-shine 1.4s ease-in-out infinite;
+}
+@media (prefers-reduced-motion: reduce) {
+  .skel {
+    animation: none;
+  }
+}
