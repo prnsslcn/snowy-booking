@@ -31,12 +31,9 @@ export interface HeroProps {
   alt: string;
   /** 운영자 공지(관리자 설정) — 있을 때만 한 줄 */
   notice?: string | null;
-  /** 베타 홈(/beta): 아래 끝을 바탕색(ice-50)으로 물들여 다음 섹션과 이음 + 스크롤 때 어두워지지 않음.
-   *  폰은 눈안개를 더 높이(툴바로 화면이 낮아지면 'Snowy' 가 사진 쪽으로 올라감), 예약하기 버튼 없음 */
-  fade?: boolean;
 }
 
-export function Hero({ src, phoneSrc, alt, notice, fade = false }: HeroProps) {
+export function Hero({ src, phoneSrc, alt, notice }: HeroProps) {
   const { ready } = usePageTransition();
   const t = tr(useLocale());
 
@@ -85,7 +82,7 @@ export function Hero({ src, phoneSrc, alt, notice, fade = false }: HeroProps) {
       */}
       <div
         aria-hidden
-        className={`absolute inset-x-0 bottom-0 md:h-[50%] ${fade ? 'h-[52%]' : 'h-[34%]'}`}
+        className="absolute inset-x-0 bottom-0 h-[52%] md:h-[50%]"
         style={{
           backdropFilter: 'blur(9px) saturate(1.05)',
           WebkitBackdropFilter: 'blur(9px) saturate(1.05)',
@@ -109,10 +106,10 @@ export function Hero({ src, phoneSrc, alt, notice, fade = false }: HeroProps) {
           WebkitMaskComposite: 'source-in',
         }}
       />
-      <div aria-hidden className={`absolute inset-x-0 bottom-0 bg-gradient-to-t from-white/70 via-[#eef4fa]/35 to-transparent md:h-[56%] md:from-white/75 ${fade ? 'h-[60%] via-[#eef4fa]/45' : 'h-[42%]'}`} />
+      <div aria-hidden className="absolute inset-x-0 bottom-0 h-[60%] bg-gradient-to-t from-white/70 via-[#eef4fa]/45 to-transparent md:h-[56%] md:from-white/75 lg:via-[#eef4fa]/35" />
       <Snowfall active={snowing} className="absolute inset-0 h-full w-full" />
-      {/* 베타: 눈안개 아래를 바탕색으로 서서히 — 다음 섹션(ice-50)과 경계 없이 이어진다. 글자는 이 위에 */}
-      {fade && <div aria-hidden className="absolute inset-x-0 bottom-0 h-[32%] bg-gradient-to-b from-ice-50/0 via-ice-50/70 to-ice-50" />}
+      {/* 폰·태블릿: 눈안개 아래를 바탕색으로 서서히 — 다음 사진 카드(ice-50)와 경계 없이 이어진다. 글자는 이 위에 */}
+      <div aria-hidden className="absolute inset-x-0 bottom-0 h-[32%] bg-gradient-to-b from-ice-50/0 via-ice-50/70 to-ice-50 lg:hidden" />
 
       {/* 위: 하늘 위 상품 이름 줄(흰 글씨) */}
       <motion.p
@@ -150,12 +147,12 @@ export function Hero({ src, phoneSrc, alt, notice, fade = false }: HeroProps) {
             {notice && (
               <p className="hidden max-w-[22rem] rounded-full bg-white/80 px-4 py-2 text-[13px] font-medium text-glacier md:block">{notice}</p>
             )}
-            {/* 베타(fade)는 예약하기 버튼 없음 — 상품 칸·시설 안내에서 예약 */}
-            {!fade && (
+            {/* 폰·태블릿은 예약하기 버튼 없음 — 사진 카드·시설 안내에서 예약 */}
+            <span className="hidden lg:block">
               <TLink href="/booking" className={buttonClass('primary', 'md')}>
                 {t('예약하기', 'Book Now')}
               </TLink>
-            )}
+            </span>
           </motion.div>
           {notice && (
             <motion.p
@@ -207,7 +204,8 @@ export function Hero({ src, phoneSrc, alt, notice, fade = false }: HeroProps) {
       </motion.div>
 
       {/* 덮이는 동안 어두워짐 */}
-      {!fade && <motion.div aria-hidden className="pointer-events-none absolute inset-0 bg-[#0a1a2e]" style={{ opacity: shade }} />}
+      {/* PC: 다음 장이 덮는 동안 어두워짐(폰은 흐름이라 없음 — 아래 바탕색 이음이 회색으로 변하지 않게) */}
+      <motion.div aria-hidden className="pointer-events-none absolute inset-0 hidden bg-[#0a1a2e] lg:block" style={{ opacity: shade }} />
     </section>
   );
 }

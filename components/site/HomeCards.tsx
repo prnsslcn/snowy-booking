@@ -8,12 +8,12 @@ import { useLocale } from '@/components/site/LocaleProvider';
 import { blockIn, WILL } from '@/components/site/motion';
 import { usePageTransition } from '@/components/site/PageTransition';
 import type { Space } from '@/components/site/Spaces';
-import { BETA_PATH } from '@/components/site/beta-paths';
+import { FACILITY_PATH } from '@/components/site/facility-paths';
 import { TLink } from '@/components/site/TLink';
 import { tr } from '@/lib/i18n';
 
 /*
-  베타 홈(/beta) 상품 — 사진 카드형(A~E안 중 확정). 누르면 시설 안내(/beta1~3).
+  홈 상품 — 폰·태블릿(lg 미만) 전용 사진 카드. 누르면 시설 안내(/cabana · /caravan · /caravan-group). PC 는 Spaces(장 넘김형).
   - 사진이 칸 전체를 채우고, 아래쪽만 겨울 파랑으로 어둡게 물들여 그 위에 흰 글씨(큰 영문 이름 · 한글 이름 · 요금).
   - 위 모서리엔 유리 알약 두 개(순번 · 최대 인원), 아래 오른쪽엔 흰 원 화살표.
   - 등장: 칸마다 화면에 들어오면 blockIn + 사진이 살짝 크게 있다가 제자리로(줌 아웃).
@@ -35,7 +35,7 @@ function Card({ space: s, index: i }: { space: Space; index: number }) {
   return (
     <motion.li ref={ref} style={WILL} {...blockIn(10, '14%', 0.9, 0.04 + i * 0.07, inView)}>
       <TLink
-        href={BETA_PATH[s.type] ?? '/beta'}
+        href={FACILITY_PATH[s.type] ?? '/'}
         className={`group relative block aspect-[5/4] overflow-hidden rounded-[28px] bg-glacier transition-transform duration-300 ${EASE} active:scale-[0.985] lg:aspect-[3/4]`}
       >
         {photo && (
@@ -84,9 +84,9 @@ function Card({ space: s, index: i }: { space: Space; index: number }) {
   );
 }
 
-export function BetaProducts({ spaces }: { spaces: Space[] }) {
+export function HomeCards({ spaces }: { spaces: Space[] }) {
   return (
-    <section data-nav-theme="light" className="relative z-20 bg-ice-50 px-5 pb-20 pt-10 text-glacier md:px-8 lg:px-10 lg:pb-28 lg:pt-16">
+    <section data-nav-theme="light" className="relative z-20 bg-ice-50 lg:hidden px-5 pb-20 pt-10 text-glacier md:px-8 lg:px-10 lg:pb-28 lg:pt-16">
       <div className="mx-auto max-w-6xl">
         <ul className="flex flex-col gap-4 lg:grid lg:grid-cols-3 lg:gap-5">
           {spaces.map((s, i) => (

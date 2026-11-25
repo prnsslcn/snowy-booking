@@ -106,7 +106,11 @@ export function Closing({ z }: { z: number }) {
   const go = (e: React.MouseEvent<HTMLAnchorElement>) => {
     if (e.metaKey || e.ctrlKey || e.shiftKey || e.button !== 0) return;
     e.preventDefault();
-    leaveTo(e.currentTarget.getAttribute('href') ?? '/');
+    const href = e.currentTarget.getAttribute('href') ?? '/';
+    // 폰·태블릿: 상품 링크(/#cabana 등)는 시설 안내 화면(/cabana 등)으로 — 홈에 상품 장이 없다
+    const slug = href.split('#')[1];
+    if (slug && !window.matchMedia('(min-width: 1024px)').matches) return leaveTo(`/${slug}`);
+    leaveTo(href);
   };
 
   return (

@@ -24,6 +24,15 @@ const nextConfig: NextConfig = {
     NEXT_PUBLIC_SUPABASE_URL: supabaseUrl,
     NEXT_PUBLIC_SUPABASE_ANON_KEY: supabaseAnonKey,
   },
+  // 베타로 시험하던 주소 → 정식 주소(폰 홈·시설 안내로 이식됨, 2026-11-25)
+  async redirects() {
+    return [
+      { source: '/beta', destination: '/', permanent: false },
+      { source: '/beta1', destination: '/cabana', permanent: false },
+      { source: '/beta2', destination: '/caravan', permanent: false },
+      { source: '/beta3', destination: '/caravan-group', permanent: false },
+    ];
+  },
   // 기본 보안 헤더(HSTS 는 Vercel 이 붙임). CSP 는 토스 결제창·외부 글꼴과 맞춰야 해서 아직 넣지 않음.
   async headers() {
     return [

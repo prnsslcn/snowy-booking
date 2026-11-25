@@ -175,7 +175,7 @@ function SpacePanel({ space, index, total, dark }: { space: Space; index: number
       data-nav-theme={dark ? 'dark' : 'light'}
       data-lock-page={slid || undefined}
       aria-labelledby={`space-${space.slug}`}
-      className={`sticky flex min-h-[100dvh] flex-col overflow-x-clip px-5 lg:min-h-[max(100dvh,600px)] pb-6 pt-[104px] max-lg:[@media(max-height:700px)]:pb-4 max-lg:[@media(max-height:700px)]:pt-[84px] md:px-8 md:pb-8 lg:px-10 lg:pb-10 lg:pt-28 ${dark ? 'bg-glacier' : 'bg-ice-50'} ${ink}`}
+      className={`sticky hidden min-h-[100dvh] lg:flex flex-col overflow-x-clip px-5 lg:min-h-[max(100dvh,600px)] pb-6 pt-[104px] max-lg:[@media(max-height:700px)]:pb-4 max-lg:[@media(max-height:700px)]:pt-[84px] md:px-8 md:pb-8 lg:px-10 lg:pb-10 lg:pt-28 ${dark ? 'bg-glacier' : 'bg-ice-50'} ${ink}`}
       style={{ top, zIndex: 30 + index, borderTopLeftRadius: radius, borderTopRightRadius: radius }}
     >
       {/* 폰·태블릿: 두 쪽 가로 트랙(소개 | 안내). '자세히 보기'를 누르면 장 안에서 오른쪽 쪽으로 밀려 넘어간다 — 장 높이는 그대로 */}

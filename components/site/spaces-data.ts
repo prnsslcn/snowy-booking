@@ -5,7 +5,7 @@ import { money, productName, tr, type Locale } from '@/lib/i18n';
 import type { Product } from '@/lib/products';
 import { notices } from '@/lib/site-config';
 
-/* 상품 장 데이터 — 홈(/)·베타 홈(/beta)·베타 시설 안내(/beta1~3)가 같이 쓴다. 수량·인원·요금은 DB 값, 글은 확정 사실만. */
+/* 상품 장 데이터 — 홈(/, /off)·시설 안내(/cabana · /caravan · /caravan-group)가 같이 쓴다. 수량·인원·요금은 DB 값, 글은 확정 사실만. */
 
 const DISPLAY: Record<string, string> = { cabana: 'Cabana', caravan: 'Caravan', caravan_group: 'Group Caravan' };
 

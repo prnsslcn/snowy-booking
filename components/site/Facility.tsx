@@ -2,9 +2,9 @@
 
 import { motion, useInView, useScroll, useTransform } from 'framer-motion';
 import Image, { getImageProps } from 'next/image';
-import { useRef, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 
-import { BETA_PATH } from '@/components/site/beta-paths';
+import { FACILITY_PATH } from '@/components/site/facility-paths';
 import { useLocale } from '@/components/site/LocaleProvider';
 import { blockIn, WILL } from '@/components/site/motion';
 import { usePageTransition } from '@/components/site/PageTransition';
@@ -15,7 +15,8 @@ import { TLink } from '@/components/site/TLink';
 import { tr } from '@/lib/i18n';
 
 /*
-  베타 시설 안내(/beta1 · /beta2 · /beta3) — 홈 상품 카드(사진 카드형)를 이어받은 폰 중심 화면. 브라우저 스크롤 그대로.
+  시설 안내(/cabana · /caravan · /caravan-group) — 폰·태블릿 전용(lg 미만). 홈 사진 카드를 이어받은 화면, 브라우저 스크롤 그대로.
+  PC(lg 이상)로 열면 홈의 그 상품 장(/#cabana 등, 영업 종료 중엔 /off#…)으로 보낸다 — PC 는 문서형을 쓰지 않는다.
   1) 첫 화면: 대표 사진이 위를 가득(아래 모서리만 둥글게), 아래쪽을 짙게 물들여 흰 글씨 — 순번 알약 · 큰 영문 이름 · 한글 이름.
      스크롤하면 사진이 천천히 확대되며 위로 흐른다. 누르면 크게 보기.
   2) 숫자 세 칸: 최대 인원 · 요금 · 이용 시간
@@ -52,13 +53,21 @@ function useReveal<T extends HTMLElement>() {
   return [ref, seen && ready] as const;
 }
 
-export function BetaFacility({ space, index, all }: { space: Space; index: number; all: Space[] }) {
+export function Facility({ space, index, all }: { space: Space; index: number; all: Space[] }) {
   const dark = index % 2 === 0;
   const { ready, leaveTo } = usePageTransition();
   const closed = useBusinessClosed();
   const locale = useLocale();
   const t = tr(locale);
   const [open, setOpen] = useState(false);
+  // PC 로 열면 홈 상품 장으로(화면은 FacilityPage 가 lg 에서 감춰 둠)
+  useEffect(() => {
+    const pc = window.matchMedia('(min-width: 1024px)');
+    const go = () => pc.matches && window.location.replace(`${closed ? '/off' : '/'}#${space.slug}`);
+    go();
+    pc.addEventListener('change', go);
+    return () => pc.removeEventListener('change', go);
+  }, [closed, space.slug]);
   const [viewing, setViewing] = useState<number | null>(null);
   const [viewerOn, setViewerOn] = useState(false);
   const view = (k: number) => {
@@ -206,7 +215,7 @@ export function BetaFacility({ space, index, all }: { space: Space; index: numbe
             {others.map((o, i) => (
               <motion.li key={o.type} style={WILL} {...blockIn(8, '14%', 0.85, 0.08 + i * 0.08, othersIn)}>
                 <TLink
-                  href={BETA_PATH[o.type] ?? '/beta'}
+                  href={FACILITY_PATH[o.type] ?? '/'}
                   className={`group relative block aspect-[4/5] overflow-hidden rounded-[22px] bg-glacier-deep transition-transform duration-300 ${TW} active:scale-[0.98] lg:aspect-[16/10]`}
                 >
                   {o.photos[0] && (

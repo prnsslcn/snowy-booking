@@ -38,8 +38,8 @@ function navItems(locale: Locale) {
   };
 }
 
-/** 베타 화면의 상품 메뉴 → 베타 시설 안내 */
-const BETA_ANCHOR: Record<string, string> = { '#cabana': '/beta1', '#caravan': '/beta2', '#caravan-group': '/beta3' };
+/** 폰·태블릿(lg 미만) 상품 메뉴 → 시설 안내 화면(PC 는 홈 상품 장 앵커) */
+const FACILITY_ANCHOR: Record<string, string> = { '#cabana': '/cabana', '#caravan': '/caravan', '#caravan-group': '/caravan-group' };
 
 const BLUR_LAYERS = [
   { blur: 1, mask: 'linear-gradient(to bottom, #000 0%, #000 70%, transparent 100%)' },
@@ -131,9 +131,9 @@ export function Navbar() {
       return;
     }
     // 상품 앵커(#cabana 등)는 홈 기준 — 다른 화면에서는 홈으로 전환 뒤 그 자리로(leaveTo 가 처리)
-    // 베타(/beta, /beta1~3)에서는 상품 메뉴가 베타 시설 안내로
-    if (href.startsWith('#') && pathname.startsWith('/beta')) {
-      const to = BETA_ANCHOR[href];
+    // 폰·태블릿은 상품 메뉴가 시설 안내 화면으로
+    if (href.startsWith('#') && !window.matchMedia('(min-width: 1024px)').matches) {
+      const to = FACILITY_ANCHOR[href];
       if (to) return leaveTo(to);
     }
     leaveTo(href.startsWith('#') ? `${home}${href}` : href);
@@ -235,13 +235,14 @@ export function Navbar() {
             <button
               type="button"
               onClick={() => setOpen(false)}
-              className="absolute right-5 top-5 flex h-10 w-10 items-center justify-center rounded-full bg-white/[.08]"
+              // 메뉴(☰) 버튼과 같은 자리·크기 — 세 줄이 X 로 바뀐 것처럼. 테두리·바탕 없이 가는 두 획이 돌며 엇갈림
+              className="absolute right-3 top-3 flex h-9 w-9 items-center justify-center text-white/85 transition-[color,transform] duration-300 hover:text-white active:scale-90 md:right-5 md:top-4"
               aria-label={t('메뉴 닫기', 'Close menu')}
               autoFocus
             >
-              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={1.5} strokeLinecap="round" aria-hidden>
-                <circle cx="12" cy="12" r="10" />
-                <path d="M9.5 9.5l5 5M14.5 9.5l-5 5" />
+              <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={1.5} strokeLinecap="round" aria-hidden>
+                <motion.path d="M5 5l14 14" initial={{ rotate: -45, opacity: 0 }} animate={{ rotate: 0, opacity: 1 }} transition={{ duration: 0.5, delay: 0.2, ease: MENU_EASE }} style={{ originX: '50%', originY: '50%' }} />
+                <motion.path d="M19 5L5 19" initial={{ rotate: 45, opacity: 0 }} animate={{ rotate: 0, opacity: 1 }} transition={{ duration: 0.5, delay: 0.26, ease: MENU_EASE }} style={{ originX: '50%', originY: '50%' }} />
               </svg>
             </button>
 
