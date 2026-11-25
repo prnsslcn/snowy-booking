@@ -9,8 +9,9 @@ import { BUSINESS_INFO, BUSINESS_INFO_EN, COMPANY_NAME } from '@/lib/site-config
  * '© 2026 회사명' — 누르면 사업자 정보가 아래로 펼쳐진다(평소에는 접힘).
  * 사업자 정보는 전자상거래법 제10조 필수 표시라 지우지 말고, 눌러서 바로 볼 수 있게만 접는다.
  * 높이 애니메이션은 grid-template-rows 0fr→1fr(모션 줄이기면 즉시).
+ * admin: 이메일 바로 옆에 관리자 진입 링크(홈 마지막 장만 — 평소에는 접혀 숨어 있음).
  */
-export function BusinessInfo({ className = '' }: { className?: string }) {
+export function BusinessInfo({ className = '', admin = false }: { className?: string; admin?: boolean }) {
   const [open, setOpen] = useState(false);
   const id = useId();
   const en = useLocale() === 'en';
@@ -42,7 +43,18 @@ export function BusinessInfo({ className = '' }: { className?: string }) {
         }`}
       >
         <p className="overflow-hidden" inert={!open}>
-          <span className="block pt-1">{en ? BUSINESS_INFO_EN : BUSINESS_INFO}</span>
+          <span className="block pt-1">
+            {en ? BUSINESS_INFO_EN : BUSINESS_INFO}
+            {admin && (
+              <>
+                {' · '}
+                {/* 관리자 진입(별도 레이아웃이라 종이 전환 없이 일반 이동) */}
+                <a href="/admin" className="font-bold underline-offset-4 transition-colors hover:text-ink hover:underline">
+                  Admin
+                </a>
+              </>
+            )}
+          </span>
         </p>
       </div>
     </div>

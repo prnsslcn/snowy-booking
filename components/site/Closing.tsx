@@ -158,14 +158,8 @@ export function Closing({ z }: { z: number }) {
           style={WILL}
           {...blockIn(8, '14%', 0.78, 0.45, inView)}
         >
-          <div className="flex items-start justify-between gap-4">
-            {/* 누르면 사업자 정보가 펼쳐짐(전자상거래법 필수 표시) */}
-            <BusinessInfo className="min-w-0" />
-            {/* 관리자 진입(별도 레이아웃이라 종이 전환 없이 일반 이동) */}
-            <a href="/admin" className="flex-none font-medium text-ink/45 underline-offset-4 transition-colors hover:text-ink hover:underline">
-              Admin
-            </a>
-          </div>
+          {/* 누르면 사업자 정보가 펼쳐짐(전자상거래법 필수 표시) — 관리자 진입은 그 안 이메일 옆 */}
+          <BusinessInfo admin />
         </motion.div>
       </div>
 
