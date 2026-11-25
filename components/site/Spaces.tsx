@@ -25,6 +25,8 @@ export interface SpacePhoto {
   src: string;
   alt: string;
   orientation: 'portrait' | 'landscape';
+  /** 가로 사진의 3:4 세로 확장본(폰 시설 안내 첫 화면) */
+  tall?: string;
 }
 
 export interface Space {

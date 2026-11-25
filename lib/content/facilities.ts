@@ -9,6 +9,8 @@ export interface FacilityPhoto {
   /** 영문 대체 문구(손님 화면 영어 보기) */
   altEn?: string;
   orientation: 'portrait' | 'landscape';
+  /** 가로 사진의 3:4 세로 확장본(위아래만 생성 확장, 원본 부분 그대로) — 폰 시설 안내 첫 화면용 */
+  tall?: string;
 }
 
 export interface FacilityContent {
@@ -43,7 +45,7 @@ export const FACILITIES: FacilityContent[] = [
     type: 'caravan',
     slug: 'caravan',
     photos: [
-      p('caravan-1.jpg', '카라반 외관', 'landscape', 'Caravan exterior'),
+      { ...p('caravan-1.jpg', '카라반 외관', 'landscape', 'Caravan exterior'), tall: '/images/facilities/caravan-1-tall.jpg' },
       p('caravan-2.jpg', '카라반 내부', 'portrait', 'Caravan interior'),
       p('caravan-3.jpg', '카라반 침대', 'portrait', 'Caravan beds'),
       p('caravan-4.jpg', '카라반 온도 조절기', 'portrait', 'Caravan thermostat'),
@@ -53,7 +55,7 @@ export const FACILITIES: FacilityContent[] = [
     type: 'caravan_group',
     slug: 'caravan-group',
     photos: [
-      p('caravan-group-1.jpg', '단체카라반 외관', 'landscape', 'Group caravan exterior'),
+      { ...p('caravan-group-1.jpg', '단체카라반 외관', 'landscape', 'Group caravan exterior'), tall: '/images/facilities/caravan-group-1-tall.jpg' },
       p('caravan-group-3.jpg', '단체카라반 내부', 'portrait', 'Group caravan interior'),
       p('caravan-group-2.jpg', '단체카라반 침대', 'portrait', 'Group caravan beds'),
     ],
@@ -63,6 +65,8 @@ export const FACILITIES: FacilityContent[] = [
 /** 홈 히어로(데스크톱 가로 / 폰 세로 크롭) */
 export const PHOTO = {
   hero: p('caravan-group-1-hero.jpg', '눈 덮인 소나무 앞 설원 위의 단체카라반 두 대', 'landscape', 'Two group caravans on a snowfield in front of snow-covered pines'),
+  /** 베타 홈(/beta) 폰 첫 화면 — 단체카라반 3:4 세로 확장본(위아래만 생성 확장, 원본 부분 그대로) */
+  heroPhoneTall: p('caravan-group-1-tall.jpg', '눈 덮인 소나무 앞 설원 위의 단체카라반 두 대', 'portrait', 'Two group caravans on a snowfield in front of snow-covered pines'),
   heroPhone: p('caravan-group-1-phone.jpg', '눈 덮인 소나무 앞 설원 위의 단체카라반 두 대', 'portrait', 'Two group caravans on a snowfield in front of snow-covered pines'),
 };
 

@@ -52,7 +52,7 @@ export async function HomeContent({ closed: isClosed, doc = false }: { closed: b
       <>
         {/* 첫 화면 — 툴바가 접혀도 높이가 흔들리지 않게 svh */}
         <div className="relative h-[100svh] overflow-hidden">
-          <Hero src={PHOTO.hero.src} phoneSrc={PHOTO.heroPhone.src} alt={photoAlt(PHOTO.hero, locale)} notice={notice} fade />
+          <Hero src={PHOTO.hero.src} phoneSrc={PHOTO.heroPhoneTall.src} alt={photoAlt(PHOTO.hero, locale)} notice={notice} fade />
         </div>
         {products ? (
           <BetaProducts spaces={spaces} />

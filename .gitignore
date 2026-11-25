@@ -50,6 +50,7 @@ supabase/.branches
 
 # 시설 사진 원본(대용량) — 웹용 사본은 public/images/facilities/
 /public/images/*.jpg
+/public/images/*.png
 
 # Playwright MCP 산출물
 /.playwright-mcp
