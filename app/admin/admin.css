@@ -66,3 +66,37 @@
     @apply font-display font-medium tabular-nums tracking-[-0.02em];
   }
 }
+
+/*
+  블록 등장(BlockIn) — 손님 화면 blockIn 과 같은 결(blur 해제 + 상승 + fade, 같은 곡선).
+  CSS 애니메이션 + fill backwards: 끝나면 filter·transform 이 남지 않아
+  안쪽 fixed 요소(토스트·달력 시트)의 기준이 바뀌지 않는다.
+  - .block-in        : 요소 하나. 순서는 style 의 --bi-delay
+  - .block-in-kids   : 바로 아래 자식들을 차례로(화면 본문 — 제목 → 패널들)
+*/
+@keyframes admin-block-in {
+  from {
+    opacity: 0;
+    filter: blur(var(--bi-blur, 8px));
+    transform: translateY(var(--bi-y, 18px));
+  }
+}
+
+.block-in,
+.block-in-kids > * {
+  animation: admin-block-in 0.78s cubic-bezier(0.22, 1, 0.36, 1) backwards;
+  animation-delay: var(--bi-delay, 0s);
+}
+
+.block-in-kids > :nth-child(2) { --bi-delay: 0.08s; }
+.block-in-kids > :nth-child(3) { --bi-delay: 0.16s; }
+.block-in-kids > :nth-child(4) { --bi-delay: 0.24s; }
+.block-in-kids > :nth-child(5) { --bi-delay: 0.32s; }
+.block-in-kids > :nth-child(n + 6) { --bi-delay: 0.4s; }
+
+@media (prefers-reduced-motion: reduce) {
+  .block-in,
+  .block-in-kids > * {
+    animation: none;
+  }
+}
