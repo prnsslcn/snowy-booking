@@ -116,8 +116,14 @@
   background: linear-gradient(90deg, var(--color-ice-100) 0%, #edf3f9 40%, var(--color-ice-100) 80%) 0 0 / 200% 100%;
   animation: admin-skel-shine 1.4s ease-in-out infinite;
 }
+/* 진한 파랑(glacier) 위 */
+.skel-dark {
+  background: linear-gradient(90deg, rgb(255 255 255 / 0.1) 0%, rgb(255 255 255 / 0.18) 40%, rgb(255 255 255 / 0.1) 80%) 0 0 / 200% 100%;
+  animation: admin-skel-shine 1.4s ease-in-out infinite;
+}
 @media (prefers-reduced-motion: reduce) {
-  .skel {
+  .skel,
+  .skel-dark {
     animation: none;
   }
 }

@@ -1,35 +1,38 @@
+import { SkBars, SkLine, SkPage, SkPanel, SkPanelHead, SkStats, SkTable, SkTitle } from '@/components/admin/Skeleton';
+
 /**
- * 관리자 화면 불러오는 동안 — 메뉴를 누르는 즉시 본문 자리에 제목·패널 모양을 보여 준다(서버 응답 기다리는 동안 멈춰 보이지 않게).
- * BlockIn 대신 짧게 옅어지며 나타남(0.12초 뒤 — 빨리 오면 거의 안 보이게). 실제 화면이 도착하면 그때 BlockIn 으로 나타난다.
+ * 대시보드 불러오는 동안 — 실제 화면과 같은 배치(오늘 띠 · 상품별 점유 · 오늘 예약 표).
+ * 다른 관리자 화면은 각자 폴더의 loading.tsx 가 자기 배치로 그린다.
  */
-export default function AdminLoading() {
+export default function DashboardLoading() {
   return (
-    <div style={{ animation: 'admin-skel-in 0.2s ease-out 0.12s backwards' }} aria-busy="true" aria-label="불러오는 중">
-      <div className="mb-6 md:mb-8">
-        <div className="skel h-[14px] w-20 rounded-md" />
-        <div className="skel mt-2.5 h-[28px] w-40 rounded-lg md:h-[34px]" />
-      </div>
-      <div className="flex flex-col gap-5">
-        <div className="panel">
-          <div className="skel h-[15px] w-32 rounded-md" />
-          <div className="mt-6 grid grid-cols-2 gap-4 md:grid-cols-4">
-            {[0, 1, 2, 3].map((i) => (
-              <div key={i}>
-                <div className="skel h-[12px] w-16 rounded-md" />
-                <div className="skel mt-3 h-[30px] w-24 rounded-lg" />
-              </div>
-            ))}
+    <SkPage>
+      <SkTitle sub={false} w="7.5rem" />
+      <SkStats
+        glacier
+        head={
+          <div className="flex flex-wrap items-end justify-between gap-x-6 gap-y-3">
+            <div>
+              <SkLine dark h={20} bar={11} w="3rem" />
+              <SkLine dark h={32} bar={22} w="9rem" className="mt-1" />
+            </div>
+            <div className="w-full md:w-72">
+              <SkLine dark h={18} bar={10} w="100%" />
+              <SkLine dark h={10} bar={5} w="100%" className="mt-2" />
+            </div>
           </div>
+        }
+      />
+      <SkPanel className="mt-6">
+        <SkPanelHead w="8rem" />
+        <SkBars />
+      </SkPanel>
+      <SkPanel className="mt-6">
+        <SkPanelHead w="6rem" aside={<SkLine h={22} bar={12} w="3.5rem" />} />
+        <div className="mt-3">
+          <SkTable rows={3} cols={['3rem', '3rem', '6.5rem', '2.5rem', '4.5rem', '4rem']} />
         </div>
-        <div className="panel">
-          <div className="skel h-[15px] w-28 rounded-md" />
-          <div className="mt-5 flex flex-col gap-4">
-            {[0, 1, 2, 3, 4].map((i) => (
-              <div key={i} className="skel h-[18px] rounded-md" style={{ width: `${92 - i * 9}%` }} />
-            ))}
-          </div>
-        </div>
-      </div>
-    </div>
+      </SkPanel>
+    </SkPage>
   );
 }
