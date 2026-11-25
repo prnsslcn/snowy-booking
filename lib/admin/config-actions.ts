@@ -1,6 +1,6 @@
 'use server';
 
-import { revalidatePath, revalidateTag } from 'next/cache';
+import { revalidatePath, revalidateTag, updateTag } from 'next/cache';
 
 import type { ActionResult } from '@/lib/admin/actions';
 import { logAdminAction } from '@/lib/admin/audit';
@@ -8,6 +8,7 @@ import { getAdminUser } from '@/lib/admin/auth';
 import { holidayRange } from '@/lib/admin/config';
 import { adminErrorMessage } from '@/lib/admin/errors';
 import { fetchHolidays } from '@/lib/admin/holidays';
+import { PRODUCTS_TAG } from '@/lib/products';
 import { SITE_SETTINGS_TAG } from '@/lib/site-settings';
 import { createAdminClient } from '@/lib/supabase/admin';
 import type { Json } from '@/types/database';
@@ -33,6 +34,7 @@ export async function addUnitAction(type: string, label: string): Promise<Action
   const { error } = await createAdminClient().rpc('admin_add_unit', { p_type: type, p_label: label });
   if (error) return { ok: false, error: adminErrorMessage(error.message) };
   await logAdminAction(a.email, 'add_unit', null, { type, label });
+  updateTag(PRODUCTS_TAG); // 홈·시설 안내의 수량·요금 캐시 즉시 비움
   revalidatePath('/admin/units');
   revalidatePath('/admin/board');
   return { ok: true };
@@ -44,6 +46,7 @@ export async function setUnitActiveAction(unitId: string, active: boolean): Prom
   const { error } = await createAdminClient().rpc('admin_set_unit_active', { p_unit_id: unitId, p_active: active });
   if (error) return { ok: false, error: adminErrorMessage(error.message) };
   await logAdminAction(a.email, active ? 'unit_on' : 'unit_off', null, { unitId });
+  updateTag(PRODUCTS_TAG); // 홈·시설 안내의 수량·요금 캐시 즉시 비움
   revalidatePath('/admin/units');
   revalidatePath('/admin/board');
   return { ok: true };
@@ -112,6 +115,7 @@ export async function updatePricesAction(type: string, weekday: number, weekend:
   const { error } = await createAdminClient().from('product_types').update({ price_weekday: weekday, price_weekend: weekend }).eq('type', type);
   if (error) return { ok: false, error: error.message };
   await logAdminAction(a.email, 'price_update', null, { type, weekday, weekend });
+  updateTag(PRODUCTS_TAG); // 홈·시설 안내의 수량·요금 캐시 즉시 비움
   revalidatePath('/admin/pricing');
   revalidatePath('/', 'layout');
   return { ok: true };

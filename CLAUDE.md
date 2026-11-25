@@ -405,6 +405,7 @@ pending_payment ──(결제 승인)──▶ confirmed ──(취소 요청)�
   - 결제 확정은 토스 `status === 'DONE'` + orderId 일치만(`settlePayment`, 가상계좌 입금 대기 등은 보상 취소). 승인 응답 유실·시간 초과는 원천 조회로 복구, 웹훅 DONE 도 같은 경로
   - 취소: `request_cancel_tx` 가 2분 잠금(`cancel_lock_until`)으로 동시 취소 이중 환불 방지, 환불율은 첫 요청 시각(`cancel_requested_at`) 기준, 지난 이용일은 고객 취소 불가. 계좌 직접 환불은 토스 상태 먼저 확인
   - 조회 제한은 `lookup_attempt_begin`(원자적), 예약 선점은 IP당 10분 10회(`rate_hit`). 매출에는 취소 후 남은 금액(1일 전 50%·당일) 포함, 건수는 제외
+- **오픈 몰림 캐시(2026-11-26):** 예약 현황 `/api/availability` = Vercel CDN 5초(+옛 응답 5초) + 서버 메모리 2초 단일 조회(`getAvailabilityCached`), proxy 매처에서 제외. 상품 목록 `getProducts` = 데이터 캐시 5분 + 관리자 요금·유닛 변경 시 `updateTag(PRODUCTS_TAG)`. 표시용이라 몇 초 늦어도 됨 — 실제 차단은 `reserve_booking`. 배포 후 응답 헤더 `x-vercel-cache: HIT` 로 CDN 확인
 - **권한:** public 스키마 함수는 anon·authenticated 실행 불가가 원칙(0001에서 기본 권한 회수). 새 함수는 `service_role`에만 명시적 GRANT. grill-booking도 같은 문제를 0038로 수정함
 - **로컬 Supabase:** grill-booking과 동시 실행을 위해 포트 **553xx**(API 55321, DB 55322, Studio 55323). Colima 메모리 2GiB라 realtime·storage·edge·analytics 비활성
 - **개발 환경(2026-11-22, grill-booking과 같은 방식):** `pnpm dev`(3000) 하나만, **항상 로컬 DB**. `.env.local` = 로컬 Supabase(`supabase status -o env` 값) + 가짜 결제(`NEXT_PUBLIC_PAYMENTS_FAKE=1`, `TOSS_FAKE=1`) + `NOTIFICATIONS_DISABLED=1`. 로컬 Supabase가 꺼져 있으면 `colima start` → `pnpm exec supabase start`. 로컬 관리자 계정: `admin@local.test` / `localadmin123`(로컬 DB에만)

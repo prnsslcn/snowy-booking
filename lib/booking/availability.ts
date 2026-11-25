@@ -118,3 +118,26 @@ export async function getAvailability(now: Date = new Date()): Promise<Availabil
 
   return { today, minDate: firstBookableDate(now), maxDate, days };
 }
+
+/*
+  오픈 몰림 대비 — 같은 서버 안에서 잠깐(AVAILABILITY_TTL_MS) 같은 결과를 나눠 쓴다.
+  - 그사이 동시에 들어온 요청은 진행 중인 조회 하나를 함께 기다린다(DB 에 한 번만 묻기).
+  - 표시용이라 몇 초 늦어도 안전: 실제 예약은 reserve_booking 이 DB 에서 다시 판정하고,
+    매진이면 SOLD_OUT 으로 거절 → 예약 화면이 현황을 다시 불러온다.
+  - 서버 메모리라 시간이 지나면 저절로 사라지고, 오래된 값이 남지 않는다(데이터 캐시와 달리 '한참 지난 값'을 주지 않음).
+*/
+const AVAILABILITY_TTL_MS = 2000;
+let cached: { at: number; value: Promise<AvailabilityResponse> } | null = null;
+
+export function getAvailabilityCached(): Promise<AvailabilityResponse> {
+  const now = Date.now();
+  if (cached && now - cached.at < AVAILABILITY_TTL_MS) return cached.value;
+  const value = getAvailability(new Date(now));
+  const entry = { at: now, value };
+  cached = entry;
+  // 실패한 조회는 나눠 쓰지 않는다(다음 요청이 다시 시도)
+  value.catch(() => {
+    if (cached === entry) cached = null;
+  });
+  return value;
+}
