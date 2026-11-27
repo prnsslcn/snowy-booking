@@ -2,6 +2,7 @@ import type { Metadata } from 'next';
 
 import { LegalPage } from '@/components/site/LegalPage';
 import { getLocale } from '@/lib/i18n/server';
+import { CONTACT_PHONE } from '@/lib/site-config';
 
 export async function generateMetadata(): Promise<Metadata> {
   return (await getLocale()) === 'en'
@@ -89,7 +90,7 @@ function RefundKo() {
       </p>
 
       <h2>문의</h2>
-      <p>취소·환불 관련 문의: campingclub2020@naver.com</p>
+      <p>취소·환불 관련 문의: {CONTACT_PHONE ? `${CONTACT_PHONE} · ` : ''}campingclub2020@naver.com</p>
     </>
   );
 }
@@ -163,7 +164,7 @@ function RefundEn() {
       </p>
 
       <h2>Contact</h2>
-      <p>Questions about cancellations and refunds: campingclub2020@naver.com</p>
+      <p>Questions about cancellations and refunds: {CONTACT_PHONE ? `${CONTACT_PHONE} · ` : ''}campingclub2020@naver.com</p>
     </>
   );
 }

@@ -8,7 +8,7 @@ import { tr } from '@/lib/i18n';
 
 /**
  * 하위 화면(예약·조회·결과) 공용 푸터 — 홈 마지막 장과 같은 모양.
- * 사업자 정보는 전자상거래법 제10조에 따라 결제 사이트에 필수 → '© 회사명'을 누르면 펼쳐짐(BusinessInfo).
+ * 사업자 정보는 전자상거래법 제10조에 따라 결제 사이트에 필수 → 항상 펼쳐 보임(BusinessInfo).
  */
 export function SiteFooter({ dark = false, glacier = false }: { dark?: boolean; /** 겨울 파랑 바탕(베타 시설 안내 카바나·단체카라반) */ glacier?: boolean }) {
   const onBlue = dark || glacier;

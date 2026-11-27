@@ -158,7 +158,7 @@ export function Closing({ z }: { z: number }) {
           style={WILL}
           {...blockIn(8, '14%', 0.78, 0.45, inView)}
         >
-          {/* 누르면 사업자 정보가 펼쳐짐(전자상거래법 필수 표시) — 관리자 진입은 그 안 이메일 옆 */}
+          {/* 사업자 정보(전자상거래법 필수 표시, 항상 펼침) — 관리자 진입은 이메일 옆 */}
           <BusinessInfo admin />
         </motion.div>
       </div>

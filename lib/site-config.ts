@@ -15,8 +15,8 @@ export function usageTime(locale: 'ko' | 'en'): string {
   return locale === 'en' ? `${USAGE_START}\u2060–\u2060${USAGE_END}` : USAGE_TIME;
 }
 
-/** 고객 문의 전화 [미정]. null이면 화면·문자에서 생략. */
-export const CONTACT_PHONE: string | null = null;
+/** 고객 문의 전화(2026-11-27 운영자 확정). 사업자 정보·취소환불정책·고객 문자에 표시 */
+export const CONTACT_PHONE: string | null = '010-7651-5572';
 
 /** 사이트 주소(문자 내 조회 링크용) [미정 — 도메인]. 미설정이면 링크 생략. */
 export function siteUrl(): string | null {
@@ -38,13 +38,26 @@ export const MAP_LINKS = [
   { label: '카카오맵', labelEn: 'KakaoMap', href: `https://map.kakao.com/?q=${MAP_QUERY}` },
 ] as const;
 
-/** 사업자 정보(전자상거래법 제10조 — 결제 사이트 필수 표시). 푸터에서 '© 회사명'을 눌러 펼친다 */
+/** 사업자 정보(전자상거래법 제10조 — 결제 사이트 필수 표시). 푸터에 항상 펼쳐 보임(토스·카드사 심사: 접기 형태는 반송 위험, 전화번호 필수) */
 export const COMPANY_NAME = '주식회사 에이비씨웍스글로벌';
-export const BUSINESS_INFO =
-  '대표 황혜진 · 사업자등록번호 442-87-01602 · 통신판매업신고 제2021-서울강서-1055호 · 서울특별시 강서구 마곡중앙로 171, 5층 513호 씨(마곡동) · campingclub2020@naver.com';
+const BUSINESS_EMAIL = 'campingclub2020@naver.com';
+export const BUSINESS_INFO = [
+  '대표 황혜진',
+  '사업자등록번호 442-87-01602',
+  '통신판매업신고 제2021-서울강서-1055호',
+  '서울특별시 강서구 마곡중앙로 171, 5층 513호 씨(마곡동)',
+  ...(CONTACT_PHONE ? [`문의 ${CONTACT_PHONE}`] : []),
+  BUSINESS_EMAIL,
+].join(' · ');
 /** 영어 보기 — 회사·대표 이름과 등록번호는 공식 표기(한국어) 그대로, 항목 이름과 주소만 영문 */
-export const BUSINESS_INFO_EN =
-  'CEO 황혜진 · Business Registration No. 442-87-01602 · Mail-Order Sales Registration No. 제2021-서울강서-1055호 · Room 513-C, 5F, 171 Magokjungang-ro, Gangseo-gu, Seoul, Korea · campingclub2020@naver.com';
+export const BUSINESS_INFO_EN = [
+  'CEO 황혜진',
+  'Business Registration No. 442-87-01602',
+  'Mail-Order Sales Registration No. 제2021-서울강서-1055호',
+  'Room 513-C, 5F, 171 Magokjungang-ro, Gangseo-gu, Seoul, Korea',
+  ...(CONTACT_PHONE ? [`Contact ${CONTACT_PHONE}`] : []),
+  BUSINESS_EMAIL,
+].join(' · ');
 
 /** 손님 화면 안내 문구 묶음(한/영). 문자·관리자는 아래 한국어 상수를 그대로 쓴다 */
 export function notices(locale: 'ko' | 'en') {
