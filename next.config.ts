@@ -13,6 +13,30 @@ const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL || process.env.SUPABASE
 const supabaseAnonKey =
   process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || process.env.SUPABASE_ANON_KEY || "";
 
+/**
+ * CSP — 지금은 Report-Only(막지 않고 브라우저 콘솔에 위반만 경고). 토스 라이브 결제 테스트에서 경고가 없으면
+ * 헤더 이름을 Content-Security-Policy 로 바꿔 실제 차단.
+ *  - 토스는 공식 허용 목록이 없어 결제위젯(js.tosspayments.com → 결제수단·약관 iframe)과 토스 계열 도메인을 넓게 허용
+ *  - script 'unsafe-inline': Next 가 RSC 데이터를 인라인 스크립트로 넣음(nonce 를 쓰면 모든 화면이 동적 렌더링이 돼 CDN 캐시를 잃음)
+ *  - style 'unsafe-inline': framer-motion·인라인 style 속성
+ *  - Supabase: 관리자 로그인·로그아웃이 브라우저에서 직접 호출
+ */
+const TOSS = 'https://*.tosspayments.com https://*.toss.im';
+const isDev = process.env.NODE_ENV !== 'production';
+const csp = [
+  "default-src 'self'",
+  `script-src 'self' 'unsafe-inline'${isDev ? " 'unsafe-eval'" : ''} ${TOSS}`,
+  `style-src 'self' 'unsafe-inline' https://cdn.jsdelivr.net ${TOSS}`,
+  `font-src 'self' data: https://cdn.jsdelivr.net ${TOSS}`,
+  "img-src 'self' data: blob: https:",
+  `connect-src 'self' ${supabaseUrl} ${TOSS}${isDev ? ' ws: wss:' : ''}`,
+  `frame-src ${TOSS}`,
+  "frame-ancestors 'self'",
+  `form-action 'self' ${TOSS}`,
+  "base-uri 'self'",
+  "object-src 'none'",
+].join('; ');
+
 const nextConfig: NextConfig = {
   // 로컬에서 운영 DB용 dev 서버와 로컬 DB용 dev 서버를 함께 띄울 때 빌드 폴더를 나눈다(NEXT_DIST_DIR=.next-local)
   ...(process.env.NEXT_DIST_DIR ? { distDir: process.env.NEXT_DIST_DIR } : {}),
@@ -33,12 +57,13 @@ const nextConfig: NextConfig = {
       { source: '/beta3', destination: '/caravan-group', permanent: false },
     ];
   },
-  // 기본 보안 헤더(HSTS 는 Vercel 이 붙임). CSP 는 토스 결제창·외부 글꼴과 맞춰야 해서 아직 넣지 않음.
+  // 기본 보안 헤더(HSTS 는 Vercel 이 붙임) + CSP(위, 지금은 Report-Only)
   async headers() {
     return [
       {
         source: '/:path*',
         headers: [
+          { key: 'Content-Security-Policy-Report-Only', value: csp },
           { key: 'X-Content-Type-Options', value: 'nosniff' },
           { key: 'X-Frame-Options', value: 'SAMEORIGIN' },
           { key: 'Referrer-Policy', value: 'strict-origin-when-cross-origin' },
