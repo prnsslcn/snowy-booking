@@ -14,8 +14,8 @@ const supabaseAnonKey =
   process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || process.env.SUPABASE_ANON_KEY || "";
 
 /**
- * CSP — 지금은 Report-Only(막지 않고 브라우저 콘솔에 위반만 경고). 토스 라이브 결제 테스트에서 경고가 없으면
- * 헤더 이름을 Content-Security-Policy 로 바꿔 실제 차단.
+ * CSP — 실제 차단(2026-11-28: Report-Only 로 올려 토스 라이브 결제·고객 취소·관리자 환불까지 경고 0건 확인 후 전환).
+ * 새 외부 리소스(스크립트·글꼴·iframe 등)를 추가하면 여기에 허용해야 화면에서 막히지 않는다.
  *  - 토스는 공식 허용 목록이 없어 결제위젯(js.tosspayments.com → 결제수단·약관 iframe)과 토스 계열 도메인을 넓게 허용
  *  - script 'unsafe-inline': Next 가 RSC 데이터를 인라인 스크립트로 넣음(nonce 를 쓰면 모든 화면이 동적 렌더링이 돼 CDN 캐시를 잃음)
  *  - style 'unsafe-inline': framer-motion·인라인 style 속성
@@ -57,13 +57,13 @@ const nextConfig: NextConfig = {
       { source: '/beta3', destination: '/caravan-group', permanent: false },
     ];
   },
-  // 기본 보안 헤더(HSTS 는 Vercel 이 붙임) + CSP(위, 지금은 Report-Only)
+  // 기본 보안 헤더(HSTS 는 Vercel 이 붙임) + CSP(위)
   async headers() {
     return [
       {
         source: '/:path*',
         headers: [
-          { key: 'Content-Security-Policy-Report-Only', value: csp },
+          { key: 'Content-Security-Policy', value: csp },
           { key: 'X-Content-Type-Options', value: 'nosniff' },
           { key: 'X-Frame-Options', value: 'SAMEORIGIN' },
           { key: 'Referrer-Policy', value: 'strict-origin-when-cross-origin' },
