@@ -366,6 +366,7 @@ pending_payment ──(결제 승인)──▶ confirmed ──(취소 요청)�
 - [x] (2026-11-23) **손님 화면 한/영 전환:** nav 맨 오른쪽 번역 아이콘(폰은 메뉴 버튼 왼쪽). 주소는 그대로, 쿠키 `lang`(1년)으로 기억. 서버 `getLocale()`(lib/i18n/server.ts), 클라이언트 `useLocale()`(components/site/LocaleProvider.tsx), 문구는 쓰는 자리에서 `tr(locale)('한국어', 'English')`. **새 손님 화면 문구는 반드시 두 언어로.** 약관 3종은 영문 번역 + "한국어 원문 우선" 안내. 회사·대표 이름·등록번호는 공식 한국어 그대로(영문 상호 미확정). 관리자 화면·문자는 한국어만
 - [x] (2026-11-21) 오시는 길(`/location`)·편의시설·소개 문구는 당분간 필요 없음(필요해지면 운영자가 요청)
 - [x] (2026-11-24) **오시는 길(`/location`) 켬** — 링크는 홈 마지막 장 Visit 묶음에만(nav 에는 넣지 않음). 화면 한/영, 영문 주소 `ADDRESS_EN`(주소 복사는 한국어 주소)
+- [x] (2026-11-28) **토스 라이브 연동:** 결제위젯 키(live_gck/gsk)는 사업자 계정에 한 쌍(MID별 아님, 발급일 2026-06-11). 스노위 MID 는 개발자센터 '결제 UI 설정'의 **`SNOWY` UI**로 연결 → 코드 기본 variantKey `SNOWY`(`lib/client/toss-payment.ts`, `NEXT_PUBLIC_TOSS_VARIANT_KEY`로만 변경). `DEFAULT`·API 개별 키(live_ck/sk, MID abcbbq2pkt)는 grill 것 — 쓰지 않음. 웹훅 `https://www.abc-places.com/api/payments/webhook`(PAYMENT_STATUS_CHANGED) 등록, 서로의 웹훅은 모르는 주문을 무시
 - [x] (2026-11-27) **고객 문의 전화 010-7651-5572**(`CONTACT_PHONE`) — 사업자 정보·취소환불정책·고객 문자. 토스 요청으로 **사업자 정보는 접기 없이 항상 펼침**(카드사 심사에서 토글 형태는 반송 위험), Admin 링크는 이메일 옆 굵게 그대로
 - [x] 공휴일: 공공데이터포털 특일 API 키로 연도별 불러오기(env `HOLIDAY_API_KEY`)
 - [x] UI 방향: **겨울·스노우 테마의 밝은 톤 + 애플식 미니멀 + 토스식 깔끔함** (고객·관리자 모두 리뉴얼 예정, 시설 사진 준비됨)

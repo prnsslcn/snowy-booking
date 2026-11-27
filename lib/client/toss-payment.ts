@@ -8,7 +8,13 @@ import { ANONYMOUS, loadTossPayments, type TossPaymentsWidgets } from '@tosspaym
  *    성공 → successUrl(paymentKey·orderId·amount) → 서버 confirm 재검증. 실패·취소 → failUrl(?orderId) → 선점 즉시 반환.
  *
  * 키: 결제위젯 연동 키(클라이언트 test_gck_/live_gck_, 시크릿 test_gsk_/live_gsk_) — 클라이언트·시크릿은 같은 쌍이어야 한다.
+ *
+ * 결제 UI(variantKey): 결제위젯 키는 사업자 계정에 하나뿐(MID별 키 아님). 결제가 어느 상점(MID)으로 들어갈지는
+ * 토스 개발자센터 '결제 UI 설정'에서 UI 마다 연결한 MID 로 정해진다 → 스노위 MID 에 연결한 'SNOWY' UI(2026-11-28 생성).
+ * 'DEFAULT' 는 기존 MID(grill-booking abcbbq2pkt — grill 은 위젯이 아니라 MID별 API 개별 키·결제창 사용)에 걸려 있을 수 있어 쓰지 않는다.
+ * 기본값을 SNOWY 로 두고 필요할 때만 환경변수로 바꾼다.
  */
+const PAYMENT_UI_VARIANT = process.env.NEXT_PUBLIC_TOSS_VARIANT_KEY || 'SNOWY';
 
 export const PAYMENT_METHODS_ID = 'toss-payment-methods';
 export const AGREEMENT_ID = 'toss-agreement';
@@ -38,7 +44,7 @@ async function render(amount: number): Promise<MountedWidget> {
   const tossPayments = await loadTossPayments(clientKey);
   const widgets = tossPayments.widgets({ customerKey: ANONYMOUS }); // 비회원 결제
   await widgets.setAmount({ currency: 'KRW', value: amount }); // 결제수단 UI 보다 먼저
-  const methods = await widgets.renderPaymentMethods({ selector: `#${PAYMENT_METHODS_ID}`, variantKey: 'DEFAULT' });
+  const methods = await widgets.renderPaymentMethods({ selector: `#${PAYMENT_METHODS_ID}`, variantKey: PAYMENT_UI_VARIANT });
   const agreement = await widgets.renderAgreement({ selector: `#${AGREEMENT_ID}`, variantKey: 'AGREEMENT' }).catch(async (err: unknown) => {
     await methods.destroy().catch(() => {});
     throw err;
